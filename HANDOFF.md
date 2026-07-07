@@ -24,15 +24,20 @@ A digital construction permit request system (pilot/beta) for the DSM project. R
 - **Languages:** EN/ES via the `ES` dictionary + `T()` function. New user-facing strings should be added to the dictionary.
 - **Testing habit:** changes were verified by extracting the `<script>` into Node with DOM mocks. At minimum, check syntax with: `node -e "new Function(require('fs').readFileSync('index.html','utf8').match(/<script>([\s\S]*)<\/script>/)[1])"`.
 
+## LIVE DEPLOYMENT (done)
+- **Live site:** https://bdiaz8448-gif.github.io/project-permit-portal/ (GitHub Pages, repo `bdiaz8448-gif/project-permit-portal`). To update: re-upload index.html to the repo, commit, wait ~1 min.
+- **Cloud sync (done):** Supabase project `project-permit-portal` (ref `ltjvpodpdlmwvjmwuygm`), owned by the same GitHub account. Two tables: `permits(id text pk, updated bigint, deleted bool, data jsonb)` and `portal_config(id int pk, updated bigint, data jsonb)`. The site syncs via PostgREST with the publishable key embedded in index.html (search `CLOUD=`). Push on every save (1.2s debounce), pull every 15s + on tab focus; per-permit last-write-wins by `_u` timestamp; config row id=1 by `cfgU`. Footer badge shows sync state. All devices now share the same live data.
+- Supabase dashboard: supabase.com/dashboard → sign in with GitHub.
+
 ## Pilot limitations (by design)
-1. Data is per-device (localStorage). The backup/restore JSON in Admin → Settings is the record-keeping bridge.
-2. QR codes point at wherever the file is hosted — reprint after hosting changes.
-3. No file attachments, no digital signatures yet.
+1. QR codes point at the live URL above — reprint if hosting moves.
+2. No file attachments, no digital signatures yet.
+3. Anyone with the site URL can read/write the pilot database (publishable key, no row security) — fine for a pilot, add Supabase Auth + RLS before selling.
+4. Rare same-second edits to the SAME permit on two devices: last write wins.
 
 ## The roadmap already agreed with the owner
-1. **Host on GitHub Pages** (see GITHUB-SETUP.md) → real URL → working QR codes.
-2. **Cloud version:** Supabase (shared database + logins) + Twilio (automatic SMS). Everything in the UI was built so this swap only replaces the storage/notify layer.
-3. **Sale-ready:** multi-project support, per-company pricing (contractors free, GC pays — TurboTenant model), analytics (approval times, permits by trade partner).
+1. ~~Host on GitHub Pages~~ DONE. 2. ~~Shared cloud database~~ DONE (Supabase).
+3. **Next:** Twilio for true automatic SMS, Supabase Auth + RLS for real logins, attachments/signatures, multi-project support, per-company pricing (contractors free, GC pays — TurboTenant model), analytics.
 
 ## Maintenance model for sold copies
 Owner tools already built for this: per-permit Trash with restore, config change log with one-tap rollback (Activity Log), full JSON backup/restore. If a customer breaks something: have them send their backup file, fix it, send it back — until the cloud version makes it remote.
