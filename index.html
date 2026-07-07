@@ -345,7 +345,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.82);b
   <nav class="mainnav"><div class="nav-in" id="navIn"></div></nav>
 </header>
 <main id="app"></main>
-<footer>All permits require Jacobs review and approval before work begins. &nbsp;·&nbsp; Pilot version — data saved on this device.</footer>
+<footer><span id="syncBadge">⚪ Offline mode — data saved on this device only</span> &nbsp;·&nbsp; All permits require Jacobs review and approval before work begins.</footer>
 <div id="modalHost"></div>
 <script>
 "use strict";
@@ -523,7 +523,7 @@ function ownerDeletePermit(id){
   const i=DB.permits.findIndex(x=>x.id===id); if(i<0) return;
   const p=DB.permits[i];
   if(!confirm("Move permit "+p.number+" to the Trash?\n\nYou can restore it any time from Admin → 🗑 Trash. Its number will NOT be reused.")) return;
-  p.deletedAt=new Date().toISOString(); p.deletedBy=currentActor();
+  p.deletedAt=new Date().toISOString(); p.deletedBy=currentActor(); p._u=Date.now();
   DB.trash.unshift(p); DB.permits.splice(i,1);
   logChange("🗑 Permit moved to Trash: "+p.number, typeOf(p.typeCode).name+" · "+p.company);
   saveDB(); toast("🗑 <b>"+esc(p.number)+"</b> moved to Trash — restore it from Admin → Trash.","t-dark");
@@ -531,7 +531,7 @@ function ownerDeletePermit(id){
 }
 function trashRestore(i){
   const p=DB.trash[i]; if(!p) return;
-  delete p.deletedAt; delete p.deletedBy;
+  delete p.deletedAt; delete p.deletedBy; p._u=Date.now();
   DB.permits.unshift(p); DB.trash.splice(i,1);
   logChange("♻ Permit restored from Trash: "+p.number,"");
   saveDB(); toast("♻ <b>"+esc(p.number)+"</b> restored.","t-green"); route();
@@ -540,12 +540,14 @@ function trashForever(i){
   const p=DB.trash[i]; if(!p) return;
   if(!confirm("Permanently delete "+p.number+"? This cannot be undone. (The permit number will still never be reused.)")) return;
   DB.trash.splice(i,1); logChange("Permit permanently deleted: "+p.number,"");
+  cloudDeleteRow(p.id);
   saveDB(); route();
 }
 function trashEmpty(){
   if(!DB.trash.length) return;
   if(prompt('Type DELETE to permanently empty the Trash ('+DB.trash.length+' permits). This cannot be undone.')!=="DELETE") return;
   logChange("Trash emptied","Permanently removed "+DB.trash.length+" permits");
+  DB.trash.forEach(p=>cloudDeleteRow(p.id));
   DB.trash=[]; saveDB(); route();
 }
 /* ---------- Access & change history (owner-level) ---------- */
@@ -553,6 +555,7 @@ let IS_OWNER = sessionStorage.getItem("ppp_owner")==="1";
 function logAccess(role,name,co){
   DB.accessLog.unshift({at:new Date().toISOString(),role,name:name||"(no name)",co:co||""});
   if(DB.accessLog.length>500) DB.accessLog.length=500;
+  DB.cfgU=Date.now();
   saveDB();
 }
 function configSnapshot(){
@@ -563,6 +566,7 @@ function configSnapshot(){
 function logChange(action,detail,snapBefore){
   DB.adminLog.unshift({at:new Date().toISOString(),by:currentActor(),action,detail:detail||"",snap:snapBefore||""});
   if(DB.adminLog.length>40) DB.adminLog.length=40;
+  DB.cfgU=Date.now();
   saveDB();
 }
 function restoreSnapshot(i){
@@ -588,7 +592,8 @@ const FLOORPLANS={
   "D4|Second Floor (SF)":"assets/d4-second.jpg","D4|Second Floor Interstitial":"assets/d4-second-int.jpg"};
 const floorPlanFor=(b,f)=> FLOORPLANS[b+"|"+f]||null;
 const floorObj=(b,name)=> DB.floors.find(f=>f.b===b&&f.name===name);
-function saveDB(){ localStorage.setItem(KEY, JSON.stringify(DB)); }
+function saveDB(){ localStorage.setItem(KEY, JSON.stringify(DB)); scheduleSync(); }
+const saveDBLocal=()=> localStorage.setItem(KEY, JSON.stringify(DB));
 const uid=()=> "p"+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const esc=s=> String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmtD=d=> d? new Date(d+"T00:00:00").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}):"—";
@@ -612,6 +617,7 @@ function nextPermitNumber(bCode,tCode){
 function audit(p,action,detail){
   p.audit=p.audit||[];
   p.audit.push({at:new Date().toISOString(), by:currentActor(), role:ROLE, action, detail:detail||""});
+  p._u=Date.now(); // marks the permit changed → cloud sync picks it up
 }
 function setStatus(p,st,detail){
   const old=p.status; p.status=st;
@@ -711,6 +717,7 @@ function expireSweep(){
     if(["Approved","Active"].includes(p.status) && p.goodThrough && p.goodThrough < t){
       p.status="Expired";
       p.audit.push({at:new Date().toISOString(), by:"System", role:"system", action:"Status: auto-expired", detail:"Permit good-through date "+p.goodThrough+" passed without completion."});
+      p._u=Date.now();
       n++;
     }
   });
@@ -2135,6 +2142,7 @@ function wipeAll(){
   if(!IS_OWNER){ toast("Only the Owner can do a fresh start.","t-red"); return; }
   if(prompt('Type ERASE to delete ALL permits and empty the Trash.\n\nBuildings, floors, trade partners, permit types, reviewers, PINs, and settings are all KEPT.')==="ERASE"){
     logChange("🧹 Fresh start — all permits deleted","Removed "+DB.permits.length+" permits and "+DB.trash.length+" trashed permits");
+    [...DB.permits,...DB.trash].forEach(p=>cloudDeleteRow(p.id));
     DB.permits=[]; DB.trash=[]; DB.counters={}; saveDB();
     toast("🧹 Fresh start — all permits cleared. Setup and PINs kept.","t-blue"); route();
   }
@@ -2329,6 +2337,95 @@ function exportByType(){
   dl(new Blob([out.join("\r\n")],{type:"application/vnd.ms-excel"}),"Permit_Log_ByType_"+today()+".csv");
 }
 
+/* ============================================================
+   LIVE CLOUD SYNC — every device sees the same permits
+   (Supabase REST; localStorage stays as the offline cache)
+   ============================================================ */
+const CLOUD={ url:"https://ltjvpodpdlmwvjmwuygm.supabase.co", key:"sb_publishable_DiH5dXOI8BpuPIvtClmZhg_ZDZjVTi3" };
+const cloudOn=()=> CLOUD.url.startsWith("https://");
+const sbH=()=>({apikey:CLOUD.key,Authorization:"Bearer "+CLOUD.key,"Content-Type":"application/json"});
+let lastPush=+(localStorage.getItem("ppp_lastpush")||0);
+let SYNC_STATE=cloudOn()?"sync":"off";
+let syncTimer=null, syncBusy=false;
+function scheduleSync(){ if(!cloudOn()) return; clearTimeout(syncTimer); syncTimer=setTimeout(()=>syncNow(), 1200); }
+function updateSyncBadge(){
+  const el=document.getElementById("syncBadge"); if(!el) return;
+  el.innerHTML = SYNC_STATE==="ok" ? '<span style="color:var(--green)">🟢 Live — synced across all devices</span>'
+    : SYNC_STATE==="sync" ? '⏳ Syncing…'
+    : SYNC_STATE==="err" ? '<span style="color:var(--red)">🔴 Sync issue — retrying (changes saved on this device)</span>'
+    : '⚪ Offline mode — data saved on this device only';
+}
+function mergeLogs(a,b,cap){
+  const seen=new Set(), out=[];
+  [...(a||[]),...(b||[])].forEach(e=>{ const k=JSON.stringify([e.at,e.action||e.role,e.name||e.by]); if(!seen.has(k)){seen.add(k);out.push(e);} });
+  out.sort((x,y)=> (y.at||"").localeCompare(x.at||""));
+  return out.slice(0,cap);
+}
+async function syncPush(){
+  const rows=[
+    ...DB.permits.filter(p=>(p._u||0)>lastPush).map(p=>({id:p.id,updated:p._u||Date.now(),deleted:false,data:p})),
+    ...DB.trash.filter(p=>(p._u||0)>lastPush).map(p=>({id:p.id,updated:p._u||Date.now(),deleted:true,data:p}))
+  ];
+  if(rows.length){
+    const r=await fetch(CLOUD.url+"/rest/v1/permits",{method:"POST",
+      headers:{...sbH(),Prefer:"resolution=merge-duplicates"},body:JSON.stringify(rows)});
+    if(!r.ok) throw new Error("push "+r.status);
+  }
+  if((DB.cfgU||0)>lastPush){
+    const cfg={cfg:JSON.parse(configSnapshot()),counters:DB.counters,accessLog:DB.accessLog.slice(0,300),adminLog:DB.adminLog};
+    const r=await fetch(CLOUD.url+"/rest/v1/portal_config",{method:"POST",
+      headers:{...sbH(),Prefer:"resolution=merge-duplicates"},body:JSON.stringify([{id:1,updated:DB.cfgU,data:cfg}])});
+    if(!r.ok) throw new Error("cfg push "+r.status);
+  }
+  lastPush=Date.now(); localStorage.setItem("ppp_lastpush",String(lastPush));
+}
+async function syncPull(){
+  const r=await fetch(CLOUD.url+"/rest/v1/permits?select=id,updated,deleted,data",{headers:sbH()});
+  if(!r.ok) throw new Error("pull "+r.status);
+  const rows=await r.json();
+  let changed=false;
+  rows.forEach(row=>{
+    const lu=(DB.permits.find(p=>p.id===row.id)?._u)||(DB.trash.find(p=>p.id===row.id)?._u)||0;
+    if((row.updated||0)>lu){
+      changed=true;
+      DB.permits=DB.permits.filter(p=>p.id!==row.id);
+      DB.trash=DB.trash.filter(p=>p.id!==row.id);
+      if(row.deleted) DB.trash.unshift(row.data); else DB.permits.unshift(row.data);
+    }
+  });
+  const rc=await fetch(CLOUD.url+"/rest/v1/portal_config?select=updated,data&id=eq.1",{headers:sbH()});
+  if(rc.ok){
+    const cfgRow=(await rc.json())[0];
+    if(cfgRow&&(cfgRow.updated||0)>(DB.cfgU||0)){
+      changed=true;
+      const c=cfgRow.data||{};
+      if(c.cfg){ Object.assign(DB,{buildings:c.cfg.buildings,floors:c.cfg.floors,contractors:c.cfg.contractors,
+        permitTypes:c.cfg.permitTypes,reviewers:c.cfg.reviewers,permitDocs:c.cfg.permitDocs,safetyUsers:c.cfg.safetyUsers||[]});
+        DB.settings={...DB.settings,...c.cfg.settings}; }
+      Object.entries(c.counters||{}).forEach(([k,v])=>{ DB.counters[k]=Math.max(DB.counters[k]||0,v); });
+      DB.accessLog=mergeLogs(DB.accessLog,c.accessLog,500);
+      DB.adminLog=mergeLogs(DB.adminLog,c.adminLog,40);
+      DB.cfgU=cfgRow.updated;
+    }
+  }
+  if(changed){
+    saveDBLocal();
+    // refresh the screen unless the user is mid-form or has a pop-up open
+    if(!F&&!document.querySelector(".modal-bk")){ window._keepScroll=true; route(); }
+  }
+}
+async function syncNow(){
+  if(!cloudOn()||syncBusy) return;
+  syncBusy=true; SYNC_STATE="sync"; updateSyncBadge();
+  try{ await syncPull(); await syncPush(); SYNC_STATE="ok"; }
+  catch(e){ SYNC_STATE="err"; }
+  syncBusy=false; updateSyncBadge();
+}
+async function cloudDeleteRow(id){
+  if(!cloudOn()) return;
+  try{ await fetch(CLOUD.url+"/rest/v1/permits?id=eq."+encodeURIComponent(id),{method:"DELETE",headers:sbH()}); }catch(e){}
+}
+
 /* ---------- Cinematic intro (Hubtown-inspired, field-lightweight) ---------- */
 const SKYLINE_SVG=(cls,stroke)=>`<svg class="${cls}" viewBox="0 0 1200 200" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="${stroke}" stroke-width="2">
   <path d="M0 200 V150 H70 V110 H150 V200"/>
@@ -2390,6 +2487,13 @@ setInterval(()=>{
   const v=location.hash.replace(/^#\/?/,"").split("/")[0];
   if(changed||["dashboard","board","myreviews"].includes(v)){ window._keepScroll=true; route(); } // refresh timers WITHOUT moving the page
 }, 30000);
+/* live sync loop */
+updateSyncBadge();
+if(cloudOn()){
+  syncNow();
+  setInterval(syncNow, 15000);
+  document.addEventListener("visibilitychange",()=>{ if(!document.hidden) syncNow(); });
+}
 </script>
 </body>
 </html>
