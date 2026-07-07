@@ -1,0 +1,2395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#0f1b2d">
+<title>Project Permit Portal — Request. Review. Approve. Track.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0c1524; --navy2:#132238; --charcoal:#22303f;
+  --yellow:#ffb81c; --yellow-d:#e6a400;
+  --green:#1e8e3e; --green-d:#0f6f32;
+  --blue:#1a73e8; --blue-d:#174ea6;
+  --orange:#e8710a; --red:#d93025; --gray:#8a94a0; --gray-l:#e9edf2;
+  --bg:#eef1f6; --card:#ffffff; --text:#141d29; --muted:#5b6773;
+  --radius:18px;
+  --shadow:0 1px 2px rgba(13,22,38,.05),0 6px 18px rgba(13,22,38,.07);
+  --shadow-lg:0 2px 4px rgba(13,22,38,.06),0 14px 40px rgba(13,22,38,.13);
+  --gold-grad:linear-gradient(135deg,#ffc94a,#ffb81c 55%,#f0a500);
+  --navy-grad:linear-gradient(160deg,#16263f 0%,#0c1524 70%);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:
+  radial-gradient(1200px 500px at 85% -10%, #dfe7f3 0%, transparent 60%),
+  radial-gradient(900px 420px at -10% 0%, #e8ecf5 0%, transparent 55%),
+  var(--bg);
+  color:var(--text);font-size:16px;line-height:1.45;min-height:100vh;font-feature-settings:"cv02","cv03"}
+::selection{background:#ffb81c55}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit;font-size:16px}
+a{color:var(--blue);text-decoration:none}
+
+/* ===== Header ===== */
+header{background:var(--navy-grad);color:#fff;position:sticky;top:0;z-index:50;box-shadow:0 2px 20px rgba(4,10,20,.35);border-bottom:1px solid rgba(255,184,28,.28)}
+.hdr-in{max-width:1200px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:11px;cursor:pointer}
+.logo-badge{width:40px;height:40px;border-radius:11px;background:var(--gold-grad);color:var(--navy);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:17px;letter-spacing:-.5px;flex:none;box-shadow:0 3px 10px rgba(255,184,28,.35),inset 0 1px 0 rgba(255,255,255,.45)}
+.logo h1{font-size:17.5px;font-weight:800;line-height:1.15;letter-spacing:-.2px}
+.logo small{display:block;font-size:10.5px;font-weight:600;color:#9fb0c6;letter-spacing:1.6px;text-transform:uppercase;margin-top:1px}
+.hdr-sp{flex:1}
+.rolewrap{display:flex;align-items:center;gap:8px}
+.langwrap{display:flex;gap:0;border:1px solid #2c3e57;border-radius:99px;overflow:hidden}
+.langwrap .lang{background:var(--navy2);color:#8fa0b8;border:none;padding:7px 13px;font-size:12.5px;font-weight:800;letter-spacing:.5px}
+.langwrap .lang.on{background:var(--gold-grad);color:var(--navy)}
+.rolebtn{background:var(--navy2);color:#cfd8e3;border:1px solid #2c3e57;border-radius:99px;padding:7px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px}
+.rolebtn .dot{width:8px;height:8px;border-radius:50%;background:var(--yellow)}
+nav.mainnav{background:var(--navy2);border-top:1px solid #24334a}
+.nav-in{max-width:1200px;margin:0 auto;display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.nav-in a{color:#aab6c6;padding:12px 15px;font-size:13.5px;font-weight:600;white-space:nowrap;border-bottom:3px solid transparent;transition:color .12s}
+.nav-in a.on{color:var(--yellow);border-bottom-color:var(--yellow);background:linear-gradient(180deg,transparent 40%,rgba(255,184,28,.14));font-weight:800}
+.nav-in a:hover{color:#fff}
+.nav-in a:active{background:rgba(255,255,255,.06)}
+
+/* ===== Layout ===== */
+main{max-width:1200px;margin:0 auto;padding:20px 14px 90px;animation:pgIn .28s ease both}
+@keyframes pgIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+.narrow{max-width:680px;margin:0 auto}
+.mid{max-width:860px;margin:0 auto}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;margin-bottom:16px;border:1px solid rgba(19,34,56,.055);transition:box-shadow .18s}
+.card.tight{padding:15px 17px}
+h2.page{font-size:24px;font-weight:800;margin:4px 0 4px;letter-spacing:-.4px}
+p.sub{color:var(--muted);font-size:14.5px;margin-bottom:16px}
+.section-t{font-size:13px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin:4px 0 10px}
+hr.div{border:none;border-top:1px solid var(--gray-l);margin:16px 0}
+
+/* ===== Buttons ===== */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:13px;font-weight:700;font-size:16px;padding:14px 22px;min-height:52px;transition:transform .08s, filter .15s, box-shadow .18s;text-align:center;letter-spacing:-.1px}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:scale(.98)}
+.btn-y{background:var(--gold-grad);color:var(--navy);box-shadow:0 4px 14px rgba(255,184,28,.38),inset 0 1px 0 rgba(255,255,255,.5)}
+.btn-y:hover{filter:brightness(1.04);box-shadow:0 7px 20px rgba(255,184,28,.48),inset 0 1px 0 rgba(255,255,255,.5)}
+.btn-dark{background:var(--navy-grad);color:#fff;box-shadow:0 4px 14px rgba(12,21,36,.3)}
+.btn-g{background:linear-gradient(135deg,#27a04a,#1e8e3e);color:#fff;box-shadow:0 4px 14px rgba(30,142,62,.32)}
+.btn-o{background:linear-gradient(135deg,#f5821f,#e8710a);color:#fff;box-shadow:0 4px 14px rgba(232,113,10,.3)}
+.btn-r{background:linear-gradient(135deg,#e4453a,#d93025);color:#fff;box-shadow:0 4px 14px rgba(217,48,37,.3)}
+.btn-b{background:linear-gradient(135deg,#3585f2,#1a73e8);color:#fff;box-shadow:0 4px 14px rgba(26,115,232,.3)}
+.btn-line{background:#fff;color:var(--text);border:2px solid #d5dbe3}
+.btn-line:hover{border-color:var(--navy);box-shadow:var(--shadow)}
+.btn-cancel:hover{background:var(--red)!important;border-color:var(--red)!important;color:#fff!important}
+.btn-ghost{background:transparent;color:var(--muted);border:none;font-weight:600}
+.btn-sm{min-height:38px;padding:7px 14px;font-size:13.5px;border-radius:9px}
+.btn-block{display:flex;width:100%}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.btnrow .btn{flex:1;min-width:150px}
+
+/* ===== Status badges ===== */
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:800;padding:4px 11px;border-radius:99px;white-space:nowrap;letter-spacing:.2px}
+.badge::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.st-Draft{background:#eef1f5;color:#5b6773}
+.st-Submitted{background:#fff3cd;color:#8a6400}
+.st-UnderReview{background:#e2edfd;color:#174ea6}
+.st-NeedsUpdate{background:#fdebd9;color:#a4520a}
+.st-Approved{background:#e0f2e5;color:#0f6f32}
+.st-Active{background:#1e8e3e;color:#fff}
+.st-Completed{background:#dbe4f7;color:#1f3a72}
+.st-Expired{background:#e5e8ec;color:#6b7684}
+.st-Void{background:#3a4450;color:#e6e9ee}
+.st-Lost{background:#fde2e0;color:#b3140a}
+.st-Rejected{background:#fde2e0;color:#b3140a}
+
+/* ===== Forms ===== */
+.f-group{margin-bottom:15px}
+.f-label{display:block;font-size:13.5px;font-weight:700;margin-bottom:6px;color:#33404d}
+.f-label .req{color:var(--red);margin-left:2px}
+.f-in,select.f-in,textarea.f-in{width:100%;border:2px solid #d5dbe3;border-radius:11px;padding:13px 14px;min-height:50px;background:#fff;color:var(--text)}
+.f-in:focus{outline:none;border-color:var(--blue)}
+.f-in.err{border-color:var(--red);background:#fff7f6}
+textarea.f-in{min-height:90px;resize:vertical}
+.f-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:560px){.f-row{grid-template-columns:1fr}}
+.seg{display:flex;gap:8px;flex-wrap:wrap}
+.seg button{flex:1;min-width:110px;min-height:52px;border:2px solid #d5dbe3;background:#fff;border-radius:11px;font-weight:700;font-size:15px;color:var(--muted)}
+.seg button.on{border-color:var(--navy);background:var(--navy);color:#fff}
+.seg.yn button.on.yes{border-color:var(--green);background:var(--green)}
+.seg.yn button.on.no{border-color:var(--gray);background:var(--gray)}
+.linkgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.linkopt{border:2px solid #d5dbe3;background:#fff;border-radius:11px;padding:11px 12px;font-weight:600;font-size:13.5px;text-align:left;color:var(--muted);transition:all .12s}
+.linkopt.on{border-color:var(--navy);background:var(--navy);color:#fff;box-shadow:0 3px 10px rgba(12,21,36,.25)}
+.hint{font-size:12.5px;color:var(--muted);margin-top:5px}
+.errbox{background:#fde2e0;color:#8f1007;border-radius:10px;padding:12px 14px;font-size:14px;font-weight:600;margin-bottom:14px;display:none}
+
+/* ===== Stepper ===== */
+.steps{display:flex;gap:4px;margin-bottom:18px}
+.steps .stp{flex:1;text-align:center}
+.steps .bar{height:5px;border-radius:99px;background:#dfe4ea;margin-bottom:6px}
+.steps .on .bar{background:var(--yellow)}
+.steps .done .bar{background:var(--green)}
+.steps span{font-size:10.5px;font-weight:700;color:#98a2ad;text-transform:uppercase;letter-spacing:.4px}
+.steps .on span{color:var(--text)}
+
+/* ===== Permit type grid ===== */
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.tcard{background:#fff;border:2px solid #e3e8ee;border-radius:var(--radius);padding:16px;cursor:pointer;display:flex;gap:13px;align-items:flex-start;transition:border-color .14s, box-shadow .18s, transform .12s;text-align:left}
+.tcard:hover{border-color:var(--yellow);box-shadow:var(--shadow-lg);transform:translateY(-2px)}
+.tcard .ico{font-size:26px;width:48px;height:48px;flex:none;background:#f2f5f9;border-radius:11px;display:flex;align-items:center;justify-content:center}
+.tcard b{font-size:15.5px;display:block}
+.tcard .code{display:inline-block;font-size:11px;font-weight:800;background:var(--navy);color:var(--yellow);border-radius:5px;padding:1px 7px;margin:3px 0 5px}
+.tcard p{font-size:12.8px;color:var(--muted);line-height:1.4}
+.tcard.hr-flag{border-left:5px solid var(--yellow)}
+
+/* ===== Tracker ===== */
+.tracker{display:flex;align-items:center;margin:14px 0;overflow-x:auto;padding-bottom:4px}
+.tk{display:flex;flex-direction:column;align-items:center;min-width:74px;flex:1}
+.tk .cir{width:30px;height:30px;border-radius:50%;background:#dfe4ea;color:#98a2ad;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;z-index:1}
+.tk.done .cir{background:var(--green);color:#fff}
+.tk.now .cir{background:var(--yellow);color:var(--navy);box-shadow:0 0 0 4px #ffb81c40}
+.tk span{font-size:10.5px;font-weight:700;color:#98a2ad;margin-top:5px;text-align:center}
+.tk.done span,.tk.now span{color:var(--text)}
+.tk-line{height:3px;flex:1;background:#dfe4ea;margin:0 -18px;position:relative;top:-13px;min-width:12px}
+.tk-line.done{background:var(--green)}
+.tracker.dead{opacity:.45}
+
+/* ===== Summary cards ===== */
+.sumgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:16px}
+.sum{background:#fff;border-radius:15px;box-shadow:var(--shadow);padding:14px 15px;cursor:pointer;border:2px solid rgba(19,34,56,.05);transition:box-shadow .18s, transform .12s, border-color .14s}
+.sum:hover{border-color:#c9d2dd;box-shadow:var(--shadow-lg);transform:translateY(-2px)}
+.sum.on{border-color:var(--navy)}
+.sum b{font-size:27px;display:block;line-height:1.1;letter-spacing:-.8px;font-weight:800}
+.sum span{font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+.sum .tick{width:26px;height:4px;border-radius:99px;display:block;margin-top:7px}
+
+/* ===== Tables & permit cards ===== */
+.tblwrap{overflow-x:auto;border-radius:12px;box-shadow:var(--shadow);background:#fff}
+table.tbl{width:100%;border-collapse:collapse;min-width:760px}
+table.tbl th{background:var(--navy-grad);color:#cfd8e3;font-size:11px;text-transform:uppercase;letter-spacing:.7px;text-align:left;padding:12px;white-space:nowrap}
+table.tbl td{padding:11px 12px;border-top:1px solid #eef1f5;font-size:13.8px;vertical-align:middle}
+table.tbl tr:hover td{background:#f7f9fc}
+.pnum{font-weight:800;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.3px}
+.pcard{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:12px}
+.pcard .top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.pcard .meta{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;font-size:13.5px;color:var(--muted)}
+.pcard .meta b{color:var(--text);font-weight:600}
+.kv{display:grid;grid-template-columns:190px 1fr;gap:7px 14px;font-size:14.5px}
+.kv dt{color:var(--muted);font-weight:600}
+.kv dd{font-weight:600}
+@media(max-width:560px){.kv{grid-template-columns:1fr}.kv dt{margin-top:6px;font-size:12.5px;text-transform:uppercase;letter-spacing:.3px}}
+
+/* ===== Filters ===== */
+.filters{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:14px}
+.filters .f-in{width:auto;min-width:130px;flex:1;min-height:44px;padding:8px 12px;font-size:14px}
+.filters input.f-in{min-width:170px}
+
+/* ===== Hero (landing) — blueprint style ===== */
+.hero{border-radius:26px;padding:38px 30px 32px;color:#fff;box-shadow:var(--shadow-lg);position:relative;overflow:hidden;border:1px solid rgba(255,184,28,.25);
+  background:
+    repeating-linear-gradient(0deg, rgba(122,160,220,.075) 0 1px, transparent 1px 36px),
+    repeating-linear-gradient(90deg, rgba(122,160,220,.075) 0 1px, transparent 1px 36px),
+    radial-gradient(560px 300px at 90% -10%, rgba(255,184,28,.17), transparent 60%),
+    radial-gradient(500px 320px at -8% 110%, rgba(26,115,232,.22), transparent 60%),
+    linear-gradient(158deg,#17293f 0%, #0c1524 62%, #0a1220 100%)}
+.hero::before{content:"";position:absolute;top:-80px;right:-80px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(255,184,28,.24),transparent 70%);animation:heroGlow 6s ease-in-out infinite}
+@keyframes heroGlow{0%,100%{opacity:.8;transform:scale(1)}50%{opacity:1;transform:scale(1.12)}}
+.hero::after{content:"";position:absolute;bottom:0;left:0;right:0;height:6px;background:repeating-linear-gradient(45deg,var(--yellow) 0 14px,#1a2434 14px 28px)}
+.hero-kicker{display:inline-flex;align-items:center;gap:7px;background:rgba(255,184,28,.13);border:1px solid rgba(255,184,28,.45);color:var(--yellow);font-size:12px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;border-radius:99px;padding:7px 15px;margin-bottom:16px;box-shadow:0 0 22px rgba(255,184,28,.15)}
+.hero h2{font-size:34px;font-weight:900;line-height:1.1;letter-spacing:-.9px;text-shadow:0 2px 20px rgba(0,0,0,.35)}
+.hero h2 em{font-style:normal;color:var(--yellow);text-shadow:0 0 28px rgba(255,184,28,.45)}
+.hero p{color:#bcc8da;font-size:15px;margin-top:13px;max-width:460px}
+.hero-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+@media(max-width:520px){.hero-row{grid-template-columns:1fr}}
+.hero-tile{background:#fff;border:2px solid rgba(19,34,56,.07);border-radius:18px;padding:18px 16px;text-align:left;box-shadow:var(--shadow);transition:transform .12s, box-shadow .18s, border-color .14s;cursor:pointer}
+.hero-tile:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:var(--yellow)}
+.hero-tile .ht-ico{font-size:26px;display:block;margin-bottom:8px}
+.hero-tile b{font-size:15.5px;display:block;letter-spacing:-.2px}
+.hero-tile small{color:var(--muted);font-size:12.5px;font-weight:600}
+.hero-strip{display:flex;gap:10px;margin-top:14px}
+.hero-strip>div{flex:1;background:rgba(255,255,255,.66);backdrop-filter:blur(8px);border:1px solid rgba(19,34,56,.07);border-radius:15px;padding:12px 8px;text-align:center}
+.hero-strip b{font-size:22px;font-weight:800;display:block;letter-spacing:-.5px;color:var(--navy)}
+.hero-strip span{font-size:10.8px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+
+/* ===== Cinematic intro sequence ===== */
+#intro{position:fixed;inset:0;z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;
+  background:
+    repeating-linear-gradient(0deg, rgba(122,160,220,.06) 0 1px, transparent 1px 42px),
+    repeating-linear-gradient(90deg, rgba(122,160,220,.06) 0 1px, transparent 1px 42px),
+    radial-gradient(700px 420px at 50% 115%, rgba(255,184,28,.14), transparent 65%),
+    linear-gradient(165deg,#152841 0%, #0c1524 55%, #080f1a 100%);
+  transition:transform .85s cubic-bezier(.7,0,.3,1), opacity .85s}
+#intro.lift{transform:translateY(-102%);opacity:.4}
+.intro-word{position:absolute;left:0;right:0;text-align:center;color:#fff;font-size:clamp(34px,7.5vw,72px);font-weight:900;letter-spacing:-1.5px;opacity:0;padding:0 20px;text-shadow:0 4px 40px rgba(0,0,0,.5)}
+.intro-word em{font-style:normal;color:var(--yellow);text-shadow:0 0 40px rgba(255,184,28,.5)}
+.intro-word.in{animation:wIn 1.6s cubic-bezier(.2,.7,.2,1) both}
+.intro-word.gone{animation:wOut .8s ease both}
+@keyframes wIn{from{opacity:0;transform:translateY(34px) scale(.96);filter:blur(6px)}30%{filter:blur(0)}to{opacity:1;transform:none}}
+@keyframes wOut{from{opacity:1}to{opacity:0;transform:translateY(-26px);filter:blur(4px)}}
+.intro-brand{position:absolute;left:0;right:0;text-align:center;opacity:0;padding:0 20px}
+.intro-brand.in{animation:wIn 1s cubic-bezier(.2,.7,.2,1) both}
+.intro-brand .ib-badge{width:64px;height:64px;border-radius:16px;background:var(--gold-grad);color:var(--navy);display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:26px;box-shadow:0 8px 40px rgba(255,184,28,.45);margin-bottom:14px}
+.intro-brand h1{color:#fff;font-size:clamp(26px,5vw,44px);font-weight:900;letter-spacing:-1px}
+.intro-brand p{color:var(--yellow);font-size:13px;font-weight:800;letter-spacing:3.5px;text-transform:uppercase;margin-top:8px}
+.intro-sky{position:absolute;bottom:0;left:0;right:0;width:100%;height:30vh;min-height:170px;opacity:.9}
+.intro-sky path,.intro-sky line,.intro-sky rect{stroke-dasharray:1200;stroke-dashoffset:1200;animation:draw 3.4s ease forwards .25s}
+@keyframes draw{to{stroke-dashoffset:0}}
+#introSkip{position:absolute;top:20px;right:20px;background:var(--gold-grad);border:none;color:var(--navy);border-radius:99px;padding:13px 26px;font-weight:800;font-size:15px;box-shadow:0 6px 24px rgba(255,184,28,.45);animation:skipPulse 2.4s ease-in-out infinite;cursor:pointer;z-index:5}
+#introSkip:hover{filter:brightness(1.06);transform:scale(1.04)}
+@keyframes skipPulse{0%,100%{box-shadow:0 6px 24px rgba(255,184,28,.45)}50%{box-shadow:0 6px 34px rgba(255,184,28,.75)}}
+/* ===== Marquee band (landing) ===== */
+.marquee{overflow:hidden;background:var(--navy-grad);border:1px solid rgba(255,184,28,.28);border-radius:16px;margin-top:14px;position:relative;padding:13px 0}
+.marquee::before,.marquee::after{content:"";position:absolute;top:0;bottom:0;width:46px;z-index:2;pointer-events:none}
+.marquee::before{left:0;background:linear-gradient(90deg,#0c1524,transparent)}
+.marquee::after{right:0;background:linear-gradient(270deg,#0c1524,transparent)}
+.marquee-track{display:flex;width:max-content;animation:mq 26s linear infinite;white-space:nowrap}
+.marquee:hover .marquee-track{animation-play-state:paused}
+.marquee-track span{color:#8fa0b8;font-weight:900;font-size:15px;letter-spacing:2.5px;text-transform:uppercase;padding:0 18px}
+.marquee-track span em{font-style:normal;color:var(--yellow)}
+.marquee-track b{color:var(--yellow);padding:0 4px}
+@keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media (prefers-reduced-motion: reduce){.marquee-track{animation:none}}
+.hero-sky{position:absolute;bottom:6px;left:0;right:0;width:100%;height:90px;opacity:.5;pointer-events:none}
+@media (prefers-reduced-motion: reduce){#intro{display:none}}
+
+/* ===== Toasts ===== */
+#toastHost{position:fixed;bottom:56px;left:0;right:0;z-index:200;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+.toast{background:var(--navy-grad);color:#fff;border-radius:14px;padding:14px 22px;font-size:15px;font-weight:700;box-shadow:0 10px 34px rgba(4,10,20,.4);opacity:0;transform:translateY(16px) scale(.97);transition:opacity .3s,transform .3s;max-width:92vw;text-align:center;border:1px solid rgba(255,255,255,.14)}
+.toast.show{opacity:1;transform:none}
+.toast.t-green{background:linear-gradient(135deg,#27a04a,#0f6f32);border-color:rgba(255,255,255,.25)}
+.toast.t-orange{background:linear-gradient(135deg,#f5821f,#c95f05)}
+.toast.t-red{background:linear-gradient(135deg,#e4453a,#b3140a)}
+.toast.t-blue{background:linear-gradient(135deg,#3585f2,#174ea6)}
+
+/* ===== Aging / escalation chips ===== */
+.age{display:inline-flex;align-items:center;font-size:12px;font-weight:800;border-radius:99px;padding:4px 10px;white-space:nowrap;letter-spacing:.2px}
+.age.ok{background:#e6f0e9;color:#1e6b38}
+.age.neu{background:#eef1f5;color:#5b6773}
+.age.sch{background:#e2edfd;color:#174ea6}
+.age.yel{background:#fff3cd;color:#8a6400;animation:agePulse 2.2s infinite}
+.age.red{background:var(--red);color:#fff;animation:agePulse 1.2s infinite}
+@keyframes agePulse{0%,100%{opacity:1}50%{opacity:.65}}
+tr.row-warn td{background:#fffaf0!important}
+tr.row-urgent td{background:#fff2f1!important}
+tr.row-urgent td:first-child{box-shadow:inset 4px 0 0 var(--red)}
+.pcard.pc-row-warn{border:2px solid #f5b400;background:#fffdf5}
+.pcard.pc-row-urgent{border:2px solid var(--red);background:#fff7f6;box-shadow:0 4px 18px rgba(217,48,37,.18)}
+a.btn{text-decoration:none}
+
+/* ===== Ticket (confirmation) ===== */
+.ticket{background:var(--navy-grad);border-radius:18px;padding:20px 16px 18px;position:relative;overflow:hidden;border:1px solid rgba(255,184,28,.3)}
+.ticket::after{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:var(--gold-grad)}
+.ticket .tk-lbl{font-size:11px;font-weight:800;color:#9fb0c6;text-transform:uppercase;letter-spacing:1.6px}
+.ticket .tk-num{font-size:38px;color:var(--yellow);text-shadow:0 2px 14px rgba(255,184,28,.35);margin:4px 0 10px}
+
+/* ===== Misc ===== */
+.big-icon{font-size:52px;margin-bottom:8px}
+.center{text-align:center}
+.pill-hint{background:#eef4ff;color:var(--blue-d);border-radius:10px;padding:11px 14px;font-size:13.5px;font-weight:600;margin-bottom:14px}
+.warn-hint{background:#fff8e6;color:#7a5b00;border-radius:10px;padding:11px 14px;font-size:13.5px;font-weight:600}
+.audit{border-left:3px solid var(--gray-l);padding-left:14px}
+.audit .ev{margin-bottom:12px;position:relative}
+.audit .ev::before{content:"";width:11px;height:11px;border-radius:50%;background:var(--navy);position:absolute;left:-20.5px;top:4px;border:2px solid #fff}
+.audit .ev b{font-size:14px}
+.audit .ev .when{font-size:12px;color:var(--muted)}
+.audit .ev .det{font-size:13.5px;color:#44505c;margin-top:2px;white-space:pre-wrap}
+.tag{display:inline-block;background:#eef1f5;border-radius:6px;font-size:12px;font-weight:700;padding:2px 8px;margin:2px 3px 2px 0;color:#44505c}
+.empty{padding:40px 16px;text-align:center;color:var(--muted)}
+.empty .big-icon{opacity:.6}
+footer{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.82);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid rgba(19,34,56,.08);padding:8px 14px;text-align:center;font-size:11.8px;color:var(--muted);z-index:40}
+.modal-bk{position:fixed;inset:0;background:rgba(10,18,30,.55);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:#fff;border-radius:16px;max-width:480px;width:100%;padding:22px;max-height:88vh;overflow-y:auto}
+.modal h3{font-size:18px;margin-bottom:10px}
+.qrbox{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.qrcell{background:#fff;border:2px solid #e3e8ee;border-radius:12px;padding:14px;text-align:center}
+.qrcell img{width:150px;height:150px;margin:6px auto}
+.qrcell b{font-size:14px;display:block}
+.qrcell .lnk{font-size:10.5px;color:var(--muted);word-break:break-all;margin-top:6px}
+.admin-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.admin-tabs button{border:2px solid #d5dbe3;background:#fff;border-radius:99px;padding:9px 16px;font-weight:700;font-size:13.5px;color:var(--muted)}
+.admin-tabs button.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.list-row{display:flex;align-items:center;gap:10px;padding:11px 4px;border-top:1px solid #eef1f5;flex-wrap:wrap}
+.list-row:first-child{border-top:none}
+.list-row .grow{flex:1;min-width:150px}
+.list-row b{font-size:14.5px}
+.list-row small{display:block;color:var(--muted);font-size:12.5px}
+.off{opacity:.45}
+.grp-h{background:var(--navy2);color:#fff;font-weight:800;font-size:13px;padding:8px 12px;border-radius:8px;margin:16px 0 8px;letter-spacing:.4px}
+@media print{
+  header,nav.mainnav,footer,.btn,.filters,.admin-tabs,.noprint{display:none!important}
+  body{background:#fff}
+  .card,.tblwrap{box-shadow:none;border:1px solid #ccc}
+  main{padding:0;max-width:none}
+}
+@media(max-width:640px){
+  .btn{font-size:15px}
+  h2.page{font-size:20px}
+  main{padding:14px 10px 90px}
+  .sum b{font-size:22px}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="hdr-in">
+    <div class="logo" onclick="go('home')">
+      <div class="logo-badge">PP</div>
+      <h1>Project Permit Portal<small>Request. Review. Approve. Track.</small></h1>
+    </div>
+    <div class="hdr-sp"></div>
+    <div id="langWrap" class="langwrap"></div>
+    <div class="rolewrap">
+      <button class="rolebtn" id="roleBtn" onclick="openRoleModal()"><span class="dot"></span><span id="roleLbl">Contractor</span> ▾</button>
+    </div>
+  </div>
+  <nav class="mainnav"><div class="nav-in" id="navIn"></div></nav>
+</header>
+<main id="app"></main>
+<footer>All permits require Jacobs review and approval before work begins. &nbsp;·&nbsp; Pilot version — data saved on this device.</footer>
+<div id="modalHost"></div>
+<script>
+"use strict";
+/* ============================================================
+   PROJECT PERMIT PORTAL — Pilot / Beta
+   Single-file app. Data persists in this browser (localStorage).
+   ============================================================ */
+
+/* ---------- Safety question sets (aligned with Project Aura HSE Plan Rev 2 / Master SSOW) ---------- */
+const QSETS={
+HW:["Will sparks, heat, or open flame be generated?","Has the area been inspected for combustibles?","Is a fire extinguisher available?","Is fire watch required?","Has fire watch been assigned?"],
+CS:["Has the space been evaluated?","Is atmospheric monitoring required?","Is rescue planning required?","Is an attendant assigned?"],
+NCS:["Has the space been evaluated and classified non-permit?","Could conditions change during the work?","Is ventilation adequate?","Is communication established with workers inside?"],
+LOTO:["Has the energy source been identified?","Has an isolation plan been reviewed?","Is verification of zero energy required?","Are all affected parties notified?"],
+ES:["Is the energized work justified (no de-energized option)?","Are only qualified electrical workers performing the task?","Is arc-flash PPE selected for the incident energy?","Are barriers and approach boundaries established?"],
+EXC:["Have utilities been located and marked (811 / scans)?","Is a protective system (sloping, shoring, box) in place?","Is a competent person on site?","Are spoil piles at least 2 ft from the edge?","Is ladder access within 25 ft of workers?"],
+OHPL:["Has the minimum approach distance been established?","Is a dedicated spotter assigned?","Are the lines de-energized or insulated/guarded?","Has equipment reach/height been checked against clearances?"],
+OP:["Has the area been scanned or reviewed?","Have drawings been reviewed?","Are barricades required?","Are exposed edges or floor openings protected?"],
+RA:["Is roof access authorized and controlled?","Is fall protection in place for work near edges?","Are weather conditions acceptable?","Is a warning line / perimeter established?"],
+GFG:["Is the area below and around barricaded?","Is fall protection in use while the surface is removed?","Will the opening be covered or guarded when unattended?","Will reinstallation be verified before closing the permit?"],
+LB:["Has the line been identified?","Has pressure been relieved?","Has the system been drained or flushed?","Are chemical or stored-energy hazards present?"],
+CL:["Has the lift plan been reviewed and approved?","Is the crane inspection current?","Has all rigging been inspected?","Is an exclusion zone established under the load path?","Are wind and weather within limits?"],
+PT:["Is the correct gauge installed (right range, current calibration)?","Is a pressure relief valve installed and set correctly?","Is the test area barricaded off?","Have Jacobs and the client been notified?","Has the test procedure been reviewed?"],
+PAT:["Is the operator trained and certified for the tool?","Has the tool been inspected before use?","Is the correct charge/load selected for the material?","Is the area behind and adjacent to the work clear?"],
+RAD:["Is the controlled area barricaded and posted?","Has the RSO / Jacobs been notified?","Are warning signals and lights working?","Have non-essential personnel been cleared?"],
+WC:["Has the walkable vs non-walkable area been verified on the plan?","Are weight limits confirmed for the work?","Is fall protection in place where required?","Are ceiling openings protected?"],
+BP:["Is the blast plan approved?","Have warning signals been communicated to the site?","Is the exclusion zone cleared and controlled?","Is the blaster licensed and authorized?"],
+ELEV:["Is fall protection required for this task?","Will workers be tied off 100% at height?","Is the equipment inspection current (MEWP / scaffold tag)?","Are ground conditions and outriggers verified?","Is a rescue plan in place for workers at height?"],
+EL:["Are the lift controls isolated or controlled?","Is use coordinated with the responsible owner?","Are load limits confirmed and posted?","Has the lift been inspected before use?"],
+BR:["Has the rigging plan been reviewed?","Is all rigging gear inspected and tagged?","Is the load path clear of personnel?","Are attachment points rated for the load?"]
+};
+
+/* ---------- Seed data (from real DSM-4 master permit log) ---------- */
+const SEED = {
+  settings:{ pin:"1234", project:"DSM Project", remind1:15, remind2:30, adminName:"Permit Office", adminEmail:"", adminPhone:"", alerts:false },
+  buildings:[
+    {code:"D4", name:"DSM-4", active:true},
+    {code:"D3", name:"DSM-3", active:true},
+    {code:"HB", name:"Head Block", active:true},
+    {code:"CUB", name:"CUB", active:true}
+  ],
+  floors:[
+    {id:"f1", b:"D4", name:"Ground Floor (GF)", active:true},
+    {id:"f2", b:"D4", name:"First Floor (FF)", active:true},
+    {id:"f3", b:"D4", name:"Second Floor (SF)", active:true},
+    {id:"f4", b:"D4", name:"Roof", active:true},
+    {id:"f5", b:"D4", name:"Waste Pit", active:true},
+    {id:"f6", b:"D4", name:"Exterior / Site", active:true},
+    {id:"f7", b:"D3", name:"Ground Floor (GF)", active:true},
+    {id:"f8", b:"D3", name:"First Floor (FF)", active:true},
+    {id:"f9", b:"D3", name:"Second Floor (SF)", active:true},
+    {id:"f10", b:"D3", name:"Roof", active:true},
+    {id:"f11", b:"HB", name:"All Levels", active:true},
+    {id:"f12", b:"CUB", name:"All Levels", active:true}
+  ],
+  contractors:[
+    "DH Griffin","Wayne Brothers","SIC","Amico","Merit","PureClean","InServ","FPI",
+    "Graycor","BMWC","UPSI","Ameco"
+  ].map((n,i)=>({id:"c"+(i+1), name:n, contact:"", phone:"", email:"", active:true})),
+  reviewers:[
+    "JJ Jaramillo","Lorena Vickery","Drew Foster","Mike Fitzpatrick","Gary Workman","Shawn Patterson","Building HSE/CM (any available)"
+  ].map((n,i)=>({id:"r"+(i+1), name:n, email:"", phone:"", active:true})),
+  permitTypes:[
+    {code:"HW", name:"Hot Work Permit", ico:"🔥", hr:true, desc:"Work involving sparks, heat, flame, welding, cutting, or grinding."},
+    {code:"CS", name:"Confined Space Permit", ico:"🕳️", hr:true, desc:"Work involving entry into a confined or restricted space."},
+    {code:"NCS", name:"Non-Confined Space Permit", ico:"📋", hr:false, desc:"Work requiring non-confined space permit review."},
+    {code:"LOTO", name:"Lockout / Tagout Permit", ico:"🔒", hr:true, desc:"Work involving energy isolation or hazardous energy control."},
+    {code:"ES", name:"Energized System Permit", ico:"⚡", hr:true, desc:"Work involving energized systems or live energy exposure."},
+    {code:"EXC", name:"Excavation and Trenching", ico:"⛏️", hr:false, desc:"Work involving digging, trenching, grading, or soil disturbance."},
+    {code:"OHPL", name:"Working Near Overhead Power Lines", ico:"🗼", hr:false, desc:"Work near overhead electrical lines or equipment."},
+    {code:"OP", name:"Opening and Penetration Permit", ico:"🧱", hr:true, desc:"Work involving floor, wall, ceiling, or system penetrations."},
+    {code:"RA", name:"Roof Access Permit", ico:"🏠", hr:false, desc:"Work requiring roof access or work on roof areas."},
+    {code:"GFG", name:"Grating / Flooring / Guardrail Removal", ico:"🚧", hr:false, desc:"Removal of walking surfaces or fall protection barriers."},
+    {code:"LB", name:"Line Break Permit", ico:"🔧", hr:true, desc:"Work involving opening piping, tubing, hoses, or systems."},
+    {code:"CL", name:"Critical Lift", ico:"🏗️", hr:true, desc:"Lifting activity requiring critical lift review."},
+    {code:"PT", name:"Pressure Testing", ico:"🌡️", hr:true, desc:"Testing involving pressure, stored energy, or temporary systems."},
+    {code:"PAT", name:"Powder-Actuated Tools", ico:"🔩", hr:false, desc:"Work involving powder-actuated fastening tools."},
+    {code:"RAD", name:"Radiography Site", ico:"☢️", hr:false, desc:"Work involving radiography or controlled access areas."},
+    {code:"WC", name:"Walkable Ceiling", ico:"🪜", hr:true, desc:"Work on or above walkable ceiling areas."},
+    {code:"BP", name:"Blasting Permit", ico:"💥", hr:false, desc:"Work involving blasting or explosive-related activity."},
+    {code:"ELEV", name:"Elevated Work Permit", ico:"🧗", hr:true, desc:"Work at height on platforms, scaffolds, MEWPs, or elevated surfaces."},
+    {code:"EL", name:"Existing Lift Permit", ico:"📦", hr:false, desc:"Work involving existing lift systems or lift-related controls."},
+    {code:"BR", name:"Bull Rigging", ico:"⛓️", hr:false, desc:"Rigging activity requiring specialized review."}
+  ].map(t=>({...t, q:QSETS[t.code]||[], active:true})),
+  permits:[], counters:{}
+};
+
+const STATUSES=["Draft","Submitted","Under Review","Needs Update","Approved","Active","Completed","Expired","Void","Lost","Rejected"];
+const OPEN_STATUSES=["Submitted","Under Review","Needs Update","Approved","Active"];
+const TRACK=["Under Review","Active","Completed"];
+const stageOf=st=> st==="Completed"?2 : ["Approved","Active"].includes(st)?1 : 0;
+const DEAD=["Void","Lost","Rejected","Expired"];
+
+/* ---------- DB ---------- */
+const KEY="ppp_db_v1";
+let DB;
+function loadDB(){
+  try{ DB = JSON.parse(localStorage.getItem(KEY)) || null; }catch(e){ DB=null; }
+  if(!DB){ DB = JSON.parse(JSON.stringify(SEED)); saveDB(); }
+  // forward-fill new seed keys
+  for(const k of Object.keys(SEED)) if(DB[k]===undefined) DB[k]=JSON.parse(JSON.stringify(SEED[k]));
+  DB.settings={...SEED.settings,...DB.settings};
+  migrate();
+}
+const D4_AREAS=["Sector A","Sector B","Sector C","Sector D","Upstream","Downstream","Waste Pit","CIP Room","AHU Room","Electrical Room","Mechanical Room","Temp Power Skid","Storm Drain","Corridor","Stairwell","Loading Dock"];
+function migrate(){
+  if((DB._v||1)<3){
+    const addF=(b,name)=>{ if(!DB.floors.some(f=>f.b===b&&f.name===name)) DB.floors.push({id:uid(),b,name,active:true}); };
+    addF("D4","Ground Floor Interstitial"); addF("D4","First Floor Interstitial"); addF("D4","Second Floor Interstitial");
+    DB.floors.forEach(f=>{ if(f.lead===undefined) f.lead=""; if(!f.areas) f.areas=(f.b==="D4"?D4_AREAS.slice():[]); });
+    if(DB.settings.notifyOn===undefined) DB.settings.notifyOn=true;
+    if(!DB.settings.notifyDays) DB.settings.notifyDays=[0,1,2,3,4,5,6];
+    if(!DB.permitDocs) DB.permitDocs=[
+      {n:"Project Aura — HSE Plan Rev 2",u:"Project Aura - HSE Plan Rev 2.pdf",g:"Reference"},
+      {n:"MASTER Safe System of Work (SSOW) Rev 3",u:"w4rw4/250613 Aura - MASTER Safe System of Work - English - Rev3.pdf",g:"Reference"},
+      {n:"DSM-4 Floor Plans & Walkable Ceiling",u:"DSM4 floor plans and walkable ceiling plain.pdf",g:"Reference"},
+      {n:"Hot Work Permit",u:"w4rw4/Hot Work Permit(2).pdf",g:"Permit Forms"},
+      {n:"Hot Work Permit (with Extension)",u:"w4rw4/Hot Work Permit(with EXT).pdf",g:"Permit Forms"},
+      {n:"Confined Space Entry Assessment & Permit Rev 2",u:"w4rw4/Jacobs Confined Space Entry Assessment and Permit Rev2.pdf",g:"Permit Forms"},
+      {n:"Confined Space Rescue Plan Template",u:"w4rw4/Confined-space-rescue-plan Template(2).pdf",g:"Permit Forms"},
+      {n:"Non-Permit CSE Data Sheet Template",u:"w4rw4/Non Permit CSE Data Sheet Template.pdf",g:"Permit Forms"},
+      {n:"Complex Lockout Tagout Plan (Packet)",u:"w4rw4/PACKET-Project Aura Complex Lockout Tagout Plan.pdf",g:"Permit Forms"},
+      {n:"Energized Electrical Permit & Checklist (Packet)",u:"w4rw4/PACKET-Corporate_Site Energized Electrical Permit_Checklist.pdf",g:"Permit Forms"},
+      {n:"Excavation and Trenching Permit Rev 2",u:"w4rw4/FDBN-Excavation and Trenching Permit Rev2.pdf",g:"Permit Forms"},
+      {n:"Line Break Permit",u:"w4rw4/Line Break Permit.pdf",g:"Permit Forms"},
+      {n:"Opening & Penetration Checklist",u:"w4rw4/Opening Penetration Checklist  Final.pdf",g:"Permit Forms"},
+      {n:"Roof Access Permit (Pink)",u:"w4rw4/Roof Access Permit(pink)(FDBN).pdf",g:"Permit Forms"},
+      {n:"Grating / Floor Plate / Guardrail Removal Checklist & Permit",u:"w4rw4/Grating-Floor-Plate-Guardrail Removal Checklist and Permit.pdf",g:"Permit Forms"},
+      {n:"Work at Height Permit Rev 2",u:"w4rw4/Work at Height Permit Rev2.pdf",g:"Permit Forms"},
+      {n:"Pressure Test Risk Assessment",u:"w4rw4/Pressure Test Risk Assessment.pdf",g:"Permit Forms"},
+      {n:"Crane Critical Lift / Rigging / Lifting Plan",u:"w4rw4/Crane Critical lift-Rigging-Lifting-Plan.pdf",g:"Permit Forms"},
+      {n:"Bull Rigging Lift Permit Rev 2",u:"w4rw4/Bull Rigging Lift Permit Rev2.pdf",g:"Permit Forms"},
+      {n:"Man Basket Exiting Permit (Gold) Rev 2",u:"w4rw4/Man Basket Exiting Permit(gold) Rev2.pdf",g:"Permit Forms"},
+      {n:"Greenlift",u:"w4rw4/Greenlift.pdf",g:"Permit Forms"},
+      {n:"Material Unload / Handling",u:"w4rw4/Material Unload Handling.pdf",g:"Permit Forms"},
+      {n:"Ladder Use Justification",u:"w4rw4/Ladder Use Justification FDBN.pdf",g:"Permit Forms"}
+    ];
+    DB._v=3; saveDB();
+  }
+  if((DB._v||1)<4){
+    // rename Elevator Work → Elevated Work Permit
+    const el=DB.permitTypes.find(t=>t.code==="ELEV");
+    if(el){ el.name="Elevated Work Permit"; el.ico="🧗"; el.hr=true; el.desc="Work at height on platforms, scaffolds, MEWPs, or elevated surfaces."; }
+    // every permit type gets its safety question set (keeps any admin-customized sets)
+    DB.permitTypes.forEach(t=>{ if((!t.q||!t.q.length)&&QSETS[t.code]) t.q=QSETS[t.code].slice(); });
+    DB._v=4; saveDB();
+  }
+  if((DB._v||1)<5){
+    // trade partner safety managers
+    DB.contractors.forEach(c=>{ if(c.safName===undefined){ c.safName=""; c.safPhone=""; c.safEmail=""; } });
+    // Jacobs building safety leads
+    DB.buildings.forEach(b=>{ if(b.safLead===undefined){ b.safLead=""; b.safPhone=""; b.safEmail=""; } });
+    // permits requiring Jacobs Safety sign-off (admin-adjustable)
+    DB.permitTypes.forEach(t=>{ if(t.safetyReq===undefined) t.safetyReq=["CS","PT","RA","ELEV","EL"].includes(t.code); });
+    // multiple admin users, each with their own PIN
+    if(!DB.settings.admins||!DB.settings.admins.length) DB.settings.admins=[{name:"BDiaz",pin:DB.settings.pin||"1234"}];
+    DB._v=5; saveDB();
+  }
+  if((DB._v||1)<6){
+    if(!DB.safetyUsers) DB.safetyUsers=[];           // trade partner safety managers with view-only PINs
+    if(!DB.accessLog) DB.accessLog=[];               // who signed in, when, as what
+    if(!DB.adminLog) DB.adminLog=[];                 // what admins changed, with restore points
+    if(!DB.settings.owner) DB.settings.owner={name:"Owner",pin:"7777"}; // level above admin — sees the Activity Log
+    DB._v=6; saveDB();
+  }
+  if((DB._v||1)<7){
+    if(!DB.trash) DB.trash=[];                          // deleted permits — owner can restore
+    if(!DB.settings.notifyMode) DB.settings.notifyMode="manual"; // "auto" = text opens ready-to-send on submit
+    DB._v=7; saveDB();
+  }
+}
+/* ---------- Owner: delete permits to trash / restore ---------- */
+function ownerDeletePermit(id){
+  if(!IS_OWNER){ toast("Only the Owner can delete permits.","t-red"); return; }
+  const i=DB.permits.findIndex(x=>x.id===id); if(i<0) return;
+  const p=DB.permits[i];
+  if(!confirm("Move permit "+p.number+" to the Trash?\n\nYou can restore it any time from Admin → 🗑 Trash. Its number will NOT be reused.")) return;
+  p.deletedAt=new Date().toISOString(); p.deletedBy=currentActor();
+  DB.trash.unshift(p); DB.permits.splice(i,1);
+  logChange("🗑 Permit moved to Trash: "+p.number, typeOf(p.typeCode).name+" · "+p.company);
+  saveDB(); toast("🗑 <b>"+esc(p.number)+"</b> moved to Trash — restore it from Admin → Trash.","t-dark");
+  go("status"); route();
+}
+function trashRestore(i){
+  const p=DB.trash[i]; if(!p) return;
+  delete p.deletedAt; delete p.deletedBy;
+  DB.permits.unshift(p); DB.trash.splice(i,1);
+  logChange("♻ Permit restored from Trash: "+p.number,"");
+  saveDB(); toast("♻ <b>"+esc(p.number)+"</b> restored.","t-green"); route();
+}
+function trashForever(i){
+  const p=DB.trash[i]; if(!p) return;
+  if(!confirm("Permanently delete "+p.number+"? This cannot be undone. (The permit number will still never be reused.)")) return;
+  DB.trash.splice(i,1); logChange("Permit permanently deleted: "+p.number,"");
+  saveDB(); route();
+}
+function trashEmpty(){
+  if(!DB.trash.length) return;
+  if(prompt('Type DELETE to permanently empty the Trash ('+DB.trash.length+' permits). This cannot be undone.')!=="DELETE") return;
+  logChange("Trash emptied","Permanently removed "+DB.trash.length+" permits");
+  DB.trash=[]; saveDB(); route();
+}
+/* ---------- Access & change history (owner-level) ---------- */
+let IS_OWNER = sessionStorage.getItem("ppp_owner")==="1";
+function logAccess(role,name,co){
+  DB.accessLog.unshift({at:new Date().toISOString(),role,name:name||"(no name)",co:co||""});
+  if(DB.accessLog.length>500) DB.accessLog.length=500;
+  saveDB();
+}
+function configSnapshot(){
+  return JSON.stringify({buildings:DB.buildings,floors:DB.floors,contractors:DB.contractors,
+    permitTypes:DB.permitTypes,reviewers:DB.reviewers,permitDocs:DB.permitDocs,safetyUsers:DB.safetyUsers,
+    settings:{...DB.settings}});
+}
+function logChange(action,detail,snapBefore){
+  DB.adminLog.unshift({at:new Date().toISOString(),by:currentActor(),action,detail:detail||"",snap:snapBefore||""});
+  if(DB.adminLog.length>40) DB.adminLog.length=40;
+  saveDB();
+}
+function restoreSnapshot(i){
+  const e=DB.adminLog[i]; if(!e||!e.snap){ toast("No restore point on this entry.","t-red"); return; }
+  if(!confirm("Restore the setup (buildings, floors, trade partners, permit types, reviewers, settings) to how it was BEFORE this change?\n\nPermits and their history are NOT touched.")) return;
+  const snap=JSON.parse(e.snap);
+  Object.assign(DB,{buildings:snap.buildings,floors:snap.floors,contractors:snap.contractors,
+    permitTypes:snap.permitTypes,reviewers:snap.reviewers,permitDocs:snap.permitDocs,safetyUsers:snap.safetyUsers||[]});
+  DB.settings={...DB.settings,...snap.settings};
+  logChange("⏪ Configuration restored","Rolled back to before: "+e.action+" ("+fmtDT(e.at)+")");
+  saveDB(); toast("⏪ Setup restored. Permits untouched.","t-blue"); route();
+}
+function urgCls(p){
+  if(!notifyActive()) return "";
+  if(!["Submitted","Under Review"].includes(p.status)) return "";
+  const b=escBase(p); if(!b||b.getTime()>Date.now()) return "";
+  const m=ageMin(p), r1=+DB.settings.remind1||15, r2=+DB.settings.remind2||30;
+  return m>=r2?"row-urgent":m>=r1?"row-warn":"";
+}
+const FLOORPLANS={
+  "D4|Ground Floor (GF)":"assets/d4-ground.jpg","D4|Ground Floor Interstitial":"assets/d4-ground-int.jpg",
+  "D4|First Floor (FF)":"assets/d4-first.jpg","D4|First Floor Interstitial":"assets/d4-first-int.jpg",
+  "D4|Second Floor (SF)":"assets/d4-second.jpg","D4|Second Floor Interstitial":"assets/d4-second-int.jpg"};
+const floorPlanFor=(b,f)=> FLOORPLANS[b+"|"+f]||null;
+const floorObj=(b,name)=> DB.floors.find(f=>f.b===b&&f.name===name);
+function saveDB(){ localStorage.setItem(KEY, JSON.stringify(DB)); }
+const uid=()=> "p"+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const esc=s=> String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmtD=d=> d? new Date(d+"T00:00:00").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}):"—";
+const fmtDT=t=> t? new Date(t).toLocaleString(undefined,{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}):"—";
+const today=()=> new Date().toISOString().slice(0,10);
+const stCls=s=> "st-"+s.replace(/\s/g,"");
+const badge=s=> `<span class="badge ${stCls(s)}">${esc(typeof T==="function"?T(s):s)}</span>`;
+const typeOf=c=> DB.permitTypes.find(t=>t.code===c)||{name:c,ico:"📄",code:c,q:[]};
+const bldOf=c=> DB.buildings.find(b=>b.code===c)||{name:c,code:c};
+
+/* ---------- Permit numbering: BUILDING-TYPE-### (never reused) ---------- */
+function nextPermitNumber(bCode,tCode){
+  const k=bCode+"-"+tCode;
+  const used = DB.permits.filter(p=>p.number&&p.number.startsWith(k+"-")).map(p=>parseInt(p.number.split("-").pop(),10)||0);
+  const cur = Math.max(DB.counters[k]||0, ...(used.length?used:[0]));
+  DB.counters[k]=cur+1;
+  return k+"-"+String(cur+1).padStart(3,"0");
+}
+
+/* ---------- Audit trail (system-written, never editable) ---------- */
+function audit(p,action,detail){
+  p.audit=p.audit||[];
+  p.audit.push({at:new Date().toISOString(), by:currentActor(), role:ROLE, action, detail:detail||""});
+}
+function setStatus(p,st,detail){
+  const old=p.status; p.status=st;
+  audit(p, "Status: "+old+" → "+st, detail);
+  if(st==="Approved"||(st==="Active"&&!p.approvedBy)){ p.approvedAt=new Date().toISOString(); p.approvedBy=currentActor(); }
+  if(["Completed","Void","Lost","Rejected"].includes(st)) p.closedAt=new Date().toISOString();
+  saveDB();
+}
+
+/* ---------- Language (EN/ES) ---------- */
+let LANG=localStorage.getItem("ppp_lang")||"en";
+function setLang(l){ LANG=l; localStorage.setItem("ppp_lang",l); renderNav(location.hash.replace(/^#\/?/,"").split("/")[0]); route(); }
+const ES={
+"Home":"Inicio","New Permit":"Nuevo Permiso","My Permits":"Mis Permisos","Dashboard":"Panel","My Reviews":"Mis Revisiones","Reviews":"Revisiones","Permit Board":"Tablero de Permisos","All Permits":"Todos los Permisos","Admin":"Admin","Reports & Export":"Reportes y Exportar","Permit Forms":"Formatos","How-To":"Cómo Hacerlo",
+"Draft":"Borrador","Submitted":"Enviado","Under Review":"En Revisión","Needs Update":"Necesita Actualización","Approved":"Aprobado","Active":"Activo","Completed":"Completado","Expired":"Vencido","Void":"Anulado","Lost":"Perdido","Rejected":"Rechazado",
+"Request a Permit in":"Solicite un Permiso en","Under 2 Minutes":"Menos de 2 Minutos",
+"Submit from your phone, tablet, computer, or kiosk. Save a walk to the permit office and track your request from the field.":"Envíe su solicitud desde su teléfono, tableta, computadora o kiosco. Ahórrese la caminata a la oficina de permisos y siga su solicitud desde el campo.",
+"Start Permit Request":"Iniciar Solicitud de Permiso","Check My Permit Status":"Ver Estado de Mis Permisos","Copy a Previous Permit":"Copiar un Permiso Anterior",
+"Fast-track your permit":"Su permiso más rápido","Track from the field":"Siga desde el campo","Yesterday's permit, today's date":"El permiso de ayer, con fecha de hoy",
+"permits live on site today":"permisos activos hoy en sitio","permit types available":"tipos de permiso disponibles","average request time":"tiempo promedio de solicitud",
+"Select Permit Type":"Seleccione el Tipo de Permiso","Choose the permit that best matches the work being performed.":"Elija el permiso que mejor corresponda al trabajo a realizar.",
+"I'm not sure which permit I need":"No sé cuál permiso necesito",
+"Location":"Ubicación","Contractor":"Contratista","Work Details":"Detalles","Paperwork":"Documentos","Submit":"Enviar",
+"Request Permit":"Solicitar Permiso","Update Permit":"Actualizar Permiso",
+"Complete the fields below. Jacobs will review your request before work begins.":"Complete los campos abajo. Jacobs revisará su solicitud antes de comenzar el trabajo.",
+"Work Location":"Ubicación del Trabajo","Contractor Information":"Información del Contratista","Paperwork & Safety Checks":"Documentos y Verificaciones de Seguridad","Jacobs Review":"Revisión de Jacobs",
+"Building":"Edificio","Floor / Level":"Piso / Nivel","Area / Room / Column Line":"Área / Cuarto / Línea de Columna","Specific Work Location":"Ubicación Específica del Trabajo",
+"Contractor Company":"Compañía Contratista","Requested By":"Solicitado Por","Requester Phone":"Teléfono del Solicitante","Requester Email":"Correo del Solicitante",
+"Foreman / Supervisor Name":"Nombre del Capataz / Supervisor","Foreman / Supervisor Phone":"Teléfono del Capataz / Supervisor",
+"⤵ Foreman is the same person as the requester":"⤵ El capataz es la misma persona que el solicitante",
+"Shift":"Turno","Start Date":"Fecha de Inicio","Permit Good Through":"Permiso Válido Hasta","Estimated Start Time":"Hora Estimada de Inicio","Estimated Finish Time":"Hora Estimada de Término",
+"What work are you doing?":"¿Qué trabajo va a realizar?","Equipment or tools involved":"Equipo o herramientas","Number of workers":"Número de trabajadores",
+"Required paperwork submitted?":"¿Entregó los documentos requeridos?","JHA / SSOW available?":"¿Tiene JHA / SSOW disponible?","Permit-specific documentation available?":"¿Tiene documentación específica del permiso?",
+"Requested Jacobs Reviewer":"Revisor de Jacobs Solicitado","Additional notes for Jacobs":"Notas adicionales para Jacobs",
+"Quick check before you submit":"Revisión rápida antes de enviar",
+"Next →":"Siguiente →","← Back":"← Atrás","Cancel":"Cancelar","Save Draft & finish later":"Guardar Borrador y terminar después",
+"✓ Submit Permit Request":"✓ Enviar Solicitud de Permiso","✓ Resubmit Permit Request":"✓ Reenviar Solicitud de Permiso",
+"Permit Request Submitted":"Solicitud de Permiso Enviada","Your permit request has been sent to Jacobs for review.":"Su solicitud de permiso fue enviada a Jacobs para revisión.",
+"Your Permit Number":"Su Número de Permiso","View Permit Status":"Ver Estado del Permiso","Submit Another Permit":"Enviar Otro Permiso","Copy This Permit for Tomorrow":"Copiar Este Permiso para Mañana",
+"⚠️ Work may not begin until the permit has been reviewed and approved by Jacobs.":"⚠️ El trabajo no puede comenzar hasta que Jacobs revise y apruebe el permiso.",
+"My Permit Status":"Estado de Mis Permisos","Track your requests without calling or walking to the permit office.":"Siga sus solicitudes sin llamar ni caminar a la oficina de permisos.",
+"View Details":"Ver Detalles","Copy Permit":"Copiar Permiso","Update Request":"Actualizar Solicitud","Finish & Submit":"Terminar y Enviar",
+"Days":"Días","Nights":"Noches",
+"Permit Forms & Project Documents":"Formatos de Permisos y Documentos del Proyecto",
+"Every hard-copy permit form in one place — open, print, or attach to an email for the contractor.":"Todos los formatos de permiso en un solo lugar — abra, imprima o adjunte a un correo para el contratista.",
+"How to Request a Permit":"Cómo Solicitar un Permiso","Ten little steps — under two minutes once you've done it once.":"Diez pasos sencillos — menos de dos minutos cuando ya lo hizo una vez.",
+"Open the portal":"Abra el portal","Scan the QR code posted on your floor, or open the website on any phone, tablet, or the kiosk. The QR code even fills in your building and floor for you.":"Escanee el código QR de su piso o abra el sitio en cualquier teléfono, tableta o kiosco. El código QR llena el edificio y el piso por usted.",
+"Tap “Start Permit Request”":"Toque “Iniciar Solicitud de Permiso”","The big yellow button on the home screen.":"El botón amarillo grande en la pantalla de inicio.",
+"Pick your permit type":"Elija su tipo de permiso","Tap the card that matches your work — welding or grinding is Hot Work, entering a tank or pit is Confined Space. Not sure? Tap “I'm not sure which permit I need” at the bottom.":"Toque la tarjeta que corresponda a su trabajo — soldar o esmerilar es Trabajo en Caliente, entrar a un tanque o fosa es Espacio Confinado. ¿No está seguro? Toque “No sé cuál permiso necesito”.",
+"Say where you're working":"Diga dónde va a trabajar","Pick the building and floor. Tap “View Floor Plan” to see the drawing and find your sector or room. The floor's Jacobs lead is selected for you automatically.":"Elija el edificio y el piso. Toque “Ver Plano del Piso” para ver el dibujo y encontrar su sector o cuarto. El líder de Jacobs del piso se selecciona automáticamente.",
+"Your info":"Sus datos","Company, your name, and phone. If you're also the foreman, tap “Foreman is the same person as the requester” — done, no retyping.":"Compañía, su nombre y teléfono. Si usted también es el capataz, toque “El capataz es la misma persona” — listo, sin volver a escribir.",
+"When and what":"Cuándo y qué","Day or night shift, start date, permit good-through date, start time, and describe the work in plain words: “welding pipe supports on the mezzanine.”":"Turno de día o noche, fecha de inicio, fecha de vencimiento, hora de inicio, y describa el trabajo en palabras sencillas: “soldando soportes de tubería en el mezzanine.”",
+"Answer the safety questions":"Responda las preguntas de seguridad","Quick Yes/No taps — fire extinguisher available? Area checked? They match the project safety plan.":"Toques rápidos de Sí/No — ¿hay extintor disponible? ¿Se revisó el área? Corresponden al plan de seguridad del proyecto.",
+"You instantly get a permit number like D4-HW-028 on a gold ticket. Write it on your hard-copy permit. Then tap “Text” to send it to the Jacobs reviewer — the message is already written for you.":"Al instante recibe un número de permiso como D4-HW-028 en un boleto dorado. Escríbalo en su permiso físico. Luego toque “Texto” para enviarlo al revisor de Jacobs — el mensaje ya está escrito.",
+"Track it":"Sígalo","“My Permits” shows where your request is — three steps: Under Review → Active → Completed. The moment Jacobs approves, it goes Active and you can work. When the job's done, YOU mark it complete right from your phone.":"“Mis Permisos” muestra su solicitud en tres pasos: En Revisión → Activo → Completado. En cuanto Jacobs aprueba, pasa a Activo y puede trabajar. Cuando termine el trabajo, USTED lo marca completado desde su teléfono.",
+"Tomorrow: copy it":"Mañana: cópielo","Same job tomorrow? Tap “Copy This Permit” — everything fills in, you just confirm the date. 30 seconds.":"¿El mismo trabajo mañana? Toque “Copiar Este Permiso” — todo se llena solo, usted solo confirma la fecha. 30 segundos.",
+"Best way to learn? Try one right now — you can void it after.":"¿La mejor forma de aprender? Haga uno ahora mismo — se puede anular después.",
+"Try a Practice Permit":"Hacer un Permiso de Práctica",
+"Yes":"Sí","No":"No","Not Applicable":"No Aplica",
+"🏁 Work Finished — Mark Complete":"🏁 Trabajo Terminado — Marcar Completado","thank you":"gracias",
+"Do you need other permits for this same task?":"¿Necesita otros permisos para esta misma tarea?",
+"Which other permits? We'll create them together with the same information.":"¿Cuáles otros permisos? Los crearemos juntos con la misma información.",
+"Linked permits created with this request:":"Permisos vinculados creados con esta solicitud:",
+"Trade Partner Information":"Información de la Empresa Colaboradora","Trade Partner Company":"Empresa Colaboradora",
+"safety manager":"gerente de seguridad","will also be notified of this permit.":"también será notificado de este permiso.",
+"This permit also requires Jacobs Safety sign-off — the building's safety lead will be notified automatically.":"Este permiso también requiere la firma de Seguridad de Jacobs — el líder de seguridad del edificio será notificado automáticamente.",
+"My Company's Permits":"Permisos de Mi Empresa",
+"WE BUILD":"CONSTRUIMOS","BOLD":"EN GRANDE","SAFE":"SEGURO","TOGETHER":"JUNTOS",
+"ONE PERMIT":"UN PERMISO","AT A TIME":"A LA VEZ",
+"Request. Review. Approve. Track.":"Solicite. Revise. Apruebe. Siga.","Skip intro":"Saltar intro",
+"Notification sent automatically":"Notificación enviada automáticamente",
+"Your messaging app just opened with everyone already filled in — Jacobs lead, safety manager — message written. Just press":"Su aplicación de mensajes se abrió con todos los destinatarios listos — líder de Jacobs, gerente de seguridad — mensaje escrito. Solo presione",
+"Open the message again":"Abrir el mensaje otra vez"
+};
+function T(s){ return LANG==="en"? s : (ES[s]||s); }
+
+/* ---------- Roles ---------- */
+let ROLE = sessionStorage.getItem("ppp_role") || "contractor";
+let MYCO = sessionStorage.getItem("ppp_company") || "";
+let MYNAME = sessionStorage.getItem("ppp_name") || "";
+function currentActor(){
+  if(ROLE==="contractor") return (MYNAME||"Trade Partner") + (MYCO? " ("+MYCO+")":"");
+  if(ROLE==="safety") return (MYNAME||"Safety Manager") + (MYCO? " ("+MYCO+" Safety)":"");
+  return MYNAME || (ROLE==="jacobs"?"Jacobs Reviewer":"Admin");
+}
+function setRole(r,name){
+  ROLE=r; sessionStorage.setItem("ppp_role",r);
+  if(name!==undefined){ MYNAME=name; sessionStorage.setItem("ppp_name",name); }
+  renderNav(); go(r==="contractor"?"home":r==="safety"?"status":(r==="jacobs"?"dashboard":"admin"));
+  route();
+}
+
+/* ---------- Auto-expiration (daily permits) ---------- */
+function expireSweep(){
+  const t=today(); let n=0;
+  DB.permits.forEach(p=>{
+    if(["Approved","Active"].includes(p.status) && p.goodThrough && p.goodThrough < t){
+      p.status="Expired";
+      p.audit.push({at:new Date().toISOString(), by:"System", role:"system", action:"Status: auto-expired", detail:"Permit good-through date "+p.goodThrough+" passed without completion."});
+      n++;
+    }
+  });
+  if(n) saveDB();
+  return n;
+}
+
+/* ---------- Notifications (pilot: one-tap text/email + on-device alerts) ---------- */
+const isIOS=/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)&&"ontouchend" in document||/iPhone|iPad|iPod/.test(navigator.userAgent);
+function smsHref(phone,body){ return "sms:"+(phone||"").replace(/[^\d+,]/g,"")+(isIOS?"&":"?")+"body="+encodeURIComponent(body); }
+function mailHref(email,subj,body){ return "mailto:"+(email||"")+"?subject="+encodeURIComponent(subj)+"&body="+encodeURIComponent(body); }
+function permitLink(p){ return location.href.split("#")[0]+"#/review/"+p.id; }
+function msgForReviewer(p){
+  const t=typeOf(p.typeCode);
+  return "PERMIT REVIEW NEEDED\n"+p.number+" — "+t.name+"\n"
+    +bldOf(p.building).name+" · "+p.floor+(p.area?" · "+p.area:"")+"\n"
+    +"Work: "+p.description+"\n"
+    +"Requested by "+p.requestedBy+" ("+p.company+") "+p.phone+"\n"
+    +"Shift: "+p.shift+" · Good through "+p.goodThrough+"\n"
+    +"Open to review: "+permitLink(p);
+}
+function msgForContractor(p){
+  const head = p.status==="Approved"||p.status==="Active" ? "✅ PERMIT "+p.status.toUpperCase()
+    : p.status==="Needs Update" ? "✏️ PERMIT NEEDS UPDATE"
+    : p.status==="Rejected" ? "❌ PERMIT REJECTED" : "PERMIT UPDATE — "+p.status;
+  return head+"\n"+p.number+" — "+typeOf(p.typeCode).name+"\n"
+    +(p.status==="Approved"||p.status==="Active" ? "Good through "+p.goodThrough+(p.approvalConditions?"\nConditions: "+p.approvalConditions:"")
+     : p.status==="Needs Update" ? "Jacobs needs: "+(p.reviewComments||"see portal")
+     : p.status==="Rejected" ? "Reason: "+(p.rejectReason||"see portal") : "")
+    +"\nJacobs: "+(p.approvedBy||p.reviewer)+"\nCheck status: "+permitLink(p);
+}
+function notifyBtns(phone,email,subj,body,who){
+  const any=phone||email;
+  if(!any) return `<div class="hint">⚠ No phone/email on file for ${esc(who)} — add it in Admin → Jacobs Reviewers.</div>`;
+  return `<div class="btnrow" style="margin-top:8px">
+    ${phone?`<a class="btn btn-dark btn-sm" href="${smsHref(phone,body)}">📱 Text ${esc(who)}</a>`:""}
+    ${email?`<a class="btn btn-line btn-sm" href="${mailHref(email,subj,body)}">✉️ Email ${esc(who)}</a>`:""}
+  </div>`;
+}
+function msgEscalation(p){
+  const m=ageMin(p);
+  return "⚠️ PERMIT ESCALATION\n"+(p.reviewer||"The reviewer")+" has not approved permit "+p.number
+    +" — waiting "+m+" min.\n"+typeOf(p.typeCode).name+" · "+p.company+"\n"
+    +bldOf(p.building).name+" · "+p.floor+"\nPlease review or contact "+(p.reviewer||"the reviewer")+".\n"+permitLink(p);
+}
+function autoNotifyRecipients(p){
+  const nums=[];
+  const r=DB.reviewers.find(x=>x.name===p.reviewer)||{};
+  if(r.phone) nums.push(r.phone);
+  const co=DB.contractors.find(c=>c.name===p.company)||{};
+  if(co.safPhone) nums.push(co.safPhone);
+  if(typeOf(p.typeCode).safetyReq){ const b=bldOf(p.building); if(b.safPhone) nums.push(b.safPhone); }
+  return [...new Set(nums)];
+}
+function autoNotifyHref(p){
+  const nums=autoNotifyRecipients(p);
+  return nums.length? smsHref(nums.map(n=>n.replace(/[^\d+]/g,"")).join(","), msgForReviewer(p)) : "";
+}
+function fireAutoNotify(p){
+  const href=autoNotifyHref(p); if(!href) return false;
+  const a=document.createElement("a"); a.href=href; a.click();
+  return true;
+}
+function reviewerNotifyPanel(p){
+  const r=DB.reviewers.find(x=>x.name===p.reviewer)||{};
+  const s=DB.settings;
+  const m=ageMin(p), r1=+s.remind1||15, r2=+s.remind2||30;
+  const started=escBase(p)&&escBase(p).getTime()<=Date.now();
+  const pendingNow=notifyActive()&&started&&["Submitted","Under Review"].includes(p.status);
+  if(!notifyActive()) return `<div class="pill-hint" style="background:#eef1f5;color:#5b6773">🔕 Notifications are off — record-keeping mode. The contractor can call Jacobs to review. Permit number stays valid: <b class="pnum">${esc(p.number)}</b></div>`;
+  return `<div class="card" style="border:2px solid var(--yellow)">
+    <div class="section-t">📣 Notify Jacobs — don't let it sit</div>
+    <p style="font-size:14px">One tap sends <b>${esc(p.reviewer||"the reviewer")}</b> a message with the permit number, details, and review link — you just press send.</p>
+    ${notifyBtns(r.phone,r.email,"Permit review needed: "+p.number,msgForReviewer(p),p.reviewer||"reviewer")}
+    ${pendingNow&&m>=r1?`<hr class="div">
+      <p style="font-size:13.5px;font-weight:700;color:var(--orange)">⏰ Waiting ${m} min — escalate to ${esc(p.reviewer||"the reviewer")}'s supervisor${r.supName?" ("+esc(r.supName)+")":""}:</p>
+      ${r.supPhone||r.supEmail
+        ? notifyBtns(r.supPhone,r.supEmail,"Escalation — permit "+p.number+" not approved",msgEscalation(p),r.supName||"supervisor")
+        : `<div class="hint">⚠ No supervisor on file for ${esc(p.reviewer||"this reviewer")} — add one in Admin → Jacobs Reviewers.</div>`}`:""}
+    ${pendingNow&&m>=r2&&(s.adminPhone||s.adminEmail)?`<hr class="div">
+      <p style="font-size:13.5px;font-weight:700;color:var(--red)">🚨 Waiting ${m} min — notify the permit office:</p>
+      ${notifyBtns(s.adminPhone,s.adminEmail,"URGENT — permit "+p.number+" not approved",msgEscalation(p),s.adminName||"Permit Office")}`:""}
+    ${(()=>{const co=DB.contractors.find(c=>c.name===p.company)||{};
+      return co.safName?`<hr class="div"><p style="font-size:13.5px;font-weight:700">🦺 Notify ${esc(p.company)}'s safety manager:</p>
+      ${notifyBtns(co.safPhone,co.safEmail,"Permit notice: "+p.number+" ("+p.company+")",msgForReviewer(p),co.safName)}`:"";})()}
+    ${(()=>{const t2=typeOf(p.typeCode), b=bldOf(p.building);
+      return t2.safetyReq?`<hr class="div"><p style="font-size:13.5px;font-weight:700;color:#a4290f">🦺 JACOBS SAFETY SIGN-OFF REQUIRED — notify the ${esc(b.name)} safety lead${b.safLead?" ("+esc(b.safLead)+")":""}:</p>
+      ${b.safPhone||b.safEmail?notifyBtns(b.safPhone,b.safEmail,"Safety sign-off needed: "+p.number,
+        "🦺 SAFETY SIGN-OFF NEEDED\n"+p.number+" — "+t2.name+"\n"+b.name+" · "+p.floor+(p.area?" · "+p.area:"")+"\n"+p.company+" · "+p.requestedBy+"\nPlease coordinate sign-off / area check.\n"+permitLink(p),b.safLead||"safety lead")
+        :`<div class="hint">⚠ No safety lead on file for ${esc(b.name)} — add one in Admin → Buildings.</div>`}`:"";})()}
+  </div>`;
+}
+function contractorNotifyPanel(p){
+  if(!notifyActive()) return "";
+  if(!["Approved","Active","Needs Update","Rejected"].includes(p.status)) return "";
+  return `<div class="card" style="border:2px solid var(--green)">
+    <div class="section-t">📣 Notify the contractor</div>
+    <p style="font-size:14px">Send <b>${esc(p.requestedBy)}</b>${p.foreman?" / foreman <b>"+esc(p.foreman)+"</b>":""} the ${p.status==="Approved"||p.status==="Active"?"approval":"status update"} by text or email.</p>
+    ${notifyBtns(p.phone,p.email,"Permit "+p.status+": "+p.number,msgForContractor(p),p.requestedBy)}
+    ${p.foremanPhone?`<div class="btnrow" style="margin-top:4px"><a class="btn btn-line btn-sm" href="${smsHref(p.foremanPhone,msgForContractor(p))}">📱 Text foreman ${esc(p.foreman||"")}</a></div>`:""}
+  </div>`;
+}
+/* Escalation timers — clock starts at scheduled work start (or submission, whichever is later) */
+function notifyActive(){
+  const s=DB.settings;
+  if(!s.notifyOn) return false;
+  return (s.notifyDays||[0,1,2,3,4,5,6]).includes(new Date().getDay());
+}
+function escBase(p){
+  if(!p.submittedAt) return null;
+  let base=new Date(p.submittedAt);
+  if(p.startDate){
+    const st=new Date(p.startDate+"T"+(p.startTime&&/^\d\d:\d\d/.test(p.startTime)?p.startTime:"07:00"));
+    if(!isNaN(st)&&st>base) base=st;
+  }
+  return base;
+}
+function ageMin(p){ const b=escBase(p); return b? Math.max(0,Math.floor((Date.now()-b.getTime())/60000)) : 0; }
+function ageChip(p){
+  if(!["Submitted","Under Review"].includes(p.status)) return "";
+  const b=escBase(p); if(!b) return "";
+  if(b.getTime()>Date.now()) return `<span class="age sch">🕐 Clock starts ${fmtDT(b.toISOString())}</span>`;
+  const m=ageMin(p), r1=+DB.settings.remind1||15, r2=+DB.settings.remind2||30;
+  const lbl=m>=60? Math.floor(m/60)+"h "+(m%60)+"m" : m+" min";
+  if(!notifyActive()) return `<span class="age neu">⏱ ${lbl}</span>`;
+  if(m>=r2) return `<span class="age red">⏱ ${lbl} — URGENT</span>`;
+  if(m>=r1) return `<span class="age yel">⏱ ${lbl} — reminder</span>`;
+  return `<span class="age ok">⏱ ${lbl}</span>`;
+}
+/* Toasts — instant feedback for every action */
+function toast(msg,kind){
+  let h=document.getElementById("toastHost");
+  if(!h){ h=document.createElement("div"); h.id="toastHost"; document.body.appendChild(h); }
+  const t=document.createElement("div"); t.className="toast "+(kind||"t-dark"); t.innerHTML=msg;
+  h.appendChild(t);
+  requestAnimationFrame(()=>t.classList.add("show"));
+  setTimeout(()=>{ t.classList.remove("show"); setTimeout(()=>t.remove(),450); },4500);
+}
+function enableAlerts(){
+  if(!("Notification" in window)){ alert("This browser doesn't support pop-up alerts."); return; }
+  Notification.requestPermission().then(perm=>{
+    if(perm==="granted"){ DB.settings.alerts=true; saveDB();
+      new Notification("Permit Portal alerts on ✔",{body:"Keep this tab open — you'll get pop-ups for new and overdue permits."});
+      route();
+    } else alert("Alerts were blocked. Allow notifications for this site in your browser settings.");
+  });
+}
+function alertSweep(){
+  if(!notifyActive()) return;
+  if(!DB.settings.alerts||!("Notification" in window)||Notification.permission!=="granted") return;
+  const r1=+DB.settings.remind1||15, r2=+DB.settings.remind2||30; let dirty=false;
+  DB.permits.forEach(p=>{
+    if(!["Submitted","Under Review"].includes(p.status)) return;
+    const m=ageMin(p);
+    const rv=DB.reviewers.find(x=>x.name===p.reviewer)||{};
+    if(m>=r2&&!p.n2){ p.n2=1; dirty=true; new Notification("🚨 URGENT — "+p.number+" waiting "+m+" min",{body:"Notify the permit office. "+typeOf(p.typeCode).name+" · "+p.company+" · reviewer "+p.reviewer,tag:p.id+"u"}); }
+    else if(m>=r1&&!p.n1){ p.n1=1; dirty=true; new Notification("⏰ Escalate — "+p.number+" waiting "+m+" min",{body:(p.reviewer||"Reviewer")+" hasn't approved."+(rv.supName?" Text supervisor "+rv.supName+" from the permit page.":""),tag:p.id+"r"}); }
+  });
+  if(dirty) saveDB();
+}
+
+/* ---------- Router ---------- */
+const VIEWS={};
+function go(view,arg){ location.hash = "#/"+view+(arg?("/"+encodeURIComponent(arg)):""); }
+function route(){
+  const h=location.hash.replace(/^#\/?/,"");
+  const [v,arg]=h.split("/");
+  const qs=new URLSearchParams(location.search);
+  expireSweep();
+  const fn=VIEWS[v||"home"]||VIEWS.home;
+  // role guards
+  if(["dashboard","review","board","myreviews","forms"].includes(v) && ROLE==="contractor"){ openRoleModal("Jacobs sign-in required for that page."); return; }
+  if(["dashboard","review","myreviews","types","form"].includes(v) && ROLE==="safety"){ openRoleModal("Safety managers have view access — permits are submitted by supervisors."); return; }
+  if(["admin","reports"].includes(v) && ROLE!=="admin"){ openRoleModal("Admin sign-in required for that page."); return; }
+  const keep=window._keepScroll; window._keepScroll=false;
+  const y=window.scrollY;
+  document.getElementById("app").innerHTML = fn(decodeURIComponent(arg||""), qs);
+  if(keep) window.scrollTo(0,y); else window.scrollTo(0,0);
+  const NAV_ALIAS={form:"types",help:"types",confirm:"status",view:"status",copy:"home",review:"dashboard",howto:ROLE==="contractor"?"howto":"dashboard"};
+  renderNav(NAV_ALIAS[v]||v||"home");
+  if(window._afterRender){ const f=window._afterRender; window._afterRender=null; f(); }
+}
+window.addEventListener("hashchange",route);
+
+/* ---------- Nav ---------- */
+function renderNav(cur){
+  const items = ROLE==="contractor"
+    ? [["home","Home"],["types","New Permit"],["status","My Permits"],["howto","How-To"]]
+    : ROLE==="safety"
+    ? [["status","My Company's Permits"],["board","Permit Board"],["forms","Permit Forms"],["howto","How-To"]]
+    : ROLE==="jacobs"
+    ? [["dashboard","Dashboard"],["myreviews","My Reviews"],["board","Permit Board"],["types","New Permit"],["status","All Permits"],["forms","Permit Forms"]]
+    : [["dashboard","Dashboard"],["myreviews","Reviews"],["board","Permit Board"],["status","All Permits"],["types","New Permit"],["forms","Permit Forms"],["admin","Admin"],["reports","Reports & Export"]];
+  document.getElementById("navIn").innerHTML = items.map(([v,l])=>
+    `<a href="#/${v}" class="${cur===v?"on":""}">${T(l)}</a>`).join("");
+  const lw=document.getElementById("langWrap");
+  if(lw) lw.innerHTML=`<button class="lang ${LANG==="en"?"on":""}" onclick="setLang('en')">EN</button><button class="lang ${LANG==="es"?"on":""}" onclick="setLang('es')">ES</button>`;
+  document.getElementById("roleLbl").textContent =
+    ROLE==="contractor" ? (MYCO||"Trade Partner")
+    : ROLE==="safety" ? ((MYCO||"Trade Partner")+" · Safety")
+    : ROLE==="jacobs" ? ("Jacobs · "+(MYNAME||"Reviewer"))
+    : (IS_OWNER?"👑 Owner · ":"Admin · ")+(MYNAME||"");
+}
+
+/* ---------- Modal helpers ---------- */
+function modal(html){ document.getElementById("modalHost").innerHTML =
+  `<div class="modal-bk" onclick="if(event.target===this)closeModal()"><div class="modal">${html}</div></div>`; }
+function closeModal(){ document.getElementById("modalHost").innerHTML=""; }
+function openRoleModal(msg){
+  modal(`
+    <h3>Welcome to the team — who's using the portal?</h3>
+    ${msg?`<div class="warn-hint" style="margin-bottom:12px">${esc(msg)}</div>`:""}
+    <div class="f-group"><label class="f-label">I am…</label>
+      <div class="seg" id="roleSeg" style="flex-wrap:wrap">
+        <button data-r="contractor" class="${ROLE==="contractor"?"on":""}" style="min-width:46%">👷 Trade Partner<br><small style="font-weight:600">Supervisor / Foreman</small></button>
+        <button data-r="safety" class="${ROLE==="safety"?"on":""}" style="min-width:46%">🦺 Trade Partner<br><small style="font-weight:600">Safety Manager</small></button>
+        <button data-r="jacobs" class="${ROLE==="jacobs"?"on":""}" style="min-width:46%">📋 Jacobs<br><small style="font-weight:600">Reviewer</small></button>
+        <button data-r="admin" class="${ROLE==="admin"?"on":""}" style="min-width:46%">⚙️ Admin<br><small style="font-weight:600">Full access</small></button>
+      </div></div>
+    <div class="f-group" id="coWrap"><label class="f-label">My company</label>
+      <select class="f-in" id="roleCo">${DB.contractors.filter(c=>c.active).map(c=>`<option ${c.name===MYCO?"selected":""}>${esc(c.name)}</option>`).join("")}</select></div>
+    <div class="f-group"><label class="f-label">My name</label>
+      <input class="f-in" id="roleName" value="${esc(MYNAME)}" placeholder="Your name"></div>
+    <div class="f-group" id="pinWrap" style="display:none"><label class="f-label">PIN</label>
+      <input class="f-in" id="rolePin" type="password" inputmode="numeric" placeholder="Enter PIN">
+      <div class="hint" id="pinHint"></div></div>
+    <div class="btnrow">
+      <button class="btn btn-g" id="roleGo" onclick="applyRole()">✓ Continue</button>
+      <button class="btn btn-line btn-cancel" onclick="closeModal()">Cancel</button>
+    </div>
+    <div class="hint center" style="margin-top:8px">Press <b>Enter</b> to continue.</div>`);
+  const seg=document.getElementById("roleSeg");
+  let sel=ROLE;
+  const sync=()=>{ const needsPin=["jacobs","admin","safety"].includes(sel), needsCo=sel==="contractor";
+                   document.getElementById("pinWrap").style.display = needsPin?"block":"none";
+                   document.getElementById("coWrap").style.display = needsCo?"block":"none";
+                   const ph=document.getElementById("pinHint"); if(ph) ph.textContent =
+                     sel==="admin"?"Your personal admin PIN (managed in Admin → Admin Users)."
+                     :sel==="safety"?"Your safety access PIN — ask the permit office (Admin → Safety Access)."
+                     :"Jacobs reviewer PIN (set in Admin → Settings).";
+                   setTimeout(()=>{(needsPin?document.getElementById("rolePin"):document.getElementById("roleName"))?.focus();},60); };
+  seg.querySelectorAll("button").forEach(b=>b.onclick=()=>{ seg.querySelectorAll("button").forEach(x=>x.classList.remove("on")); b.classList.add("on"); sel=b.dataset.r; sync(); });
+  sync();
+  document.querySelector(".modal").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); applyRole(); } });
+  window.applyRole=()=>{
+    let name=document.getElementById("roleName").value.trim();
+    IS_OWNER=false; sessionStorage.removeItem("ppp_owner");
+    if(sel==="jacobs"){
+      const pin=document.getElementById("rolePin").value;
+      if(pin!==DB.settings.pin){ alert("Incorrect PIN."); return; }
+      if(!name){ alert("Please enter your name — sign-ins are recorded."); return; }
+    } else if(sel==="admin"){
+      const pin=document.getElementById("rolePin").value;
+      const own=DB.settings.owner||{};
+      if(pin===own.pin){ IS_OWNER=true; sessionStorage.setItem("ppp_owner","1"); if(!name) name=own.name||"Owner"; }
+      else{
+        const adm=(DB.settings.admins||[]).find(a=>a.pin===pin);
+        if(!adm){ alert("Incorrect PIN."); return; }
+        if(!name) name=adm.name;
+      }
+    } else if(sel==="safety"){
+      const pin=document.getElementById("rolePin").value;
+      const su=(DB.safetyUsers||[]).find(u=>u.pin===pin);
+      if(!su){ alert("Incorrect safety PIN. Ask the permit office to set you up under Admin → Safety Access."); return; }
+      MYCO=su.company; sessionStorage.setItem("ppp_company",MYCO);
+      if(!name) name=su.name;
+    } else {
+      MYCO=document.getElementById("roleCo").value; sessionStorage.setItem("ppp_company",MYCO);
+      if(!name){ alert("Please enter your name — sign-ins are recorded."); return; }
+    }
+    closeModal();
+    logAccess(sel==="admin"&&IS_OWNER?"owner":sel, name, ["contractor","safety"].includes(sel)?MYCO:"");
+    setRole(sel,name);
+  };
+}
+/* ============================================================
+   CONTRACTOR SCREENS
+   ============================================================ */
+VIEWS.home = ()=>{
+  const t=today();
+  const active=DB.permits.filter(p=>["Approved","Active"].includes(p.status)&&(!p.goodThrough||p.goodThrough>=t)).length;
+  const mineOpen=DB.permits.filter(p=>p.company===MYCO&&OPEN_STATUSES.includes(p.status)).length;
+  return `
+<div class="narrow" style="padding-top:6px">
+  <div class="hero">
+    ${SKYLINE_SVG("hero-sky","rgba(255,184,28,.5)")}
+    <div class="hero-kicker">⚡ ${T("Fast-track your permit")}</div>
+    <h2>${T("Request a Permit in")}<br><em>${T("Under 2 Minutes")}</em></h2>
+    <p>${T("Submit from your phone, tablet, computer, or kiosk. Save a walk to the permit office and track your request from the field.")}</p>
+    <button class="btn btn-y btn-block" style="font-size:18px;min-height:62px;margin-top:18px" onclick="go('types')">🚀 &nbsp;${T("Start Permit Request")}</button>
+  </div>
+  <div class="hero-row">
+    <button class="hero-tile" onclick="go('status')"><span class="ht-ico">📱</span><b>${T("Check My Permit Status")}</b><small>${MYCO?mineOpen+" open · "+esc(MYCO):T("Track from the field")}</small></button>
+    <button class="hero-tile" onclick="go('copy')"><span class="ht-ico">📄</span><b>${T("Copy a Previous Permit")}</b><small>${T("Yesterday's permit, today's date")}</small></button>
+  </div>
+  <div class="hero-strip">
+    <div><b>${active}</b><span>${T("permits live on site today")}</span></div>
+    <div><b>${DB.permitTypes.filter(x=>x.active).length}</b><span>${T("permit types available")}</span></div>
+    <div><b>&lt;2<span style="font-size:15px">min</span></b><span>${T("average request time")}</span></div>
+  </div>
+  <div class="marquee"><div class="marquee-track">
+    ${Array(2).fill(`<span>${T("WE BUILD")} <em>${T("BOLD")}</em></span><b>◆</b><span>${T("WE BUILD")} <em>${T("SAFE")}</em></span><b>◆</b><span>${T("WE BUILD")} <em>${T("TOGETHER")}</em></span><b>◆</b><span>${T("ONE PERMIT")} <em>${T("AT A TIME")}</em></span><b>◆</b>`).join("")}
+  </div></div>
+  <div class="center" style="margin-top:12px"><button class="btn btn-ghost" onclick="go('howto')">🎓 ${T("How to Request a Permit")}</button></div>
+  <p class="sub center" style="font-size:12.5px;margin-top:14px">Scan a floor QR code to pre-fill your building and level automatically.<br>All permits require Jacobs review and approval before work begins.</p>
+</div>`;
+};
+
+/* ---- Permit type selection ---- */
+VIEWS.types = ()=>{
+  window._afterRender=()=>{ const s=document.getElementById("tSearch"); if(s) s.oninput=()=>filterTypes(s.value); };
+  return `
+  <h2 class="page">${T("Select Permit Type")}</h2>
+  <p class="sub">${T("Choose the permit that best matches the work being performed.")}</p>
+  <div class="f-group"><input class="f-in" id="tSearch" placeholder="🔍  Search permit type…"></div>
+  <div class="tgrid" id="tGrid">
+    ${DB.permitTypes.filter(t=>t.active).map(t=>`
+      <button class="tcard ${t.hr?"hr-flag":""}" data-name="${esc((t.name+" "+t.code).toLowerCase())}" onclick="startForm('${t.code}')">
+        <div class="ico">${t.ico}</div>
+        <div><b>${esc(t.name)}</b><span class="code">${t.code}</span><p>${esc(t.desc)}</p></div>
+      </button>`).join("")}
+  </div>
+  <div style="height:14px"></div>
+  <button class="btn btn-line btn-block" onclick="go('help')">🤔 &nbsp;${T("I'm not sure which permit I need")}</button>`;
+};
+function filterTypes(q){ q=q.trim().toLowerCase();
+  document.querySelectorAll("#tGrid .tcard").forEach(c=>c.style.display = c.dataset.name.includes(q)?"":"none"); }
+
+VIEWS.help = ()=>`
+<div class="mid">
+  <h2 class="page">Not sure which permit you need?</h2>
+  <p class="sub">No problem — answer with your best description and Jacobs will point you to the right permit.</p>
+  <div class="card">
+    <div class="pill-hint">Quick guide: 🔥 sparks/welding/grinding → Hot Work · 🕳️ entering tanks/pits → Confined Space · 🔒 shutting off energy → LOTO · 🔧 opening pipes → Line Break · 🧱 drilling/cutting floors or walls → Opening &amp; Penetration · 🪜 working above ceilings → Walkable Ceiling</div>
+    <p style="font-size:14.5px;margin-bottom:12px">You can start a <b>General Request</b> — describe the work and Jacobs will confirm the permit type during review.</p>
+    <button class="btn btn-y btn-block" onclick="startForm('NCS')">Start a General Request</button>
+    <div style="height:10px"></div>
+    <button class="btn btn-ghost btn-block" onclick="go('types')">← Back to permit types</button>
+  </div>
+</div>`;
+
+/* ---- Form (5 steps) ---- */
+let F=null; // working form state
+function blankForm(tCode){
+  const qs=new URLSearchParams(location.search);
+  return { typeCode:tCode, building:qs.get("b")||"D4", floor:qs.get("f")||"", area:"", location:"",
+    company:MYCO||"", requestedBy:MYNAME||"", phone:"", email:"", foreman:"", foremanPhone:"",
+    shift:"Days", startDate:today(), goodThrough:today(), startTime:"", endTime:"",
+    description:"", equipment:"", workers:"", paperwork:"", jha:"", permitDocs:"",
+    reviewer:"", notes:"", answers:{}, needLinked:"", linkedTypes:[], step:1, editingId:null };
+}
+function startForm(tCode){ F=blankForm(tCode); go("form"); }
+function copyPermit(id){
+  const p=DB.permits.find(x=>x.id===id); if(!p) return;
+  F={...blankForm(p.typeCode), building:p.building, floor:p.floor, area:p.area, location:p.location,
+     company:p.company, requestedBy:p.requestedBy, phone:p.phone, email:p.email, foreman:p.foreman, foremanPhone:p.foremanPhone,
+     shift:p.shift, startDate:today(), goodThrough:today(), startTime:p.startTime, endTime:p.endTime,
+     description:p.description, equipment:p.equipment, workers:p.workers, paperwork:p.paperwork, jha:p.jha,
+     permitDocs:p.permitDocs, reviewer:p.reviewer, notes:p.notes, answers:{...(p.answers||{})}};
+  go("form");
+}
+function editPermit(id){ // Needs Update flow
+  const p=DB.permits.find(x=>x.id===id); if(!p) return;
+  F={...JSON.parse(JSON.stringify(p)), step:1, editingId:id};
+  go("form");
+}
+
+const STEP_NAMES=["Location","Contractor","Work Details","Paperwork","Submit"];
+VIEWS.form = ()=>{
+  if(!F) return VIEWS.types();
+  const t=typeOf(F.typeCode);
+  const stepHtml=[stepLocation,stepContractor,stepWork,stepPaper,stepReview][F.step-1]();
+  return `
+  <div class="narrow">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+      <div class="ico" style="font-size:30px">${t.ico}</div>
+      <div><h2 class="page" style="margin:0">${T(F.editingId?"Update Permit":"Request Permit")}</h2>
+      <p class="sub" style="margin:0">${esc(t.name)} — ${t.code}${F.editingId?` · <span class="pnum">${esc(F.number)}</span>`:""}</p></div>
+    </div>
+    ${F.editingId?`<div class="warn-hint" style="margin-bottom:12px">Jacobs asked for an update on this permit. Fix the items below and resubmit.</div>`:
+      `<p class="sub">${T("Complete the fields below. Jacobs will review your request before work begins.")}</p>`}
+    ${t.safetyReq?`<div class="pill-hint" style="background:#fff3f0;color:#a4290f">🦺 ${T("This permit also requires Jacobs Safety sign-off — the building's safety lead will be notified automatically.")}</div>`:""}
+    <div class="steps">${STEP_NAMES.map((n,i)=>`<div class="stp ${i+1<F.step?"done":i+1===F.step?"on":""}"><div class="bar"></div><span>${T(n)}</span></div>`).join("")}</div>
+    <div class="errbox" id="errBox"></div>
+    <div class="card">${stepHtml}</div>
+    <div class="btnrow">
+      ${F.step>1?`<button class="btn btn-line" onclick="stepGo(-1)">${T("← Back")}</button>`:`<button class="btn btn-ghost" onclick="cancelForm()">${T("Cancel")}</button>`}
+      ${F.step<5?`<button class="btn btn-y" onclick="stepGo(1)">${T("Next →")}</button>`
+                :`<button class="btn btn-g" style="font-size:17px" onclick="submitForm()">${T(F.editingId?"✓ Resubmit Permit Request":"✓ Submit Permit Request")}</button>`}
+    </div>
+    ${F.step<5&&!F.editingId?`<div class="center" style="margin-top:8px"><button class="btn btn-ghost" onclick="saveDraft()">${T("Save Draft & finish later")}</button></div>`:""}
+  </div>`;
+};
+function cancelForm(){ if(confirm("Discard this permit request?")){ F=null; go("home"); } }
+function fld(id,label,req,html){ return `<div class="f-group"><label class="f-label">${T(label)}${req?'<span class="req">*</span>':""}</label>${html}</div>`; }
+function inp(id,ph,type){ return `<input class="f-in" id="${id}" type="${type||"text"}" value="${esc(F[id]??"")}" placeholder="${ph||""}" onchange="F['${id}']=this.value">`; }
+function ta(id,ph){ return `<textarea class="f-in" id="${id}" placeholder="${ph||""}" onchange="F['${id}']=this.value">${esc(F[id]??"")}</textarea>`; }
+function sel(id,opts,ph){ return `<select class="f-in" id="${id}" onchange="F['${id}']=this.value">
+  <option value="">${ph||"Select…"}</option>${opts.map(o=>`<option ${F[id]===o?"selected":""}>${esc(o)}</option>`).join("")}</select>`; }
+function segYN(id,label,req){
+  const v=F.answers?F.answers[id]??F[id]:F[id];
+  const get = id.startsWith("q:") ? `F.answers['${id}']` : `F['${id}']`;
+  return `<div class="f-group"><label class="f-label">${T(label)}${req?'<span class="req">*</span>':""}</label>
+    <div class="seg yn" id="seg_${id.replace(/[^a-z0-9]/gi,"_")}">
+      <button class="${v==="Yes"?"on yes":""}" onclick="${get}='Yes';rerenderForm()">${T("Yes")}</button>
+      <button class="${v==="No"?"on no":""}" onclick="${get}='No';rerenderForm()">${T("No")}</button>
+      ${id==="permitDocs"?`<button class="${v==="N/A"?"on no":""}" onclick="${get}='N/A';rerenderForm()">${T("Not Applicable")}</button>`:""}
+    </div></div>`;
+}
+function rerenderForm(){ document.getElementById("app").innerHTML=VIEWS.form(); }
+
+function pickFloor(name){
+  F.floor=name;
+  const fo=floorObj(F.building,name);
+  if(fo&&fo.lead&&DB.reviewers.some(r=>r.name===fo.lead)){ F.reviewer=fo.lead; F._leadAuto=true; } else F._leadAuto=false;
+  rerenderForm();
+}
+function showPlan(){
+  const src=floorPlanFor(F.building,F.floor); if(!src) return;
+  modal(`<div style="max-width:none">
+    <h3 style="display:flex;justify-content:space-between;align-items:center">🗺️ ${esc(bldOf(F.building).name)} — ${esc(F.floor)}
+      <button class="btn btn-line btn-sm" onclick="closeModal()">✕ Close</button></h3>
+    <p class="hint" style="margin-bottom:8px">Pinch or scroll to zoom. Find your sector / room, then type it in the Area field.</p>
+    <div style="overflow:auto;max-height:70vh;border:1px solid #dfe4ea;border-radius:10px">
+      <img src="${src}" style="width:1400px;max-width:none" alt="Floor plan"></div>
+    <div class="btnrow"><a class="btn btn-dark btn-sm" href="${encodeURI("DSM4 floor plans and walkable ceiling plain.pdf")}" target="_blank">Open full PDF</a></div>
+  </div>`);
+  document.querySelector(".modal").style.maxWidth="min(1100px,96vw)";
+}
+function stepLocation(){
+  const floors=DB.floors.filter(f=>f.b===F.building&&f.active).map(f=>f.name);
+  const qs=new URLSearchParams(location.search);
+  const fo=floorObj(F.building,F.floor);
+  const areas=(fo&&fo.areas&&fo.areas.length)?fo.areas:[];
+  const fp=floorPlanFor(F.building,F.floor);
+  return `<div class="section-t">Work Location</div>
+  ${qs.get("b")?`<div class="pill-hint">📍 Pre-filled from QR code — confirm it's right.</div>`:""}
+  ${fld("building","Building",1,`<select class="f-in" onchange="F.building=this.value;F.floor='';F._leadAuto=false;rerenderForm()">
+    ${DB.buildings.filter(b=>b.active).map(b=>`<option value="${b.code}" ${F.building===b.code?"selected":""}>${esc(b.name)}</option>`).join("")}</select>`)}
+  ${fld("floor","Floor / Level",1,`<select class="f-in" onchange="pickFloor(this.value)">
+    <option value="">Select floor…</option>${floors.map(o=>`<option ${F.floor===o?"selected":""}>${esc(o)}</option>`).join("")}</select>`)}
+  ${fo&&fo.lead?`<div class="pill-hint">👷 Floor lead: <b>${esc(fo.lead)}</b> — auto-selected as your Jacobs reviewer.</div>`:""}
+  ${fp?`<div class="f-group"><button class="btn btn-line btn-block" onclick="showPlan()">🗺️ View Floor Plan — ${esc(F.floor)}</button>
+    <div class="hint">Look up your sector or room on the drawing, then enter it below.</div></div>`:""}
+  ${fld("area","Area / Room / Column Line",0,`<input class="f-in" id="area" list="areaSug" value="${esc(F.area??"")}" placeholder="Start typing — sectors &amp; rooms suggest themselves" onchange="F.area=this.value">
+    <datalist id="areaSug">${areas.map(a=>`<option value="${esc(a)}">`).join("")}</datalist>`)}
+  ${fld("location","Specific Work Location",1,inp("location","Where exactly is the work?"))}`;
+}
+function stepContractor(){
+  const co=DB.contractors.find(c=>c.name===F.company)||{};
+  return `<div class="section-t">${T("Trade Partner Information")}</div>
+  ${fld("company","Trade Partner Company",1,`<select class="f-in" onchange="F.company=this.value;rerenderForm()">
+    <option value="">Select…</option>${DB.contractors.filter(c=>c.active).map(c=>`<option ${F.company===c.name?"selected":""}>${esc(c.name)}</option>`).join("")}</select>`)}
+  ${co.safName?`<div class="pill-hint">🦺 ${esc(co.safName)} (${esc(F.company)} ${T("safety manager")}) ${T("will also be notified of this permit.")}</div>`:""}
+  ${fld("requestedBy","Requested By",1,inp("requestedBy","Your name"))}
+  <div class="f-row">
+    ${fld("phone","Requester Phone",1,inp("phone","(555) 555-5555","tel"))}
+    ${fld("email","Requester Email",0,inp("email","name@company.com","email"))}
+  </div>
+  <div class="f-group">
+    <button class="btn btn-line btn-sm" onclick="F.foreman=F.requestedBy;F.foremanPhone=F.phone;rerenderForm()">⤵ Foreman is the same person as the requester</button>
+  </div>
+  <div class="f-row">
+    ${fld("foreman","Foreman / Supervisor Name",0,inp("foreman",""))}
+    ${fld("foremanPhone","Foreman / Supervisor Phone",0,inp("foremanPhone","","tel"))}
+  </div>`;
+}
+function stepWork(){
+  return `<div class="section-t">Work Details</div>
+  <div class="f-group"><label class="f-label">${T("Shift")}<span class="req">*</span></label>
+    <div class="seg">
+      <button class="${F.shift==="Days"?"on":""}" onclick="F.shift='Days';rerenderForm()">☀️ ${T("Days")}</button>
+      <button class="${F.shift==="Nights"?"on":""}" onclick="F.shift='Nights';rerenderForm()">🌙 ${T("Nights")}</button>
+    </div></div>
+  <div class="f-row">
+    ${fld("startDate","Start Date",1,inp("startDate","","date"))}
+    ${fld("goodThrough","Permit Good Through",1,inp("goodThrough","","date"))}
+  </div>
+  <div class="f-row">
+    ${fld("startTime","Estimated Start Time",0,inp("startTime","","time"))}
+    ${fld("endTime","Estimated Finish Time",0,inp("endTime","","time"))}
+  </div>
+  ${fld("description","What work are you doing?",1,ta("description","Describe the work in plain language"))}
+  <div class="f-row">
+    ${fld("equipment","Equipment or tools involved",0,inp("equipment","e.g., grinder, welder, scissor lift"))}
+    ${fld("workers","Number of workers",0,inp("workers","e.g., 4","number"))}
+  </div>`;
+}
+function stepPaper(){
+  const t=typeOf(F.typeCode);
+  return `<div class="section-t">Paperwork &amp; Safety Checks</div>
+  ${segYN("paperwork","Required paperwork submitted?",1)}
+  ${segYN("jha","JHA / SSOW available?",1)}
+  ${segYN("permitDocs","Permit-specific documentation available?",0)}
+  ${t.q&&t.q.length?`<hr class="div"><div class="section-t">${esc(t.name)} — Safety Questions</div>
+    ${t.q.map((q,i)=>segYN("q:"+i,esc(q),1)).join("")}`:""}
+  <hr class="div">
+  <div class="f-group"><label class="f-label">🔗 ${T("Do you need other permits for this same task?")}</label>
+    <div class="seg yn">
+      <button class="${F.needLinked==="Yes"?"on yes":""}" onclick="F.needLinked='Yes';rerenderForm()">${T("Yes")}</button>
+      <button class="${F.needLinked==="No"||!F.needLinked?"on no":""}" onclick="F.needLinked='No';F.linkedTypes=[];rerenderForm()">${T("No")}</button>
+    </div></div>
+  ${F.needLinked==="Yes"?`<div class="f-group"><label class="f-label">${T("Which other permits? We'll create them together with the same information.")}</label>
+    <div class="linkgrid">${DB.permitTypes.filter(x=>x.active&&x.code!==F.typeCode).map(x=>`
+      <button class="linkopt ${F.linkedTypes.includes(x.code)?"on":""}" onclick="toggleLinked('${x.code}')">${x.ico} ${esc(x.name)}</button>`).join("")}
+    </div><div class="hint">Example: Elevated Work often pairs with Man-Basket Exiting or Hot Work. Each linked permit gets its own number — same location, people, and dates.</div></div>`:""}
+  <div class="hint">Attachments/photo upload comes in the next version — for the pilot, bring paperwork to Jacobs or note it below.</div>`;
+}
+function toggleLinked(c){ const i=F.linkedTypes.indexOf(c); if(i>=0) F.linkedTypes.splice(i,1); else F.linkedTypes.push(c); rerenderForm(); }
+function stepReview(){
+  const t=typeOf(F.typeCode);
+  const fo=floorObj(F.building,F.floor);
+  return `<div class="section-t">Jacobs Review</div>
+  ${F._leadAuto&&F.reviewer?`<div class="pill-hint">👷 <b>${esc(F.reviewer)}</b> is the floor lead for ${esc(F.floor)} — we picked them for you. You can change it if needed.</div>`
+    :fo&&fo.lead?"":`<div class="hint" style="margin-bottom:8px">Don't know who reviews your area? Pick "Building HSE/CM (any available)".</div>`}
+  ${fld("reviewer","Requested Jacobs Reviewer",1,sel("reviewer",DB.reviewers.filter(r=>r.active).map(r=>r.name)))}
+  ${fld("notes","Additional notes for Jacobs",0,ta("notes","Anything Jacobs should know?"))}
+  <hr class="div"><div class="section-t">Quick check before you submit</div>
+  <dl class="kv">
+    <dt>Permit Type</dt><dd>${t.ico} ${esc(t.name)} (${t.code})</dd>
+    <dt>Building / Floor</dt><dd>${esc(bldOf(F.building).name)} · ${esc(F.floor||"—")}</dd>
+    <dt>Location</dt><dd>${esc(F.location||"—")}</dd>
+    <dt>Company</dt><dd>${esc(F.company||"—")}</dd>
+    <dt>Requested By</dt><dd>${esc(F.requestedBy||"—")}</dd>
+    <dt>Shift</dt><dd>${esc(F.shift)}</dd>
+    <dt>Dates</dt><dd>${fmtD(F.startDate)} → ${fmtD(F.goodThrough)}</dd>
+    <dt>Work</dt><dd>${esc(F.description||"—")}</dd>
+  </dl>`;
+}
+function validateStep(){
+  const errs=[];
+  const need=(v,l)=>{ if(!v||!String(v).trim()) errs.push(l); };
+  if(F.step===1){ need(F.building,"Building"); need(F.floor,"Floor / Level"); need(F.location,"Specific Work Location"); }
+  if(F.step===2){ need(F.company,"Contractor Company"); need(F.requestedBy,"Requested By"); need(F.phone,"Requester Phone"); }
+  if(F.step===3){ need(F.startDate,"Start Date"); need(F.goodThrough,"Permit Good Through"); need(F.description,"What work are you doing?");
+    if(F.startDate&&F.goodThrough&&F.goodThrough<F.startDate) errs.push("Permit Good Through cannot be before the Start Date"); }
+  if(F.step===4){ need(F.paperwork,"Required paperwork submitted?"); need(F.jha,"JHA / SSOW available?");
+    const t=typeOf(F.typeCode); (t.q||[]).forEach((q,i)=>{ if(!F.answers["q:"+i]) errs.push("Safety question: "+q); }); }
+  if(F.step===5){ need(F.reviewer,"Requested Jacobs Reviewer"); }
+  return errs;
+}
+function stepGo(d){
+  if(d>0){ const errs=validateStep();
+    if(errs.length){ const b=document.getElementById("errBox"); b.style.display="block";
+      b.innerHTML="Please complete: "+errs.map(esc).join(" · "); window.scrollTo(0,0); return; } }
+  F.step=Math.min(5,Math.max(1,F.step+d));
+  document.getElementById("app").innerHTML=VIEWS.form(); window.scrollTo(0,0);
+}
+function saveDraft(){
+  const p=persistForm("Draft");
+  alert("Draft saved. Find it under My Permits → Draft. Reference: "+(p.number||"(number assigned at submission)"));
+  F=null; go("status");
+}
+function persistForm(status){
+  let p;
+  if(F.editingId){
+    p=DB.permits.find(x=>x.id===F.editingId);
+    const fields=["building","floor","area","location","company","requestedBy","phone","email","foreman","foremanPhone","shift","startDate","goodThrough","startTime","endTime","description","equipment","workers","paperwork","jha","permitDocs","reviewer","notes"];
+    fields.forEach(k=>p[k]=F[k]); p.answers={...F.answers};
+    audit(p,"Permit updated by contractor","Resubmitted after Needs Update.");
+    if(status==="Submitted") setStatus(p,"Under Review","Updated information provided — back with Jacobs.");
+  } else {
+    p={ id:uid(), ...F }; delete p.step; delete p.editingId;
+    p.submittedBy=currentActor(); p.createdAt=new Date().toISOString();
+    p.status = status==="Submitted" ? "Under Review" : status; // one step: submit lands straight in Jacobs review
+    p.audit=[];
+    p.number = p.number || nextPermitNumber(F.building,F.typeCode);
+    audit(p, status==="Draft"?"Draft created":"Permit request created","");
+    if(status==="Submitted"){ p.submittedAt=new Date().toISOString(); audit(p,"Status: Submitted → Under Review","Sent straight to Jacobs for review."); }
+    DB.permits.unshift(p);
+  }
+  saveDB(); return p;
+}
+function submitForm(){
+  for(let s=1;s<=5;s++){ F.step=s; const errs=validateStep();
+    if(errs.length){ rerenderForm(); const b=document.getElementById("errBox"); b.style.display="block";
+      b.innerHTML="Please complete: "+errs.map(esc).join(" · "); window.scrollTo(0,0); return; } }
+  const p=persistForm("Submitted");
+  if(!p.submittedAt){ p.submittedAt=new Date().toISOString(); saveDB(); }
+  // companion permits — same task, same info, each with its own number
+  if(F.needLinked==="Yes"&&F.linkedTypes.length){
+    p.groupId=p.id;
+    F.linkedTypes.forEach(code=>{
+      const c=JSON.parse(JSON.stringify(p));
+      c.id=uid(); c.typeCode=code; c.answers={}; c.groupId=p.id;
+      c.number=nextPermitNumber(p.building,code);
+      c.audit=[{at:new Date().toISOString(),by:currentActor(),role:ROLE,action:"Companion permit created",
+        detail:"Created together with "+p.number+" — same task, location, personnel, and dates. Type-specific safety questions to be confirmed with Jacobs."},
+        {at:new Date().toISOString(),by:currentActor(),role:ROLE,action:"Status: Submitted → Under Review",detail:"Sent straight to Jacobs for review."}];
+      DB.permits.unshift(c);
+    });
+    audit(p,"Linked permits created",F.linkedTypes.map(code=>typeOf(code).name).join(", "));
+    saveDB();
+  }
+  if(DB.settings.alerts&&"Notification" in window&&Notification.permission==="granted")
+    new Notification("📥 New permit "+p.number,{body:typeOf(p.typeCode).name+" · "+p.company+" · for "+p.reviewer,tag:p.id});
+  const id=p.id; F=null; go("confirm",id);
+}
+
+/* ---- Confirmation ---- */
+VIEWS.confirm = (id)=>{
+  const p=DB.permits.find(x=>x.id===id); if(!p) return VIEWS.home();
+  const t=typeOf(p.typeCode);
+  const autoMode = DB.settings.notifyMode==="auto" && notifyActive() && autoNotifyRecipients(p).length>0;
+  if(autoMode && !p.autoNotified){
+    window._afterRender=()=>{ setTimeout(()=>{ if(fireAutoNotify(p)){ p.autoNotified=true; saveDB(); } },700); };
+  }
+  return `<div class="narrow center" style="padding-top:10px">
+    <div class="big-icon">✅</div>
+    <h2 class="page">${T("Permit Request Submitted")}</h2>
+    <p class="sub">${T("Your permit request has been sent to Jacobs for review.")}</p>
+    <div class="card" style="text-align:left">
+      <div class="ticket center" style="margin-bottom:16px">
+        <div class="tk-lbl">${T("Your Permit Number")}</div>
+        <div class="pnum tk-num">${esc(p.number)}</div>
+        ${badge(p.status)}
+      </div>
+      ${(()=>{const linked=p.groupId?DB.permits.filter(o=>o.groupId===p.groupId&&o.id!==p.id):[];
+        return linked.length?`<div class="pill-hint">🔗 ${T("Linked permits created with this request:")}<br>
+        ${linked.map(o=>`<b class="pnum">${esc(o.number)}</b> (${esc(typeOf(o.typeCode).name)})`).join(" · ")}</div>`:"";})()}
+      ${trackerHtml(p)}
+      <dl class="kv">
+        <dt>Permit Type</dt><dd>${t.ico} ${esc(t.name)}</dd>
+        <dt>Contractor</dt><dd>${esc(p.company)}</dd>
+        <dt>Building / Floor</dt><dd>${esc(bldOf(p.building).name)} · ${esc(p.floor)}</dd>
+        <dt>Location</dt><dd>${esc(p.location)}</dd>
+        <dt>Submitted</dt><dd>${fmtDT(p.submittedAt)}</dd>
+        <dt>Good Through</dt><dd>${fmtD(p.goodThrough)}</dd>
+      </dl>
+    </div>
+    ${autoMode?`<div class="card" style="text-align:left;border:2px solid var(--green);background:#f2faf4">
+      <div class="section-t" style="color:var(--green-d)">⚡ ${T("Notification sent automatically")}</div>
+      <p style="font-size:14.5px">${T("Your messaging app just opened with everyone already filled in — Jacobs lead, safety manager — message written. Just press")} <b>SEND</b>.</p>
+      <div class="btnrow" style="margin-top:8px"><a class="btn btn-g btn-sm" href="${autoNotifyHref(p)}">📱 ${T("Open the message again")}</a></div>
+    </div>`:""}
+    <div style="text-align:left">${reviewerNotifyPanel(p)}</div>
+    <div class="btnrow">
+      <button class="btn btn-dark" onclick="go('status')">${T("View Permit Status")}</button>
+      <button class="btn btn-line" onclick="go('types')">${T("Submit Another Permit")}</button>
+      <button class="btn btn-line" onclick="copyPermit('${p.id}')">${T("Copy This Permit for Tomorrow")}</button>
+    </div>
+    <p class="sub" style="margin-top:12px;font-size:12.5px">${T("⚠️ Work may not begin until the permit has been reviewed and approved by Jacobs.")}</p>
+  </div>`;
+};
+function trackerHtml(p){
+  if(DEAD.includes(p.status)){
+    return `<div class="tracker dead">${TRACK.map((s,i)=>`${i?'<div class="tk-line"></div>':""}<div class="tk"><div class="cir">✕</div><span>${T(s)}</span></div>`).join("")}</div>
+    <div class="center" style="margin-bottom:10px">${badge(p.status)}</div>`;
+  }
+  const idx=stageOf(p.status);
+  const doneAll=p.status==="Completed";
+  return `<div class="tracker">${TRACK.map((s,i)=>{
+    const done=i<idx||(doneAll&&i<=idx), now=i===idx&&!doneAll;
+    return `${i?`<div class="tk-line ${i<=idx?"done":""}"></div>`:""}
+      <div class="tk ${done?"done":""} ${now?"now":""}">
+      <div class="cir">${done?"✓":i+1}</div><span>${T(s)}</span></div>`;
+  }).join("")}</div>
+  ${p.status==="Needs Update"?`<div class="center" style="margin-bottom:8px">${badge("Needs Update")}</div>`:""}`;
+}
+
+/* ---- My Permits / All Permits ---- */
+VIEWS.status = ()=>{
+  const mine = ROLE==="contractor"||ROLE==="safety";
+  window._afterRender=applyStatusFilters;
+  return `
+  <h2 class="page">${ROLE==="safety"?esc(MYCO)+" — "+T("All Permits"):mine?T("My Permit Status"):T("All Permits")}</h2>
+  <p class="sub">${ROLE==="safety"?"Everything your crews have submitted — live status, no phone calls needed.":mine?T("Track your requests without calling or walking to the permit office."):"Full permit register — search, filter, open any permit."}</p>
+  <div class="filters">
+    <input class="f-in" id="fQ" placeholder="🔍 Permit #, name, location…" oninput="applyStatusFilters()">
+    ${mine?"":`<select class="f-in" id="fCo" onchange="applyStatusFilters()"><option value="">All trade partners</option>${DB.contractors.map(c=>`<option>${esc(c.name)}</option>`).join("")}</select>`}
+    <select class="f-in" id="fT" onchange="applyStatusFilters()"><option value="">All types</option>${DB.permitTypes.map(t=>`<option value="${t.code}">${esc(t.name)}</option>`).join("")}</select>
+    <select class="f-in" id="fS" onchange="applyStatusFilters()"><option value="">All statuses</option>${STATUSES.map(s=>`<option>${s}</option>`).join("")}</select>
+    <input class="f-in" id="fD" type="date" onchange="applyStatusFilters()" title="Start date">
+  </div>
+  <div id="statusList"></div>`;
+};
+function applyStatusFilters(){
+  const q=(document.getElementById("fQ")?.value||"").toLowerCase();
+  const co=document.getElementById("fCo")?.value||"";
+  const tp=document.getElementById("fT")?.value||"";
+  const st=document.getElementById("fS")?.value||"";
+  const dt=document.getElementById("fD")?.value||"";
+  let list=DB.permits.slice();
+  if(ROLE==="contractor"||ROLE==="safety") list=list.filter(p=>p.company===MYCO);
+  if(co) list=list.filter(p=>p.company===co);
+  if(tp) list=list.filter(p=>p.typeCode===tp);
+  if(st) list=list.filter(p=>p.status===st);
+  if(dt) list=list.filter(p=>p.startDate===dt);
+  if(q) list=list.filter(p=>[p.number,p.requestedBy,p.location,p.area,p.description,p.company].join(" ").toLowerCase().includes(q));
+  const host=document.getElementById("statusList");
+  if(!list.length){ host.innerHTML=`<div class="empty"><div class="big-icon">📭</div>No permits found${ROLE==="contractor"?" for "+esc(MYCO):""}.<br><br><button class="btn btn-y" onclick="go('types')">Start a Permit Request</button></div>`; return; }
+  host.innerHTML=list.map(p=>{
+    const t=typeOf(p.typeCode);
+    const u=urgCls(p);
+    return `<div class="pcard ${u?"pc-"+u:""}">
+      <div class="top">
+        <div style="display:flex;align-items:center;gap:8px"><span style="font-size:20px">${t.ico}</span>
+          <span class="pnum" style="font-size:17px">${esc(p.number||"DRAFT")}</span></div>
+        <div style="display:flex;gap:7px;align-items:center">${ageChip(p)}${badge(p.status)}</div>
+      </div>
+      <div class="meta">
+        <div>Type: <b>${esc(t.name)}</b></div><div>Trade Partner: <b>${esc(p.company)}</b></div>
+        <div>Building: <b>${esc(bldOf(p.building).name)} · ${esc(p.floor)}</b></div><div>Requested By: <b>${esc(p.requestedBy)}</b></div>
+        <div>Submitted: <b>${fmtDT(p.submittedAt)}</b></div><div>Good Through: <b>${fmtD(p.goodThrough)}</b></div>
+      </div>
+      ${p.status==="Needs Update"&&p.reviewComments?`<div class="warn-hint" style="margin-top:10px">✏️ <b>Jacobs needs the following update before approval:</b><br>${esc(p.reviewComments)}</div>`:""}
+      <div class="btnrow" style="margin-top:12px">
+        <button class="btn btn-line btn-sm" onclick="go('view','${p.id}')">${T("View Details")}</button>
+        <button class="btn btn-line btn-sm" onclick="copyPermit('${p.id}')">${T("Copy Permit")}</button>
+        ${p.status==="Needs Update"&&ROLE==="contractor"?`<button class="btn btn-o btn-sm" onclick="editPermit('${p.id}')">${T("Update Request")}</button>`:""}
+        ${p.status==="Draft"&&ROLE==="contractor"?`<button class="btn btn-y btn-sm" onclick="editPermit('${p.id}')">${T("Finish & Submit")}</button>`:""}
+        ${["Approved","Active"].includes(p.status)&&ROLE==="contractor"?`<button class="btn btn-b btn-sm" onclick="foremanComplete('${p.id}')">${T("🏁 Work Finished — Mark Complete")}</button>`:""}
+        ${ROLE==="jacobs"||ROLE==="admin"?`<button class="btn btn-b btn-sm" onclick="go('review','${p.id}')">Review</button>`:""}
+        ${IS_OWNER?`<button class="btn btn-line btn-sm btn-cancel" onclick="ownerDeletePermit('${p.id}')">🗑</button>`:""}
+      </div>
+    </div>`;
+  }).join("");
+}
+
+/* ---- Copy previous (picker) ---- */
+VIEWS.copy = ()=>{
+  const list=DB.permits.filter(p=>!(ROLE==="contractor"||ROLE==="safety")||p.company===MYCO).slice(0,30);
+  return `<div class="mid"><h2 class="page">Copy a Previous Permit</h2>
+  <p class="sub">Most daily permits repeat. Pick yesterday's permit, confirm today's dates, and submit.</p>
+  ${list.length?list.map(p=>{const t=typeOf(p.typeCode);return `
+    <div class="pcard"><div class="top">
+      <div><span style="font-size:18px">${t.ico}</span> <span class="pnum">${esc(p.number||"DRAFT")}</span> · ${esc(t.name)}</div>${badge(p.status)}</div>
+      <div class="meta"><div>${esc(p.company)}</div><div>${esc(bldOf(p.building).name)} · ${esc(p.floor)}</div>
+      <div style="grid-column:1/-1">${esc(p.description||"")}</div></div>
+      <div class="btnrow" style="margin-top:10px"><button class="btn btn-y btn-sm" onclick="copyPermit('${p.id}')">📄 Copy for Today</button></div>
+    </div>`;}).join("")
+  :`<div class="empty"><div class="big-icon">🗂️</div>No previous permits yet for ${esc(MYCO||"your company")}.<br><br><button class="btn btn-y" onclick="go('types')">Start a New Permit</button></div>`}
+  </div>`;
+};
+
+/* ---- Read-only permit view (contractor) ---- */
+VIEWS.view = (id)=>{
+  const p=DB.permits.find(x=>x.id===id); if(!p) return VIEWS.status();
+  if(ROLE==="jacobs"||ROLE==="admin") return VIEWS.review(id);
+  const t=typeOf(p.typeCode);
+  return `<div class="mid">
+    <div class="top" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
+      <h2 class="page"><span class="pnum">${esc(p.number)}</span></h2>${badge(p.status)}
+    </div>
+    <div class="card">${trackerHtml(p)}</div>
+    ${p.status==="Needs Update"&&p.reviewComments?`<div class="warn-hint" style="margin-bottom:12px">✏️ <b>Jacobs needs the following update before approval:</b><br>${esc(p.reviewComments)}
+      <div style="margin-top:10px"><button class="btn btn-o btn-sm" onclick="editPermit('${p.id}')">Update Request</button></div></div>`:""}
+    ${p.status==="Approved"||p.status==="Active"?`<div class="pill-hint">✅ Approved by ${esc(p.approvedBy||"Jacobs")} · ${fmtDT(p.approvedAt)}${p.approvalConditions?`<br><b>Conditions:</b> ${esc(p.approvalConditions)}`:""}</div>`:""}
+    <div class="card">
+      <div class="section-t">Permit Details</div>
+      <dl class="kv">
+        <dt>Permit Type</dt><dd>${t.ico} ${esc(t.name)} (${t.code})</dd>
+        <dt>Building / Floor</dt><dd>${esc(bldOf(p.building).name)} · ${esc(p.floor)}</dd>
+        <dt>Area</dt><dd>${esc(p.area||"—")}</dd>
+        <dt>Location</dt><dd>${esc(p.location)}</dd>
+        <dt>Company</dt><dd>${esc(p.company)}</dd>
+        <dt>Requested By</dt><dd>${esc(p.requestedBy)} · ${esc(p.phone||"")}</dd>
+        <dt>Shift</dt><dd>${esc(p.shift)}</dd>
+        <dt>Dates</dt><dd>${fmtD(p.startDate)} → ${fmtD(p.goodThrough)}</dd>
+        <dt>Work</dt><dd>${esc(p.description)}</dd>
+        <dt>Jacobs Reviewer</dt><dd>${esc(p.reviewer)}</dd>
+      </dl>
+    </div>
+    <div class="btnrow">
+    ${["Approved","Active"].includes(p.status)&&ROLE==="contractor"?`<button class="btn btn-b" onclick="foremanComplete('${p.id}')">${T("🏁 Work Finished — Mark Complete")}</button>`:""}
+    <button class="btn btn-line" onclick="go('status')">← ${T("My Permits")}</button>
+    <button class="btn btn-line" onclick="copyPermit('${p.id}')">${T("Copy Permit")}</button></div>
+  </div>`;
+};
+/* ============================================================
+   JACOBS SCREENS
+   ============================================================ */
+VIEWS.dashboard = ()=>{
+  const t=today();
+  const cnt=s=>DB.permits.filter(p=>p.status===s).length;
+  const subToday=DB.permits.filter(p=>p.submittedAt&&p.submittedAt.slice(0,10)===t).length;
+  const apToday=DB.permits.filter(p=>p.approvedAt&&p.approvedAt.slice(0,10)===t).length;
+  const cpToday=DB.permits.filter(p=>p.status==="Completed"&&p.closedAt&&p.closedAt.slice(0,10)===t).length;
+  const cards=[
+    ["Submitted Today",subToday,"#f5b400","today"],
+    ["Under Review",cnt("Under Review"),"#1a73e8","Under Review"],
+    ["Needs Update",cnt("Needs Update"),"#e8710a","Needs Update"],
+    ["Approved",cnt("Approved"),"#1e8e3e","Approved"],
+    ["Active",cnt("Active"),"#0f6f32","Active"],
+    ["Completed",cnt("Completed"),"#1f3a72","Completed"],
+    ["Expired",cnt("Expired"),"#8a94a0","Expired"],
+    ["Rejected / Void / Lost",cnt("Rejected")+cnt("Void")+cnt("Lost"),"#d93025","DEAD"]
+  ];
+  const pend=DB.permits.filter(p=>["Submitted","Under Review"].includes(p.status));
+  const r1=+DB.settings.remind1||15, r2=+DB.settings.remind2||30;
+  const nActive=notifyActive();
+  const urgent=nActive?pend.filter(p=>escBase(p)&&escBase(p).getTime()<=Date.now()&&ageMin(p)>=r2).length:0;
+  const warn=nActive?pend.filter(p=>{if(!escBase(p)||escBase(p).getTime()>Date.now())return false;const m=ageMin(p);return m>=r1&&m<r2;}).length:0;
+  window._afterRender=()=>{ applyDashFilters(); renderDashHist(); };
+  return `
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
+    <div><h2 class="page">Jacobs Permit Dashboard</h2>
+    <p class="sub">Everything waiting on Jacobs, plus today's live picture. ${DB.permits.length===0?'<b>No data yet — use Admin → Settings → Load Sample Data to demo.</b>':""}</p></div>
+    <button class="btn ${DB.settings.alerts?"btn-line":"btn-dark"} btn-sm noprint" onclick="enableAlerts()">${DB.settings.alerts?"🔔 Alerts on":"🔔 Enable pop-up alerts"}</button>
+  </div>
+  ${!nActive?`<div class="pill-hint" style="background:#eef1f5;color:#5b6773">🔕 Notifications &amp; escalation timers are OFF ${DB.settings.notifyOn?"today (day schedule)":""} — board is in record-keeping mode. Turn on in Admin → Settings.</div>`:""}
+  ${urgent?`<div class="errbox" style="display:block">🚨 <b>${urgent} permit${urgent>1?"s":""} past the ${r2}-minute mark after scheduled start</b> — needs Jacobs action now.</div>`:
+    warn?`<div class="warn-hint" style="margin-bottom:14px">⏰ ${warn} permit${warn>1?"s":""} past the ${r1}-minute mark after scheduled start.</div>`:""}
+  <div class="card tight" style="display:flex;gap:18px;flex-wrap:wrap;align-items:center">
+    <b style="font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">Today's Activity</b>
+    <span class="tag" style="background:#fff3cd;color:#8a6400">📥 ${subToday} submitted</span>
+    <span class="tag" style="background:#e0f2e5;color:#0f6f32">✅ ${apToday} approved</span>
+    <span class="tag" style="background:#dbe4f7;color:#1f3a72">🏁 ${cpToday} completed</span>
+  </div>
+  <div class="sumgrid">${cards.map(([l,v,c,f])=>`
+    <div class="sum ${DASH_SEL===f?"on":""}" onclick="dashShow('${f}')"><b>${v}</b><span>${l}</span><i class="tick" style="background:${c}"></i></div>`).join("")}
+  </div>
+  <div class="hint" style="margin:-8px 0 14px">Tap any card to see those permits in the history section below — nothing disappears after approval.</div>
+
+  <div class="card tight">
+    <div class="section-t">⚠️ High-Risk Quick Filters</div>
+    <div>${DB.permitTypes.filter(x=>x.hr).map(x=>`<button class="btn btn-line btn-sm" style="margin:3px" onclick="dashType('${x.code}')">${x.ico} ${esc(x.name.replace(" Permit",""))}</button>`).join("")}</div>
+  </div>
+
+  <div class="grp-h">PENDING REVIEW QUEUE — needs Jacobs action</div>
+  <div class="filters">
+    <input class="f-in" id="dQ" placeholder="🔍 Search…" oninput="applyDashFilters()">
+    <select class="f-in" id="dB" onchange="applyDashFilters()"><option value="">All buildings</option>${DB.buildings.map(b=>`<option value="${b.code}">${esc(b.name)}</option>`).join("")}</select>
+    <select class="f-in" id="dT" onchange="applyDashFilters()"><option value="">All types</option>${DB.permitTypes.map(x=>`<option value="${x.code}">${esc(x.name)}</option>`).join("")}</select>
+    <select class="f-in" id="dCo" onchange="applyDashFilters()"><option value="">All trade partners</option>${DB.contractors.map(c=>`<option>${esc(c.name)}</option>`).join("")}</select>
+    <select class="f-in" id="dSh" onchange="applyDashFilters()"><option value="">All shifts</option><option>Days</option><option>Nights</option></select>
+    <select class="f-in" id="dRv" onchange="applyDashFilters()"><option value="">All reviewers</option>${DB.reviewers.map(r=>`<option>${esc(r.name)}</option>`).join("")}</select>
+  </div>
+  <div class="tblwrap"><table class="tbl"><thead><tr>
+    <th>Waiting</th><th>Permit #</th><th>Type</th><th>Trade Partner</th><th>Bldg</th><th>Floor / Area</th><th>Shift</th><th>Submitted</th><th>Reviewer</th><th>Status</th><th></th>
+  </tr></thead><tbody id="dashBody"></tbody></table></div>
+  <div style="height:20px"></div>
+  <div class="grp-h" id="histAnchor">PERMIT HISTORY — <span id="histTitle"></span></div>
+  <div class="tblwrap"><table class="tbl"><thead><tr>
+    <th>Permit #</th><th>Type</th><th>Trade Partner</th><th>Bldg</th><th>Floor</th><th>Submitted</th><th>Approved By</th><th>Closed</th><th>Status</th><th></th>
+  </tr></thead><tbody id="histBody"></tbody></table></div>
+  <div style="height:20px"></div>
+  <div class="grp-h">SNAPSHOT — open permits by category</div>
+  <div class="card tight" id="dashBreak">${dashBreakdowns()}</div>`;
+};
+let DASH_SEL="today";
+function dashShow(f){ DASH_SEL=f; route();
+  setTimeout(()=>document.getElementById("histAnchor")?.scrollIntoView({behavior:"smooth",block:"start"}),80); }
+function renderDashHist(){
+  const t=today(); let list,title;
+  if(DASH_SEL==="today"){ list=DB.permits.filter(p=>p.submittedAt&&p.submittedAt.slice(0,10)===t); title="everything submitted today (any current status)"; }
+  else if(DASH_SEL==="DEAD"){ list=DB.permits.filter(p=>["Rejected","Void","Lost"].includes(p.status)); title="Rejected / Void / Lost"; }
+  else { list=DB.permits.filter(p=>p.status===DASH_SEL); title=DASH_SEL; }
+  const tt=document.getElementById("histTitle"); if(tt) tt.textContent=title+" ("+list.length+")";
+  const tb=document.getElementById("histBody"); if(!tb) return;
+  tb.innerHTML=list.length? list.map(p=>{const x=typeOf(p.typeCode);return `<tr class="${urgCls(p)}">
+    <td class="pnum">${esc(p.number)}</td><td>${x.ico} ${esc(x.code)}</td><td>${esc(p.company)}</td>
+    <td>${esc(p.building)}</td><td>${esc(p.floor)}</td><td>${fmtDT(p.submittedAt)}</td>
+    <td>${esc(p.approvedBy||"—")}</td><td>${p.closedAt?fmtDT(p.closedAt):"—"}</td><td>${badge(p.status)} ${ageChip(p)}</td>
+    <td><button class="btn btn-line btn-sm" onclick="go('review','${p.id}')">Open</button></td></tr>`;}).join("")
+  : `<tr><td colspan="10" class="empty">No permits in this category yet.</td></tr>`;
+}
+function dashType(c){ go("status"); setTimeout(()=>{const s=document.getElementById("fT"); if(s){s.value=c;applyStatusFilters();}},50); }
+function applyDashFilters(){
+  const q=(document.getElementById("dQ")?.value||"").toLowerCase();
+  const b=document.getElementById("dB")?.value||"", tp=document.getElementById("dT")?.value||"";
+  const co=document.getElementById("dCo")?.value||"", sh=document.getElementById("dSh")?.value||"", rv=document.getElementById("dRv")?.value||"";
+  let list=DB.permits.filter(p=>["Submitted","Under Review","Needs Update"].includes(p.status));
+  if(b) list=list.filter(p=>p.building===b);
+  if(tp) list=list.filter(p=>p.typeCode===tp);
+  if(co) list=list.filter(p=>p.company===co);
+  if(sh) list=list.filter(p=>p.shift===sh);
+  if(rv) list=list.filter(p=>p.reviewer===rv);
+  if(q) list=list.filter(p=>[p.number,p.requestedBy,p.location,p.description,p.company].join(" ").toLowerCase().includes(q));
+  const tb=document.getElementById("dashBody"); if(!tb) return;
+  const r2=+DB.settings.remind2||30, r1=+DB.settings.remind1||15;
+  list.sort((a,b)=>ageMin(b)-ageMin(a));
+  const nAct=notifyActive();
+  tb.innerHTML = list.length? list.map(p=>{const x=typeOf(p.typeCode);const m=ageMin(p);
+    const started=escBase(p)&&escBase(p).getTime()<=Date.now();
+    const rowCls=nAct&&started&&["Submitted","Under Review"].includes(p.status)?(m>=r2?"row-urgent":m>=r1?"row-warn":""):"";
+    return `<tr class="${rowCls}">
+    <td>${ageChip(p)||"—"}</td>
+    <td class="pnum">${esc(p.number)}</td><td>${x.ico} ${esc(x.name)}</td><td>${esc(p.company)}</td>
+    <td>${esc(p.building)}</td><td>${esc(p.floor)}${p.area?" · "+esc(p.area):""}</td><td>${esc(p.shift)}</td>
+    <td>${fmtDT(p.submittedAt)}</td><td>${esc(p.reviewer)}</td><td>${badge(p.status)}</td>
+    <td><button class="btn btn-b btn-sm" onclick="go('review','${p.id}')">Review</button></td></tr>`;}).join("")
+  : `<tr><td colspan="11" class="empty">🎉 Nothing waiting on Jacobs right now.</td></tr>`;
+}
+function dashBreakdowns(){
+  const groups=[["Trade Partner",p=>p.company],["Permit Type",p=>typeOf(p.typeCode).name],["Building",p=>bldOf(p.building).name],["Floor",p=>p.floor],["Shift",p=>p.shift],["Jacobs Reviewer",p=>p.reviewer]];
+  const open=DB.permits.filter(p=>OPEN_STATUSES.includes(p.status));
+  return groups.map(([label,fn])=>{
+    const m={}; open.forEach(p=>{const k=fn(p)||"—"; m[k]=(m[k]||0)+1;});
+    const items=Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,8);
+    return `<div style="margin-bottom:10px"><b style="font-size:13px">${label}:</b> ${items.length?items.map(([k,v])=>`<span class="tag">${esc(k)} · ${v}</span>`).join(""):'<span class="tag">no open permits</span>'}</div>`;
+  }).join("");
+}
+
+/* ---- Review page ---- */
+VIEWS.review = (id)=>{
+  const p=DB.permits.find(x=>x.id===id); if(!p) return VIEWS.dashboard();
+  const t=typeOf(p.typeCode);
+  const yn=v=> v==="Yes"?"✅ Yes":v==="No"?"❌ No":v==="N/A"?"— N/A":"—";
+  return `<div class="mid">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:4px">
+    <h2 class="page">Permit Review · <span class="pnum">${esc(p.number)}</span></h2>
+    <div style="display:flex;gap:8px;align-items:center">${ageChip(p)}${badge(p.status)}</div>
+  </div>
+  <p class="sub">${t.ico} ${esc(t.name)} — ${t.code}${t.hr?' · <b style="color:var(--orange)">HIGH-RISK PERMIT</b>':""}</p>
+  ${t.safetyReq&&!DEAD.includes(p.status)&&p.status!=="Completed"?(()=>{const b=bldOf(p.building);
+    return `<div class="warn-hint" style="background:#fff3f0;color:#a4290f;margin-bottom:12px">🦺 <b>Jacobs Safety sign-off required.</b> ${b.safLead?esc(b.safLead)+" ("+esc(b.name)+" safety lead) must sign / check the area — notify below.":"No safety lead set for "+esc(b.name)+" — add one in Admin → Buildings."}</div>`;})():""}
+  ${(()=>{const linked=p.groupId?DB.permits.filter(o=>o.groupId===p.groupId&&o.id!==p.id):[];
+    return linked.length?`<div class="pill-hint">🔗 <b>Linked permits — same task:</b> ${linked.map(o=>`<a href="#/review/${o.id}"><b class="pnum">${esc(o.number)}</b></a> (${esc(typeOf(o.typeCode).code)}) ${badge(o.status)}`).join(" &nbsp; ")}</div>`:"";})()}
+  <div class="card">${trackerHtml(p)}</div>
+
+  <div class="card"><div class="section-t">Permit Information</div>
+    <dl class="kv">
+      <dt>Permit Number</dt><dd class="pnum">${esc(p.number)}</dd>
+      <dt>Status</dt><dd>${badge(p.status)}</dd>
+      <dt>Date Submitted</dt><dd>${fmtDT(p.submittedAt)}</dd>
+      <dt>Submitted By</dt><dd>${esc(p.submittedBy||p.requestedBy)}</dd>
+    </dl></div>
+
+  <div class="card"><div class="section-t">Work Location</div>
+    <dl class="kv">
+      <dt>Building</dt><dd>${esc(bldOf(p.building).name)}</dd>
+      <dt>Floor / Level</dt><dd>${esc(p.floor)}</dd>
+      <dt>Area / Room / Column</dt><dd>${esc(p.area||"—")}</dd>
+      <dt>Specific Location</dt><dd>${esc(p.location)}</dd>
+    </dl></div>
+
+  <div class="card"><div class="section-t">Contractor Information</div>
+    <dl class="kv">
+      <dt>Company</dt><dd>${esc(p.company)}</dd>
+      <dt>Requested By</dt><dd>${esc(p.requestedBy)}</dd>
+      <dt>Phone</dt><dd>${p.phone?`<a href="tel:${esc(p.phone)}">${esc(p.phone)}</a>`:"—"}</dd>
+      <dt>Email</dt><dd>${esc(p.email||"—")}</dd>
+      <dt>Foreman / Supervisor</dt><dd>${esc(p.foreman||"—")} ${p.foremanPhone?"· "+esc(p.foremanPhone):""}</dd>
+    </dl></div>
+
+  <div class="card"><div class="section-t">Work Details</div>
+    <dl class="kv">
+      <dt>Shift</dt><dd>${p.shift==="Days"?"☀️":"🌙"} ${esc(p.shift)}</dd>
+      <dt>Start Date</dt><dd>${fmtD(p.startDate)}</dd>
+      <dt>Permit Good Through</dt><dd>${fmtD(p.goodThrough)}</dd>
+      <dt>Est. Start / Finish</dt><dd>${esc(p.startTime||"—")} → ${esc(p.endTime||"—")}</dd>
+      <dt>Work Description</dt><dd>${esc(p.description)}</dd>
+      <dt>Equipment / Tools</dt><dd>${esc(p.equipment||"—")}</dd>
+      <dt>Number of Workers</dt><dd>${esc(p.workers||"—")}</dd>
+    </dl></div>
+
+  <div class="card"><div class="section-t">Paperwork &amp; Safety Checks</div>
+    <dl class="kv">
+      <dt>Paperwork Submitted</dt><dd>${yn(p.paperwork)}</dd>
+      <dt>JHA / SSOW Available</dt><dd>${yn(p.jha)}</dd>
+      <dt>Permit-Specific Docs</dt><dd>${yn(p.permitDocs)}</dd>
+    </dl>
+    ${t.q&&t.q.length?`<hr class="div"><dl class="kv">${t.q.map((q,i)=>`<dt>${esc(q)}</dt><dd>${yn((p.answers||{})["q:"+i])}</dd>`).join("")}</dl>`:""}
+    ${p.notes?`<hr class="div"><b style="font-size:13px">Contractor notes:</b><p style="font-size:14px">${esc(p.notes)}</p>`:""}
+  </div>
+
+  <div class="card" style="border:2px solid var(--navy)"><div class="section-t">Jacobs Review</div>
+    <dl class="kv" style="margin-bottom:14px">
+      <dt>Requested Reviewer</dt><dd>${esc(p.reviewer)}</dd>
+      ${p.approvedBy?`<dt>Approved By</dt><dd>${esc(p.approvedBy)} · ${fmtDT(p.approvedAt)}</dd>`:""}
+    </dl>
+    <div class="f-row">
+      <div class="f-group"><label class="f-label">Paperwork Submitted</label>
+        <select class="f-in" id="rvPS"><option ${p.paperworkSubmitted==="Yes"?"selected":""}>Yes</option><option ${p.paperworkSubmitted==="No"||!p.paperworkSubmitted?"selected":""}>No</option></select></div>
+      <div class="f-group"><label class="f-label">Paperwork Approved</label>
+        <select class="f-in" id="rvPA"><option ${p.paperworkApproved==="Yes"?"selected":""}>Yes</option><option ${p.paperworkApproved==="No"||!p.paperworkApproved?"selected":""}>No</option></select></div>
+    </div>
+    <div class="f-group"><label class="f-label">Review Comments</label>
+      <textarea class="f-in" id="rvC">${esc(p.reviewComments||"")}</textarea>
+      <div class="hint">Required when requesting an update — tell the contractor exactly what to fix.</div></div>
+    <div class="f-group"><label class="f-label">Approval Conditions</label>
+      <textarea class="f-in" id="rvCond" placeholder="e.g., Fire watch required 30 min after hot work ends">${esc(p.approvalConditions||"")}</textarea></div>
+    <div class="btnrow">
+      ${["Submitted","Under Review","Needs Update"].includes(p.status)?`
+        <button class="btn btn-g" style="font-size:17px" onclick="actApprove('${p.id}')">✓ Approve — Permit Goes Active</button>
+        <button class="btn btn-o" onclick="actNeedsUpdate('${p.id}')">✏️ Request Update</button>
+        <button class="btn btn-r" onclick="actReason('${p.id}','Rejected','Rejection reason (required)')">✕ Reject</button>`:""}
+      ${["Approved","Active"].includes(p.status)?`<button class="btn btn-b" onclick="actComplete('${p.id}')">🏁 Mark Completed</button>`:""}
+      ${!DEAD.includes(p.status)&&p.status!=="Completed"?`
+        <button class="btn btn-line" onclick="actReason('${p.id}','Void','Void reason (required)')">Void</button>
+        <button class="btn btn-line" onclick="actReason('${p.id}','Lost','Lost reason (required)')">Mark Lost</button>`:""}
+      <button class="btn btn-line" onclick="saveReviewNotes('${p.id}')">💾 Save Review Notes</button>
+      ${IS_OWNER?`<button class="btn btn-line btn-cancel" onclick="ownerDeletePermit('${p.id}')">🗑 Delete Permit (Owner)</button>`:""}
+    </div>
+  </div>
+
+  ${simopsPanel(p)}
+  ${contractorNotifyPanel(p)}
+  ${["Submitted","Under Review"].includes(p.status)?reviewerNotifyPanel(p):""}
+
+  <div class="card"><div class="section-t">Audit Trail</div>
+    <div class="audit">${(p.audit||[]).slice().reverse().map(e=>`
+      <div class="ev"><b>${esc(e.action)}</b><div class="when">${fmtDT(e.at)} · ${esc(e.by)}${e.role?" ("+esc(e.role)+")":""}</div>
+      ${e.detail?`<div class="det">${esc(e.detail)}</div>`:""}</div>`).join("")||'<span class="hint">No events yet.</span>'}
+    </div>
+    <div class="hint">Audit history is recorded automatically and cannot be edited.</div>
+  </div>
+  <div class="btnrow"><button class="btn btn-line" onclick="history.back()">← Back</button></div>
+  </div>`;
+};
+function grabReview(p){
+  p.paperworkSubmitted=document.getElementById("rvPS")?.value||p.paperworkSubmitted;
+  p.paperworkApproved=document.getElementById("rvPA")?.value||p.paperworkApproved;
+  p.reviewComments=document.getElementById("rvC")?.value??p.reviewComments;
+  p.approvalConditions=document.getElementById("rvCond")?.value??p.approvalConditions;
+}
+function rerenderReview(){ window._keepScroll=true; route(); }
+function saveReviewNotes(id){ const p=DB.permits.find(x=>x.id===id); grabReview(p);
+  audit(p,"Review notes saved",""); saveDB(); toast("💾 Review notes saved for <b>"+esc(p.number)+"</b>","t-blue"); rerenderReview(); }
+function actStatus(id,st,detail){ const p=DB.permits.find(x=>x.id===id); grabReview(p); setStatus(p,st,detail||"");
+  toast((st==="Active"?"🟢":"👀")+" <b>"+esc(p.number)+"</b> is now "+st.toUpperCase(),st==="Active"?"t-green":"t-blue"); rerenderReview(); }
+function actApprove(id){
+  const p=DB.permits.find(x=>x.id===id); grabReview(p);
+  if(["Approved","Active"].includes(p.status)){ toast("Already approved — <b>"+esc(p.number)+"</b> is "+p.status,"t-dark"); return; }
+  if(p.paperworkSubmitted!=="Yes"){ if(!confirm("Paperwork is not marked as submitted. Approve anyway?")) return; }
+  setStatus(p,"Active",(p.approvalConditions?("Approved & activated. Conditions: "+p.approvalConditions):"Approved & activated — work may proceed."));
+  toast("✅ <b>"+esc(p.number)+"</b> APPROVED &amp; ACTIVE — work may proceed. Notify the contractor below.","t-green");
+  rerenderReview();
+}
+function foremanComplete(id){
+  const p=DB.permits.find(x=>x.id===id); if(!p) return;
+  if(!confirm("Confirm the work on "+p.number+" is finished? This closes the permit.")) return;
+  setStatus(p,"Completed","Work finished — marked complete by foreman/requester in the field.");
+  toast("🏁 <b>"+esc(p.number)+"</b> "+T("Completed").toUpperCase()+" — "+T("thank you"),"t-blue");
+  route();
+}
+function actNeedsUpdate(id){
+  const p=DB.permits.find(x=>x.id===id); grabReview(p);
+  if(!p.reviewComments||!p.reviewComments.trim()){ toast("✏️ Enter Review Comments first — tell the contractor exactly what to fix.","t-orange");
+    document.getElementById("rvC")?.focus(); return; }
+  setStatus(p,"Needs Update","Jacobs: "+p.reviewComments);
+  toast("✏️ <b>"+esc(p.number)+"</b> sent back — NEEDS UPDATE","t-orange"); rerenderReview();
+}
+function actComplete(id){
+  if(!confirm("Mark this permit as Completed? This closes the permit.")) return;
+  const p=DB.permits.find(x=>x.id===id); grabReview(p); setStatus(p,"Completed","Work complete — permit closed.");
+  toast("🏁 <b>"+esc(p.number)+"</b> COMPLETED — permit closed","t-blue"); rerenderReview();
+}
+function actReason(id,st,label){
+  const r=prompt(label); if(r===null) return;
+  if(!r.trim()){ toast("A reason is required.","t-red"); return; }
+  const p=DB.permits.find(x=>x.id===id); grabReview(p);
+  if(st==="Rejected") p.rejectReason=r;
+  setStatus(p,st,r);
+  toast((st==="Rejected"?"❌":st==="Void"?"⛔":"⚠️")+" <b>"+esc(p.number)+"</b> marked "+st.toUpperCase(),"t-red"); rerenderReview();
+}
+
+/* ---- My Reviews (Jacobs reviewer history) ---- */
+VIEWS.myreviews = ()=>{
+  const me=MYNAME||"";
+  const t=today();
+  const mine=DB.permits.filter(p=>p.reviewer===me||p.approvedBy===me);
+  const waiting=DB.permits.filter(p=>p.reviewer===me&&["Submitted","Under Review","Needs Update"].includes(p.status));
+  const approved=DB.permits.filter(p=>p.approvedBy===me);
+  const apToday=approved.filter(p=>p.approvedAt&&p.approvedAt.slice(0,10)===t).length;
+  const lead={}; DB.permits.forEach(p=>{ if(p.approvedBy) lead[p.approvedBy]=(lead[p.approvedBy]||0)+1; });
+  const rows=(l,empty)=> l.length? `<div class="tblwrap"><table class="tbl"><thead><tr>
+    <th>Waiting</th><th>Permit #</th><th>Type</th><th>Trade Partner</th><th>Floor / Area</th><th>Submitted</th><th>Approved</th><th>Status</th><th></th></tr></thead><tbody>
+    ${l.map(p=>{const x=typeOf(p.typeCode);return `<tr class="${urgCls(p)}">
+      <td>${ageChip(p)||"—"}</td><td class="pnum">${esc(p.number)}</td><td>${x.ico} ${esc(x.code)}</td><td>${esc(p.company)}</td>
+      <td>${esc(p.floor)}${p.area?" · "+esc(p.area):""}</td><td>${fmtDT(p.submittedAt)}</td><td>${p.approvedAt?fmtDT(p.approvedAt):"—"}</td>
+      <td>${badge(p.status)}</td><td><button class="btn btn-b btn-sm" onclick="go('review','${p.id}')">Open</button></td></tr>`;}).join("")}
+    </tbody></table></div>` : `<div class="empty">${empty}</div>`;
+  return `
+  <h2 class="page">My Reviews${me?" — "+esc(me):""}</h2>
+  <p class="sub">Your queue, your approvals, your full history — proof of every permit you've moved.</p>
+  ${!me?`<div class="warn-hint" style="margin-bottom:14px">Set your name with the role button (top right) so permits assigned to you show here.</div>`:""}
+  <div class="sumgrid">
+    <div class="sum" style="cursor:default"><b>${waiting.length}</b><span>Waiting on me</span><i class="tick" style="background:#f5b400"></i></div>
+    <div class="sum" style="cursor:default"><b>${apToday}</b><span>Approved today</span><i class="tick" style="background:#1e8e3e"></i></div>
+    <div class="sum" style="cursor:default"><b>${approved.length}</b><span>Approved all-time</span><i class="tick" style="background:#0f6f32"></i></div>
+    <div class="sum" style="cursor:default"><b>${mine.length}</b><span>Total in my history</span><i class="tick" style="background:#1a73e8"></i></div>
+  </div>
+  <div class="grp-h">⏳ WAITING ON ME (${waiting.length})</div>
+  ${rows(waiting.sort((a,b)=>ageMin(b)-ageMin(a)),"🎉 Nothing waiting on you.")}
+  <div class="grp-h">✅ APPROVED BY ME (${approved.length})</div>
+  ${rows(approved,"No approvals yet.")}
+  <div class="grp-h">📒 MY FULL HISTORY (${mine.length})</div>
+  ${rows(mine,"No permits assigned to you yet.")}
+  <div class="grp-h">🏆 APPROVALS BY REVIEWER — whole team</div>
+  <div class="card tight">${Object.entries(lead).sort((a,b)=>b[1]-a[1]).map(([n,c])=>`<span class="tag" style="font-size:13.5px;padding:6px 12px;margin:4px">${esc(n)} — <b>${c}</b></span>`).join("")||'<span class="hint">No approvals recorded yet.</span>'}</div>`;
+};
+
+/* ---- SIMOPS: other work in the same area, same dates ---- */
+function simopsPanel(p){
+  if(DEAD.includes(p.status)||p.status==="Completed") return "";
+  const overlap=DB.permits.filter(o=>o.id!==p.id && o.building===p.building && o.floor===p.floor
+    && OPEN_STATUSES.includes(o.status)
+    && o.startDate&&p.startDate && o.startDate<=p.goodThrough && o.goodThrough>=p.startDate);
+  if(!overlap.length) return `<div class="pill-hint">🗺️ SIMOPS check: no other open permits on ${esc(bldOf(p.building).name)} · ${esc(p.floor)} for these dates.</div>`;
+  const risky=overlap.some(o=>typeOf(o.typeCode).hr)||typeOf(p.typeCode).hr;
+  return `<div class="card" style="border:2px solid ${risky?"var(--red)":"var(--orange)"}">
+    <div class="section-t">${risky?"🚨":"⚠️"} SIMOPS Check — other work in this area, same dates</div>
+    <p style="font-size:14px;margin-bottom:10px">${overlap.length} other open permit${overlap.length>1?"s":""} on <b>${esc(bldOf(p.building).name)} · ${esc(p.floor)}</b> overlapping these dates. Confirm the activities are compatible before approving${risky?" — <b style='color:var(--red)'>high-risk combination present</b>":""}.</p>
+    ${overlap.map(o=>{const x=typeOf(o.typeCode);return `
+      <div class="list-row"><div class="grow"><b>${x.ico} <span class="pnum">${esc(o.number)}</span> — ${esc(x.name)}${x.hr?' <span class="tag" style="background:#fde2e0;color:#b3140a">HIGH-RISK</span>':""}</b>
+      <small>${esc(o.company)} · ${esc(o.description||"")} · ${fmtD(o.startDate)} → ${fmtD(o.goodThrough)} · ${badge(o.status)}</small></div>
+      <button class="btn btn-line btn-sm" onclick="go('review','${o.id}')">Open</button></div>`;}).join("")}
+  </div>`;
+}
+
+/* ---- Today's Active Permits Board ---- */
+VIEWS.board = ()=>{
+  window._afterRender=applyBoardFilters;
+  return `
+  <h2 class="page">${ROLE==="safety"?esc(MYCO)+" — Permit Board":"Permit Board"}</h2>
+  <p class="sub">${ROLE==="safety"?"Every "+esc(MYCO)+" permit — open, approved, completed, closed — in one live board.":"Every permit — open, approved, completed, closed — in one live board. Filter or group it any way you need."}</p>
+  <div class="filters">
+    <select class="f-in" id="bB" onchange="applyBoardFilters()"><option value="">All buildings</option>${DB.buildings.map(b=>`<option value="${b.code}">${esc(b.name)}</option>`).join("")}</select>
+    <select class="f-in" id="bF" onchange="applyBoardFilters()"><option value="">All floors</option>${[...new Set(DB.floors.map(f=>f.name))].map(f=>`<option>${esc(f)}</option>`).join("")}</select>
+    ${ROLE==="safety"?"":`<select class="f-in" id="bCo" onchange="applyBoardFilters()"><option value="">All trade partners</option>${DB.contractors.map(c=>`<option>${esc(c.name)}</option>`).join("")}</select>`}
+    <select class="f-in" id="bT" onchange="applyBoardFilters()"><option value="">All types</option>${DB.permitTypes.map(x=>`<option value="${x.code}">${esc(x.name)}</option>`).join("")}</select>
+    <select class="f-in" id="bSh" onchange="applyBoardFilters()"><option value="">All shifts</option><option>Days</option><option>Nights</option></select>
+    <select class="f-in" id="bSt" onchange="applyBoardFilters()"><option value="">All statuses</option><option value="LIVE">🟢 Live today (Approved + Active)</option>${STATUSES.map(s=>`<option>${s}</option>`).join("")}</select>
+    <select class="f-in" id="bG" onchange="applyBoardFilters()"><option value="">No grouping</option><option value="building">Group by Building</option><option value="floor">Group by Floor</option><option value="type">Group by Permit Type</option><option value="company">Group by Contractor</option></select>
+  </div>
+  <div id="boardHost"></div>`;
+};
+function applyBoardFilters(){
+  const t=today();
+  const g=document.getElementById("bG")?.value||"";
+  const st=document.getElementById("bSt")?.value||"";
+  let list=DB.permits.slice();
+  if(ROLE==="safety") list=list.filter(p=>p.company===MYCO); // safety managers see ONLY their own company
+  if(st==="LIVE") list=list.filter(p=>["Approved","Active"].includes(p.status)&&(!p.goodThrough||p.goodThrough>=t));
+  else if(st) list=list.filter(p=>p.status===st);
+  const f=(id,fn)=>{const v=document.getElementById(id)?.value||""; if(v) list=list.filter(p=>fn(p)===v);};
+  f("bB",p=>p.building); f("bF",p=>p.floor); f("bCo",p=>p.company); f("bT",p=>p.typeCode); f("bSh",p=>p.shift);
+  const host=document.getElementById("boardHost"); if(!host) return;
+  if(!list.length){ host.innerHTML=`<div class="empty"><div class="big-icon">📋</div>No permits match these filters.</div>`; return; }
+  const rows=l=>`<div class="tblwrap"><table class="tbl"><thead><tr>
+    <th>Permit #</th><th>Type</th><th>Trade Partner</th><th>Bldg</th><th>Floor / Area</th><th>Shift</th><th>Start</th><th>Good Through</th><th>Reviewer</th><th>Status</th><th></th></tr></thead>
+    <tbody>${l.map(p=>{const x=typeOf(p.typeCode);return `<tr class="${urgCls(p)}">
+      <td class="pnum">${esc(p.number)}</td><td>${x.ico} ${esc(x.name)}</td><td>${esc(p.company)}</td>
+      <td>${esc(p.building)}</td><td>${esc(p.floor)}${p.area?" · "+esc(p.area):""}</td><td>${esc(p.shift)}</td>
+      <td>${fmtD(p.startDate)}</td><td>${fmtD(p.goodThrough)}</td><td>${esc(p.reviewer)}</td><td>${badge(p.status)} ${ageChip(p)}</td>
+      <td><button class="btn ${urgCls(p)==="row-urgent"?"btn-r":"btn-line"} btn-sm" onclick="go('${ROLE==="jacobs"||ROLE==="admin"?"review":"view"}','${p.id}')">View</button></td></tr>`;}).join("")}</tbody></table></div>`;
+  if(!g){ host.innerHTML=rows(list); return; }
+  const keyFn={building:p=>bldOf(p.building).name,floor:p=>p.floor,type:p=>typeOf(p.typeCode).name,company:p=>p.company}[g];
+  const m={}; list.forEach(p=>{const k=keyFn(p)||"—";(m[k]=m[k]||[]).push(p);});
+  host.innerHTML=Object.keys(m).sort().map(k=>`<div class="grp-h">${esc(k)} — ${m[k].length} permit${m[k].length>1?"s":""}</div>${rows(m[k])}`).join("");
+}
+/* ============================================================
+   ADMIN
+   ============================================================ */
+let ADMIN_TAB="buildings";
+VIEWS.admin = ()=>{
+  const tabs=[["buildings","Buildings"],["floors","Floors / Levels"],["contractors","Trade Partners"],["types","Permit Types"],["reviewers","Jacobs Reviewers"],["admins","Admin Users"],["safetyacc","Safety Access"],["qr","QR Codes"],["settings","Settings & Data"]];
+  if(IS_OWNER) tabs.push(["trash","🗑 Trash"+(DB.trash&&DB.trash.length?" ("+DB.trash.length+")":"")],["activity","👑 Activity Log"]);
+  return `
+  <h2 class="page">Admin Management</h2>
+  <p class="sub">Manage buildings, floors, contractors, permit types, reviewers, QR codes, and data.</p>
+  <div class="admin-tabs">${tabs.map(([k,l])=>`<button class="${ADMIN_TAB===k?"on":""}" onclick="ADMIN_TAB='${k}';go('admin');route()">${l}</button>`).join("")}</div>
+  <div class="card">${adminTab()}</div>`;
+};
+function adminTab(){
+  const row=(main,sub,actions)=>`<div class="list-row"><div class="grow"><b>${main}</b>${sub?`<small>${sub}</small>`:""}</div>${actions}</div>`;
+  const delBtn=(coll,i)=>`<button class="btn btn-r btn-sm" onclick="adminDel('${coll}',${i})">Delete</button>`;
+  if(ADMIN_TAB==="buildings") return `
+    <div class="btnrow" style="margin:0 0 8px"><button class="btn btn-y btn-sm" onclick="adminAddBuilding()">+ Add Building</button></div>
+    ${DB.buildings.map((b,i)=>row(esc(b.name),"Code: "+esc(b.code),
+      `<button class="btn btn-line btn-sm" onclick="adminEditBuilding(${i})">Edit</button>${delBtn("buildings",i)}`)).join("")}`;
+  if(ADMIN_TAB==="floors") return `
+    <div class="btnrow" style="margin:0 0 8px"><button class="btn btn-y btn-sm" onclick="adminAddFloor()">+ Add Floor</button></div>
+    <div class="hint" style="margin-bottom:8px">👷 Set a <b>Floor Lead</b> on each floor — contractors get that reviewer auto-selected. Add sectors/rooms so the Area field suggests them.</div>
+    ${DB.buildings.map(b=>`<div class="grp-h">${esc(b.name)}</div>
+      ${DB.floors.map((f,i)=>f.b!==b.code?"":row(esc(f.name),
+        (f.lead?"👷 Lead: "+esc(f.lead):'<span style="color:var(--orange)">⚠ no floor lead assigned</span>')+(f.areas&&f.areas.length?" · "+f.areas.length+" areas":""),
+        `<button class="btn btn-line btn-sm" onclick="adminEditFloor(${i})">Edit</button>${delBtn("floors",i)}`)).join("")||'<div class="hint">No floors yet — add one.</div>'}`).join("")}`;
+  if(ADMIN_TAB==="contractors") return `
+    <div class="btnrow" style="margin:0 0 8px"><button class="btn btn-y btn-sm" onclick="adminAddContractor()">+ Add Trade Partner</button></div>
+    <div class="hint" style="margin-bottom:8px">🦺 Add each trade partner's <b>Safety Manager</b> — they get a notification every time their crew submits a permit, and they can sign in as "Trade Partner Safety" to see all their company's permits.</div>
+    ${DB.contractors.map((c,i)=>row(esc(c.name),
+      esc([c.contact,c.phone,c.email].filter(Boolean).join(" · "))
+      +(c.safName?'<br>🦺 Safety: '+esc(c.safName)+(c.safPhone?" · "+esc(c.safPhone):""):'<br><span style="color:var(--orange)">⚠ no safety manager — notifications unavailable</span>'),
+      `<button class="btn btn-line btn-sm" onclick="adminEditContractor(${i})">Edit</button>${delBtn("contractors",i)}`)).join("")}`;
+  if(ADMIN_TAB==="admins") return `
+    <div class="btnrow" style="margin:0 0 8px"><button class="btn btn-y btn-sm" onclick="adminAddAdmin()">+ Add Admin User</button></div>
+    <div class="hint" style="margin-bottom:8px">Each admin gets their own name and PIN — hand these out so people can try the full system. Add as many as you want.</div>
+    ${(DB.settings.admins||[]).map((a,i)=>row(esc(a.name),"PIN: "+esc(a.pin),
+      `<button class="btn btn-line btn-sm" onclick="adminEditAdmin(${i})">Edit</button>
+       <button class="btn btn-r btn-sm" onclick="adminDelAdmin(${i})">Delete</button>`)).join("")}`;
+  if(ADMIN_TAB==="types") return `
+    <div class="btnrow" style="margin:0 0 8px"><button class="btn btn-y btn-sm" onclick="adminAddType()">+ Add Permit Type</button></div>
+    <div class="hint" style="margin-bottom:8px">Deleting a permit type removes it from the request form. Permits already issued keep their numbers and records.</div>
+    ${DB.permitTypes.map((t,i)=>row(t.ico+" "+esc(t.name),
+      "Code: "+t.code+(t.hr?" · HIGH-RISK":"")+(t.safetyReq?' · <span style="color:var(--red);font-weight:800">🦺 JACOBS SAFETY SIGN-OFF</span>':"")+(t.q.length?` · ${t.q.length} safety questions`:""),
+      `<button class="btn btn-line btn-sm" onclick="adminEditType(${i})">Edit</button>${delBtn("permitTypes",i)}`)).join("")}`;
+  if(ADMIN_TAB==="reviewers") return `
+    <div class="btnrow" style="margin:0 0 8px"><button class="btn btn-y btn-sm" onclick="adminAddReviewer()">+ Add Reviewer</button></div>
+    <div class="hint" style="margin-bottom:8px">📣 Add each reviewer's <b>cell phone and email</b> — they power the one-tap "notify reviewer" buttons when permits are submitted.</div>
+    ${DB.reviewers.map((r,i)=>row(esc(r.name),
+      ((r.phone||r.email)?esc([r.phone,r.email].filter(Boolean).join(" · ")):'<span style="color:var(--orange)">⚠ no phone/email — notifications unavailable</span>')
+      +(r.supName?'<br>👤 Supervisor: '+esc(r.supName)+(r.supPhone?" · "+esc(r.supPhone):""):'<br><span style="color:var(--orange)">⚠ no supervisor — escalation unavailable</span>'),
+      `<button class="btn btn-line btn-sm" onclick="adminEditReviewer(${i})">Edit</button>${delBtn("reviewers",i)}`)).join("")}`;
+  if(ADMIN_TAB==="safetyacc") return `
+    <div class="btnrow" style="margin:0 0 8px"><button class="btn btn-y btn-sm" onclick="adminAddSafetyUser()">+ Add Safety Manager Access</button></div>
+    <div class="hint" style="margin-bottom:8px">🦺 Each trade partner safety manager gets a personal PIN. They sign in as "Trade Partner Safety Manager" and can <b>view their own company's permits only</b> — nothing else.</div>
+    ${(DB.safetyUsers||[]).map((u,i)=>row(esc(u.name),esc(u.company)+" · PIN: "+esc(u.pin),
+      `<button class="btn btn-line btn-sm" onclick="adminEditSafetyUser(${i})">Edit</button>
+       <button class="btn btn-r btn-sm" onclick="adminDelSafetyUser(${i})">Delete</button>`)).join("")
+      ||'<div class="hint">No safety access accounts yet.</div>'}`;
+  if(ADMIN_TAB==="trash"&&IS_OWNER) return `
+    <div class="section-t">🗑 Trash — deleted permits (Owner only)</div>
+    <div class="hint" style="margin-bottom:10px">Permits you delete land here, fully intact with their audit trail. Restore them any time, or delete forever. Permit numbers are never reused either way.</div>
+    ${DB.trash.length?`<div class="btnrow" style="margin:0 0 10px"><button class="btn btn-r btn-sm" onclick="trashEmpty()">Empty Trash (${DB.trash.length})</button></div>`:""}
+    ${DB.trash.map((p,i)=>{const x=typeOf(p.typeCode);return `<div class="list-row"><div class="grow">
+      <b>${x.ico} <span class="pnum">${esc(p.number)}</span> — ${esc(x.name)}</b>
+      <small>${esc(p.company)} · ${esc(p.floor||"")} · ${esc(p.description||"").slice(0,60)} · deleted ${fmtDT(p.deletedAt)} by ${esc(p.deletedBy||"")}</small></div>
+      <button class="btn btn-g btn-sm" onclick="trashRestore(${i})">♻ Restore</button>
+      <button class="btn btn-line btn-sm btn-cancel" onclick="trashForever(${i})">Delete Forever</button></div>`;}).join("")
+      ||'<div class="empty">🗑 Trash is empty.</div>'}`;
+  if(ADMIN_TAB==="activity"&&IS_OWNER) return adminActivity();
+  if(ADMIN_TAB==="qr") return adminQR();
+  return adminSettings();
+}
+function adminAddSafetyUser(){ promptFields("Add Safety Manager Access",[
+  {key:"name",label:"Safety Manager Name"},
+  {key:"company",label:"Trade Partner Company",type:"select",opts:DB.contractors.map(c=>c.name)},
+  {key:"pin",label:"Personal PIN (4+ digits)"}],
+  o=>{ if(o.name&&o.company&&o.pin) DB.safetyUsers.push(o); }); }
+function adminEditSafetyUser(i){ const u=DB.safetyUsers[i]; promptFields("Edit Safety Access",[
+  {key:"name",label:"Name",value:u.name},
+  {key:"company",label:"Trade Partner Company",type:"select",opts:DB.contractors.map(c=>c.name),value:u.company},
+  {key:"pin",label:"Personal PIN",value:u.pin}],o=>Object.assign(u,o)); }
+function adminDelSafetyUser(i){ const u=DB.safetyUsers[i];
+  if(confirm('Remove safety access for "'+u.name+'" ('+u.company+')?')){
+    const snap=configSnapshot(); DB.safetyUsers.splice(i,1); logChange("Deleted safety access: "+u.name,u.company,snap); saveDB(); route(); } }
+function adminActivity(){
+  return `<div class="section-t">👑 Owner View — Sign-in History</div>
+  <div class="hint" style="margin-bottom:10px">Everyone who has signed into the portal on this device, newest first. Only the Owner PIN sees this page.</div>
+  <div class="tblwrap" style="margin-bottom:20px"><table class="tbl" style="min-width:520px"><thead><tr><th>When</th><th>Role</th><th>Name</th><th>Company</th></tr></thead><tbody>
+    ${(DB.accessLog||[]).slice(0,120).map(e=>`<tr><td>${fmtDT(e.at)}</td><td><span class="tag">${esc(e.role)}</span></td><td>${esc(e.name)}</td><td>${esc(e.co||"—")}</td></tr>`).join("")||'<tr><td colspan="4" class="empty">No sign-ins recorded yet.</td></tr>'}
+  </tbody></table></div>
+  <div class="section-t">👑 Admin Changes — with restore points</div>
+  <div class="hint" style="margin-bottom:10px">Every change made in the Admin panel. "⏪ Restore" rolls the setup back to before that change — permits and their audit trails are never touched.</div>
+  ${(DB.adminLog||[]).map((e,i)=>`<div class="list-row"><div class="grow"><b>${esc(e.action)}</b>
+    <small>${fmtDT(e.at)} · ${esc(e.by)}${e.detail?" · "+esc(e.detail).slice(0,120):""}</small></div>
+    ${e.snap?`<button class="btn btn-line btn-sm" onclick="restoreSnapshot(${i})">⏪ Restore</button>`:""}</div>`).join("")
+    ||'<div class="hint">No admin changes recorded yet.</div>'}`;
+}
+function adminDel(coll,i){
+  const item=DB[coll][i]; if(!item) return;
+  const name=item.name||item.code||"item";
+  if(!confirm('Delete "'+name+'"?\n\nIt will be removed from all lists and dropdowns. Permits already in the register are NOT changed.')) return;
+  const snap=configSnapshot();
+  DB[coll].splice(i,1);
+  logChange("Deleted from "+coll+": "+name,"",snap);
+  saveDB(); route();
+}
+function adminAddType(){
+  promptFields("Add Permit Type",[{key:"name",label:"Permit Name"},{key:"code",label:"Permit Code (e.g., XX)"},
+    {key:"ico",label:"Icon — paste any emoji",hint:"Copy one: 🔥 ⚡ 🔧 🪜 ⛏️ 🏗️ 🧗 🕳️ 🧱 💥 🚧 ☢️ 📦 ⛓️ 🌡️ 🛠️ 🥽 🚨 🧯 🪛 (or press Win+. / Cmd+Ctrl+Space for the emoji keyboard)"},
+    {key:"desc",label:"Short Description"},{key:"q",label:"Safety questions (one per line, optional)",type:"textarea"}],o=>{
+    if(!o.name||!o.code) return;
+    DB.permitTypes.push({code:o.code.toUpperCase(),name:o.name,desc:o.desc||"",ico:o.ico||"📄",hr:false,safetyReq:false,active:true,
+      q:o.q?o.q.split("\n").map(s=>s.trim()).filter(Boolean):[]});
+  });
+}
+function promptFields(title,fields,cb){
+  modal(`<h3>${esc(title)}</h3>${fields.map(f=>`<div class="f-group"><label class="f-label">${esc(f.label)}</label>
+    ${f.type==="textarea"?`<textarea class="f-in" id="pf_${f.key}">${esc(f.value||"")}</textarea>`
+    :f.type==="select"?`<select class="f-in" id="pf_${f.key}"><option value="">—</option>${(f.opts||[]).map(o=>`<option ${f.value===o?"selected":""}>${esc(o)}</option>`).join("")}</select>`
+    :`<input class="f-in" id="pf_${f.key}" value="${esc(f.value||"")}">`}
+    ${f.hint?`<div class="hint">${f.hint}</div>`:""}</div>`).join("")}
+    <div class="btnrow"><button class="btn btn-g" id="pfOk">✓ Save</button><button class="btn btn-line btn-cancel" onclick="closeModal()">Cancel</button></div>
+    <div class="hint center" style="margin-top:8px">Press <b>Enter</b> to save.</div>`);
+  const ok=()=>{
+    const out={}; fields.forEach(f=>out[f.key]=document.getElementById("pf_"+f.key).value.trim());
+    closeModal();
+    const snap = ROLE==="admin" ? configSnapshot() : "";
+    cb(out);
+    if(ROLE==="admin") logChange(title, out.name||out.n||"", snap);
+    saveDB(); route();
+  };
+  document.getElementById("pfOk").onclick=ok;
+  const mo=document.querySelector(".modal");
+  mo.addEventListener("keydown",e=>{ if(e.key==="Enter"&&e.target.tagName!=="TEXTAREA"){ e.preventDefault(); ok(); } });
+  setTimeout(()=>document.getElementById("pf_"+fields[0].key)?.focus(),60);
+}
+const BUILDING_FIELDS=b=>[
+  {key:"name",label:"Building Name",value:b?.name},
+  {key:"code",label:"Building Code (e.g., D3)",value:b?.code},
+  {key:"safLead",label:"Jacobs Safety Lead — Name",value:b?.safLead,hint:"Notified on every permit in this building that requires Jacobs Safety sign-off (Confined Space, Pressure Test, Roof Access, Elevated Work, Man-Basket…)."},
+  {key:"safPhone",label:"Jacobs Safety Lead — Cell Phone",value:b?.safPhone},
+  {key:"safEmail",label:"Jacobs Safety Lead — Email",value:b?.safEmail}];
+function adminAddBuilding(){ promptFields("Add Building",BUILDING_FIELDS(),o=>{ if(o.name&&o.code) DB.buildings.push({...o,code:o.code.toUpperCase(),active:true}); }); }
+function adminEditBuilding(i){ const b=DB.buildings[i]; promptFields("Edit Building",BUILDING_FIELDS(b),o=>{ Object.assign(b,o); b.code=(o.code||b.code).toUpperCase(); }); }
+const FLOOR_FIELDS=f=>[
+  {key:"name",label:"Floor Name (e.g., First Floor Interstitial)",value:f?.name},
+  {key:"b",label:"Building Code (e.g., D4)",value:f?.b},
+  {key:"lead",label:"Floor Lead — Jacobs reviewer for this floor",type:"select",opts:DB.reviewers.map(r=>r.name),value:f?.lead,
+   hint:"Auto-fills the Jacobs Reviewer when contractors pick this floor."},
+  {key:"areas",label:"Areas / rooms / sectors (one per line — suggested while contractors type)",type:"textarea",value:(f?.areas||[]).join("\n")}];
+function adminAddFloor(){ promptFields("Add Floor",FLOOR_FIELDS(),o=>{ if(o.name&&o.b) DB.floors.push({id:uid(),b:o.b.toUpperCase(),name:o.name,lead:o.lead||"",areas:o.areas?o.areas.split("\n").map(s=>s.trim()).filter(Boolean):[],active:true}); }); }
+function adminEditFloor(i){ const f=DB.floors[i]; promptFields("Edit Floor",FLOOR_FIELDS(f),o=>{ f.name=o.name||f.name; f.b=(o.b||f.b).toUpperCase(); f.lead=o.lead||""; f.areas=o.areas?o.areas.split("\n").map(s=>s.trim()).filter(Boolean):[]; }); }
+const CONTRACTOR_FIELDS=c=>[
+  {key:"name",label:"Trade Partner Name",value:c?.name},
+  {key:"contact",label:"Primary Contact",value:c?.contact},
+  {key:"phone",label:"Phone",value:c?.phone},
+  {key:"email",label:"Email",value:c?.email},
+  {key:"safName",label:"Safety Manager — Name",value:c?.safName,hint:"Gets notified whenever this trade partner submits a permit."},
+  {key:"safPhone",label:"Safety Manager — Cell Phone",value:c?.safPhone},
+  {key:"safEmail",label:"Safety Manager — Email",value:c?.safEmail}];
+function adminAddContractor(){ promptFields("Add Trade Partner",CONTRACTOR_FIELDS(),o=>{ if(o.name) DB.contractors.push({id:uid(),...o,active:true}); }); }
+function adminEditContractor(i){ const c=DB.contractors[i]; promptFields("Edit Trade Partner",CONTRACTOR_FIELDS(c),o=>Object.assign(c,o)); }
+const REVIEWER_FIELDS=r=>[
+  {key:"name",label:"Name",value:r?.name},
+  {key:"phone",label:"Cell Phone (for text notifications)",value:r?.phone},
+  {key:"email",label:"Email (for email notifications)",value:r?.email},
+  {key:"supName",label:"Supervisor Name (escalation contact)",value:r?.supName},
+  {key:"supPhone",label:"Supervisor Cell Phone",value:r?.supPhone},
+  {key:"supEmail",label:"Supervisor Email",value:r?.supEmail}];
+function adminAddReviewer(){ promptFields("Add Jacobs Reviewer",REVIEWER_FIELDS(),o=>{ if(o.name) DB.reviewers.push({id:uid(),...o,active:true}); }); }
+function adminEditReviewer(i){ const r=DB.reviewers[i]; promptFields("Edit Reviewer",REVIEWER_FIELDS(r),o=>Object.assign(r,o)); }
+function adminEditType(i){ const t=DB.permitTypes[i];
+  promptFields("Edit Permit Type — "+t.code,[{key:"name",label:"Permit Name",value:t.name},
+    {key:"ico",label:"Icon — paste any emoji",value:t.ico,hint:"🔥 ⚡ 🔧 🪜 ⛏️ 🏗️ 🧗 🕳️ 🧱 💥 🚧 ☢️ 📦 ⛓️ 🌡️ 🛠️ 🥽 🚨 🧯 🪛"},
+    {key:"desc",label:"Description",value:t.desc},
+    {key:"safetyReq",label:"Requires Jacobs Safety sign-off?",type:"select",opts:["Yes","No"],value:t.safetyReq?"Yes":"No",
+     hint:"Yes = the building's Jacobs Safety Lead is notified and must sign before work."},
+    {key:"q",label:"Safety questions (one per line)",type:"textarea",value:(t.q||[]).join("\n")}],
+    o=>{ t.name=o.name||t.name; t.ico=o.ico||t.ico; t.desc=o.desc; t.safetyReq=o.safetyReq==="Yes"; t.q=o.q?o.q.split("\n").map(s=>s.trim()).filter(Boolean):[]; }); }
+
+function adminQR(){
+  const base=location.origin==="null"||location.protocol==="file:"? location.href.split("#")[0].split("?")[0] : location.origin+location.pathname;
+  const cells=[];
+  DB.buildings.filter(b=>b.active).forEach(b=>{
+    cells.push({label:bldOf(b.code).name+" — All Floors", url:base+"?b="+b.code+"#/types"});
+    DB.floors.filter(f=>f.b===b.code&&f.active).forEach(f=>cells.push({label:b.name+" — "+f.name, url:base+"?b="+b.code+"&f="+encodeURIComponent(f.name)+"#/types"}));
+  });
+  return `<div class="section-t">Location QR Codes</div>
+  <div class="hint" style="margin-bottom:12px">Print these and post them at each building entrance and floor. Scanning pre-fills the building and floor on the permit form. QR images need an internet connection to render (pilot); the link always works.
+  <b>Note:</b> QR codes point at wherever this page is hosted — once you host the file on a URL, reopen this tab and reprint.</div>
+  <div class="qrbox">${cells.map(c=>`
+    <div class="qrcell"><b>${esc(c.label)}</b>
+      <img loading="lazy" src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(c.url)}" alt="QR for ${esc(c.label)}">
+      <div class="lnk">${esc(c.url)}</div></div>`).join("")}
+  </div>
+  <div class="btnrow"><button class="btn btn-dark" onclick="window.print()">🖨️ Print QR Posters</button></div>`;
+}
+function adminSettings(){
+  return `<div class="section-t">Access &amp; Security</div>
+  <div class="f-group" style="max-width:280px"><label class="f-label">Jacobs / Admin PIN</label>
+    <input class="f-in" id="setPin" value="${esc(DB.settings.pin)}">
+    <div class="hint">Pilot-level gate. Production version gets real logins per user.</div></div>
+  <button class="btn btn-line btn-sm" onclick="const s=configSnapshot();DB.settings.pin=document.getElementById('setPin').value.trim()||'1234';logChange('Jacobs PIN changed','',s);saveDB();toast('Jacobs PIN updated.','t-blue')">Save PIN</button>
+  ${IS_OWNER?`<hr class="div"><div class="section-t">👑 Owner PIN</div>
+  <div class="f-group" style="max-width:280px"><label class="f-label">Owner PIN (sees the Activity Log — keep it to yourself)</label>
+    <input class="f-in" id="setOwnPin" value="${esc((DB.settings.owner||{}).pin||"")}"></div>
+  <button class="btn btn-line btn-sm" onclick="DB.settings.owner.pin=document.getElementById('setOwnPin').value.trim()||'7777';saveDB();toast('Owner PIN updated.','t-blue')">Save Owner PIN</button>`:""}
+  <hr class="div"><div class="section-t">Notifications &amp; Reminders</div>
+  <div class="f-group"><label class="f-label">Notification &amp; escalation system</label>
+    <div class="seg" style="max-width:340px">
+      <button class="${DB.settings.notifyOn?"on":""}" onclick="logChange('Notifications turned ON','',configSnapshot());DB.settings.notifyOn=true;saveDB();route()">🔔 On</button>
+      <button class="${!DB.settings.notifyOn?"on":""}" onclick="logChange('Notifications turned OFF','',configSnapshot());DB.settings.notifyOn=false;saveDB();route();toast('🔕 Notifications OFF — record-keeping mode. Numbers still issue, everything still saves.','t-dark')">🔕 Off</button>
+    </div>
+    <div class="hint">OFF = record-keeping mode: permit numbers still issue, everything still saves and exports, but no timers, no colors, no escalation, no alerts — contractors call Jacobs by phone.</div></div>
+  ${DB.settings.notifyOn?`
+  <div class="f-group"><label class="f-label">Active days — notifications &amp; timers only run on checked days</label>
+    <div class="seg" style="flex-wrap:wrap">${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((d,i)=>`
+      <button style="min-width:70px" class="${(DB.settings.notifyDays||[]).includes(i)?"on":""}" onclick="toggleDay(${i})">${d}</button>`).join("")}</div>
+    <div class="hint">Example: check only Sat + Sun to run escalations on weekends when supervision is thin.</div></div>
+  <p style="font-size:14px;margin-bottom:10px">The escalation clock starts at the permit's <b>scheduled work start time</b> (or submission, if submitted after start). Dashboard turns <b style="color:var(--orange)">yellow</b> at the first mark and <b style="color:var(--red)">red / URGENT</b> at the second.</p>`:""}
+  <div class="f-row" style="max-width:560px">
+    <div class="f-group"><label class="f-label">Escalate to supervisor after (minutes)</label><input class="f-in" id="setR1" type="number" value="${esc(DB.settings.remind1)}"><div class="hint">Yellow reminder — supervisor escalation buttons appear</div></div>
+    <div class="f-group"><label class="f-label">Notify permit office after (minutes)</label><input class="f-in" id="setR2" type="number" value="${esc(DB.settings.remind2)}"><div class="hint">Red URGENT — office escalation buttons appear</div></div>
+  </div>
+  <div class="f-row" style="max-width:560px">
+    <div class="f-group"><label class="f-label">Permit office phone (gets notified on submissions)</label><input class="f-in" id="setAP" value="${esc(DB.settings.adminPhone)}" placeholder="(555) 555-5555"></div>
+    <div class="f-group"><label class="f-label">Permit office email</label><input class="f-in" id="setAE" value="${esc(DB.settings.adminEmail)}" placeholder="permits@project.com"></div>
+  </div>
+  <div class="btnrow" style="margin-top:0">
+    <button class="btn btn-line btn-sm" onclick="const s=configSnapshot();DB.settings.remind1=+document.getElementById('setR1').value||15;DB.settings.remind2=+document.getElementById('setR2').value||30;DB.settings.adminPhone=document.getElementById('setAP').value.trim();DB.settings.adminEmail=document.getElementById('setAE').value.trim();logChange('Notification settings changed','',s);saveDB();toast('Notification settings saved.','t-blue')">Save Notification Settings</button>
+    <button class="btn btn-dark btn-sm" onclick="enableAlerts()">${DB.settings.alerts?"🔔 Pop-up alerts are ON":"🔔 Enable pop-up alerts on this device"}</button>
+  </div>
+  <div class="hint">Pop-up alerts work while the portal is open in a browser tab (perfect for the kiosk or permit office computer). Fully automatic text/email — with no tap needed — comes with the cloud version.</div>
+  ${IS_OWNER?`
+  <div class="f-group" style="margin-top:14px"><label class="f-label">👑 When a supervisor submits a permit…</label>
+    <div class="seg" style="max-width:560px">
+      <button class="${DB.settings.notifyMode==="auto"?"on":""}" onclick="logChange('Notify mode → Automatic','',configSnapshot());DB.settings.notifyMode='auto';saveDB();route();toast('⚡ Automatic — the text opens ready to send the moment they submit.','t-green')">⚡ Automatic — text opens ready to send</button>
+      <button class="${DB.settings.notifyMode!=="auto"?"on":""}" onclick="logChange('Notify mode → Manual','',configSnapshot());DB.settings.notifyMode='manual';saveDB();route()">👆 Manual — tap-to-notify buttons</button>
+    </div>
+    <div class="hint">Automatic = right after submitting, their phone's messaging app opens with the Jacobs lead AND their safety manager already filled in, message written — one press of Send. Manual = the buttons work like today. (Owner-only setting.)</div></div>`:""}
+  <hr class="div"><div class="section-t">💾 Record Keeping — Save a Copy</div>
+  <p style="font-size:14px;margin-bottom:6px"><b>What this is:</b> every permit, audit trail, sign-in, and setting lives on this device. The button below saves the whole thing to one file — your official record copy.</p>
+  <p style="font-size:13.5px;color:var(--muted);margin-bottom:10px">Do this weekly (or after a busy day) and keep the file somewhere safe. If the device is ever lost or cleared, the Owner can bring everything back from that file.</p>
+  <div class="btnrow" style="margin-top:0">
+    <button class="btn btn-dark btn-sm" onclick="backupJSON()">⬇ Save Record Copy to a File</button>
+  </div>
+  ${IS_OWNER?`
+  <hr class="div"><div class="section-t">👑 Owner Tools — handle with care</div>
+  <div class="list-row"><div class="grow"><b>⬆ Bring Back from a Record Copy</b>
+    <small>Replaces EVERYTHING on this device with a record-copy file you saved earlier. Use after a lost device or a big mistake.</small></div>
+    <button class="btn btn-line btn-sm" onclick="document.getElementById('restoreFile').click()">Choose File…</button>
+    <input type="file" id="restoreFile" accept=".json" style="display:none" onchange="restoreJSON(this)"></div>
+  <div class="list-row"><div class="grow"><b>🎬 Load Practice Permits</b>
+    <small>Adds 9 pretend permits so you can demo the dashboard to the team. Delete them one-by-one with 🗑, or wipe below when done.</small></div>
+    <button class="btn btn-y btn-sm" onclick="loadSample()">Load</button></div>
+  <div class="list-row"><div class="grow"><b>🧹 Fresh Start — Delete ALL Permits</b>
+    <small>Wipes every permit and the trash so you can show the team a clean system. Buildings, floors, trade partners, reviewers, PINs, and settings are all KEPT. You must type ERASE to confirm.</small></div>
+    <button class="btn btn-r btn-sm" onclick="wipeAll()">Fresh Start…</button></div>`
+  :`<div class="hint" style="margin-top:10px">Restore, practice data, and fresh-start tools are in the Owner's hands — sign in with the Owner PIN to see them.</div>`}`;
+}
+function toggleDay(i){
+  const d=DB.settings.notifyDays||(DB.settings.notifyDays=[]);
+  const at=d.indexOf(i); if(at>=0) d.splice(at,1); else d.push(i);
+  saveDB(); route();
+}
+function backupJSON(){
+  const blob=new Blob([JSON.stringify(DB,null,2)],{type:"application/json"});
+  dl(blob,"PermitPortal_Backup_"+today()+".json");
+}
+function restoreJSON(inp){
+  const f=inp.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{ try{ const d=JSON.parse(r.result); if(!d.permits) throw 0; DB=d; saveDB(); alert("Backup restored."); route(); }catch(e){ alert("That file doesn't look like a Permit Portal backup."); } };
+  r.readAsText(f);
+}
+function wipeAll(){
+  if(!IS_OWNER){ toast("Only the Owner can do a fresh start.","t-red"); return; }
+  if(prompt('Type ERASE to delete ALL permits and empty the Trash.\n\nBuildings, floors, trade partners, permit types, reviewers, PINs, and settings are all KEPT.')==="ERASE"){
+    logChange("🧹 Fresh start — all permits deleted","Removed "+DB.permits.length+" permits and "+DB.trash.length+" trashed permits");
+    DB.permits=[]; DB.trash=[]; DB.counters={}; saveDB();
+    toast("🧹 Fresh start — all permits cleared. Setup and PINs kept.","t-blue"); route();
+  }
+}
+function dl(blob,name){ const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); }
+
+function loadSample(){
+  const t=today(); const d=n=>{const x=new Date(); x.setDate(x.getDate()+n); return x.toISOString().slice(0,10);};
+  const mk=(type,co,by,fl,loc,desc,st,rev,shift,sd,gt)=>{
+    const p={id:uid(),typeCode:type,building:"D4",floor:fl,area:"",location:loc,company:co,requestedBy:by,phone:"(555) 010-"+Math.floor(1000+Math.random()*9000),email:"",foreman:"",foremanPhone:"",
+      shift:shift||"Days",startDate:sd||t,goodThrough:gt||t,startTime:"07:00",endTime:"17:00",description:desc,equipment:"",workers:String(2+Math.floor(Math.random()*6)),
+      paperwork:"Yes",jha:"Yes",permitDocs:"Yes",reviewer:rev,notes:"",answers:{},status:"Submitted",
+      submittedBy:by+" ("+co+")",createdAt:new Date().toISOString(),submittedAt:new Date(Date.now()-Math.random()*8*3600e3).toISOString(),
+      audit:[{at:new Date().toISOString(),by:by+" ("+co+")",role:"contractor",action:"Permit request created",detail:""}]};
+    (typeOf(type).q||[]).forEach((q,i)=>p.answers["q:"+i]="Yes");
+    p.number=nextPermitNumber("D4",type);
+    if(st!=="Submitted"){ p.status=st;
+      p.audit.push({at:new Date().toISOString(),by:"JJ Jaramillo",role:"jacobs",action:"Status: Submitted → "+st,detail:""});
+      if(["Approved","Active","Completed"].includes(st)){ p.approvedBy="JJ Jaramillo"; p.approvedAt=new Date().toISOString(); p.paperworkSubmitted="Yes"; p.paperworkApproved="Yes"; }
+      if(st==="Needs Update") p.reviewComments="Please confirm fire watch assignment and add the fire extinguisher location.";
+      if(st==="Completed") p.closedAt=new Date().toISOString();
+    }
+    DB.permits.unshift(p);
+  };
+  mk("HW","FPI","Jesse Ramos","First Floor (FF)","East mezzanine, col. E-4","Welding SS pipe supports","Active","JJ Jaramillo","Days");
+  mk("HW","Graycor","Andy Beltran","Ground Floor (GF)","North wall","Grinding and cutting rebar","Approved","Lorena Vickery","Days");
+  mk("CS","InServ","Oscar Canacas","Waste Pit","Waste pit, tank T-2","Flooring installation in waste pit","Under Review","JJ Jaramillo","Days");
+  mk("LOTO","BMWC","Chris Little","Second Floor (SF)","AHU room 2-B","Isolate AHU 91U21 for coil replacement","Submitted","Drew Foster","Days");
+  mk("WC","Merit","Sam Ortiz","Second Floor (SF)","Above corridor C-2","Cable tray install above walkable ceiling","Needs Update","Lorena Vickery","Days");
+  mk("OP","Wayne Brothers","Wes Sells","Ground Floor (GF)","Slab near col. B-7","Core drill 4 in. penetrations for conduit","Submitted","JJ Jaramillo","Nights");
+  mk("LB","SIC","Maria Gonzales","First Floor (FF)","CUB tie-in line 3","Open flanged joint for spool replacement","Approved","Drew Foster","Days");
+  mk("HW","FPI","Jesse Ramos","First Floor (FF)","East mezzanine","Welding SS pipe supports","Completed","JJ Jaramillo","Days",d(-1),d(-1));
+  mk("RA","Hamlin Roofing","Terry Cole","Roof","NW roof section","Membrane patching near drain 4","Expired","Lorena Vickery","Days",d(-2),d(-1));
+  saveDB(); alert("Sample data loaded — 9 permits across statuses."); go("dashboard"); route();
+}
+
+/* ============================================================
+   PERMIT FORMS LIBRARY (hard-copy PDFs to print or email)
+   ============================================================ */
+VIEWS.forms = ()=>{
+  const groups={}; (DB.permitDocs||[]).forEach((d,i)=>{(groups[d.g||"Permit Forms"]=groups[d.g||"Permit Forms"]||[]).push({...d,i});});
+  return `
+  <h2 class="page">${T("Permit Forms & Project Documents")}</h2>
+  <p class="sub">${T("Every hard-copy permit form in one place — open, print, or attach to an email for the contractor.")}</p>
+  ${ROLE==="admin"?`<div class="btnrow" style="margin:0 0 14px"><button class="btn btn-y btn-sm" onclick="adminAddDoc()">+ Add Document</button></div>`:""}
+  ${Object.keys(groups).map(g=>`
+    <div class="grp-h">${esc(g.toUpperCase())}</div>
+    <div class="tgrid">${groups[g].map(d=>`
+      <div class="tcard" style="cursor:default">
+        <div class="ico">📄</div>
+        <div style="flex:1"><b>${esc(d.n)}</b>
+          <div class="btnrow" style="margin-top:8px">
+            <a class="btn btn-dark btn-sm" style="flex:none" href="${encodeURI(d.u)}" target="_blank">Open / Print</a>
+            ${ROLE==="admin"?`<button class="btn btn-line btn-sm btn-cancel" style="flex:none" onclick="adminDelDoc(${d.i})">Delete</button>`:""}
+          </div></div>
+      </div>`).join("")}
+    </div>`).join("")}
+  <div class="hint" style="margin-top:14px">Files live in the website folder — drop new PDFs into the <b>w4rw4</b> folder and add them here. To email one: Open / Print → download → attach.</div>`;
+};
+function adminAddAdmin(){ promptFields("Add Admin User",[{key:"name",label:"Name"},{key:"pin",label:"Personal PIN (4+ digits)"}],o=>{ if(o.name&&o.pin) DB.settings.admins.push({name:o.name,pin:o.pin}); }); }
+function adminEditAdmin(i){ const a=DB.settings.admins[i]; promptFields("Edit Admin User",[{key:"name",label:"Name",value:a.name},{key:"pin",label:"Personal PIN",value:a.pin}],o=>Object.assign(a,o)); }
+function adminDelAdmin(i){
+  if((DB.settings.admins||[]).length<=1){ toast("You need at least one admin user.","t-red"); return; }
+  if(confirm('Remove admin "'+DB.settings.admins[i].name+'"?')){
+    const snap=configSnapshot(); const nm=DB.settings.admins[i].name;
+    DB.settings.admins.splice(i,1); logChange("Deleted admin user: "+nm,"",snap); saveDB(); route(); }
+}
+function adminAddDoc(){ promptFields("Add Document",[{key:"n",label:"Document Name"},{key:"u",label:"File name / path (e.g., w4rw4/My Permit.pdf)"},{key:"g",label:"Group (Permit Forms or Reference)"}],o=>{ if(o.n&&o.u) DB.permitDocs.push({n:o.n,u:o.u,g:o.g||"Permit Forms"}); }); }
+function adminDelDoc(i){ const d=DB.permitDocs[i]; if(confirm('Remove "'+d.n+'" from the library? (The file itself is not deleted.)')){ DB.permitDocs.splice(i,1); saveDB(); route(); } }
+
+/* ============================================================
+   HOW-TO GUIDE (bilingual demo walkthrough)
+   ============================================================ */
+VIEWS.howto = ()=>{
+  const steps=[
+    ["📲",T("Open the portal"),T("Scan the QR code posted on your floor, or open the website on any phone, tablet, or the kiosk. The QR code even fills in your building and floor for you.")],
+    ["🚀",T("Tap “Start Permit Request”"),T("The big yellow button on the home screen.")],
+    ["🔥",T("Pick your permit type"),T("Tap the card that matches your work — welding or grinding is Hot Work, entering a tank or pit is Confined Space. Not sure? Tap “I'm not sure which permit I need” at the bottom.")],
+    ["📍",T("Say where you're working"),T("Pick the building and floor. Tap “View Floor Plan” to see the drawing and find your sector or room. The floor's Jacobs lead is selected for you automatically.")],
+    ["👷",T("Your info"),T("Company, your name, and phone. If you're also the foreman, tap “Foreman is the same person as the requester” — done, no retyping.")],
+    ["📅",T("When and what"),T("Day or night shift, start date, permit good-through date, start time, and describe the work in plain words: “welding pipe supports on the mezzanine.”")],
+    ["✅",T("Answer the safety questions"),T("Quick Yes/No taps — fire extinguisher available? Area checked? They match the project safety plan.")],
+    ["📤",T("Submit"),T("You instantly get a permit number like D4-HW-028 on a gold ticket. Write it on your hard-copy permit. Then tap “Text” to send it to the Jacobs reviewer — the message is already written for you.")],
+    ["📱",T("Track it"),T("“My Permits” shows where your request is — three steps: Under Review → Active → Completed. The moment Jacobs approves, it goes Active and you can work. When the job's done, YOU mark it complete right from your phone.")],
+    ["📄",T("Tomorrow: copy it"),T("Same job tomorrow? Tap “Copy This Permit” — everything fills in, you just confirm the date. 30 seconds.")]
+  ];
+  return `<div class="mid">
+  <h2 class="page">🎓 ${T("How to Request a Permit")}</h2>
+  <p class="sub">${T("Ten little steps — under two minutes once you've done it once.")}</p>
+  ${steps.map((s,i)=>`
+    <div class="pcard" style="display:flex;gap:14px;align-items:flex-start">
+      <div style="flex:none;width:44px;height:44px;border-radius:12px;background:var(--gold-grad);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 3px 10px rgba(255,184,28,.3)">${s[0]}</div>
+      <div><b style="font-size:15.5px">${i+1}. ${s[1]}</b><p style="font-size:14px;color:#44505c;margin-top:3px">${s[2]}</p></div>
+    </div>`).join("")}
+  <div class="card center" style="background:var(--navy-grad);color:#fff;border:1px solid rgba(255,184,28,.25)">
+    <p style="font-size:15px;margin-bottom:12px">${T("Best way to learn? Try one right now — you can void it after.")}</p>
+    <button class="btn btn-y" style="min-width:240px" onclick="go('types')">🚀 ${T("Try a Practice Permit")}</button>
+  </div></div>`;
+};
+
+/* ============================================================
+   REPORTS & EXPORT
+   ============================================================ */
+VIEWS.reports = ()=>{
+  window._afterRender=applyReport;
+  return `
+  <h2 class="page">Permit Reports</h2>
+  <p class="sub">Filter the register, review the summary, then export for record keeping.</p>
+  <div class="filters">
+    <input class="f-in" id="rFrom" type="date" onchange="applyReport()" title="From">
+    <input class="f-in" id="rTo" type="date" onchange="applyReport()" title="To">
+    <select class="f-in" id="rB" onchange="applyReport()"><option value="">All buildings</option>${DB.buildings.map(b=>`<option value="${b.code}">${esc(b.name)}</option>`).join("")}</select>
+    <select class="f-in" id="rCo" onchange="applyReport()"><option value="">All trade partners</option>${DB.contractors.map(c=>`<option>${esc(c.name)}</option>`).join("")}</select>
+    <select class="f-in" id="rT" onchange="applyReport()"><option value="">All types</option>${DB.permitTypes.map(x=>`<option value="${x.code}">${esc(x.name)}</option>`).join("")}</select>
+    <select class="f-in" id="rS" onchange="applyReport()"><option value="">All statuses</option>${STATUSES.map(s=>`<option>${s}</option>`).join("")}</select>
+    <select class="f-in" id="rSh" onchange="applyReport()"><option value="">All shifts</option><option>Days</option><option>Nights</option></select>
+    <select class="f-in" id="rRv" onchange="applyReport()"><option value="">All reviewers</option>${DB.reviewers.map(r=>`<option>${esc(r.name)}</option>`).join("")}</select>
+  </div>
+  <div class="sumgrid" id="rSum"></div>
+  <div class="btnrow noprint" style="margin-bottom:14px">
+    <button class="btn btn-g" onclick="exportCSV(true)">📊 Export to Excel</button>
+    <button class="btn btn-dark" onclick="exportCSV(false)">⬇ Export to CSV</button>
+    <button class="btn btn-b" onclick="exportByType()">🗂 Export Grouped by Permit Type</button>
+    <button class="btn btn-line" onclick="window.print()">🖨 Print Report</button>
+  </div>
+  <div class="hint noprint" style="margin:-6px 0 14px">"Grouped by Permit Type" matches your master spreadsheet layout — one section per permit type (Hot Work, Confined Space, LOTO…), ready for the record file.</div>
+  <div id="rTbl"></div>`;
+};
+let REPORT_LIST=[];
+function reportFilter(){
+  let list=DB.permits.slice().filter(p=>p.status!=="Draft"||true);
+  const v=id=>document.getElementById(id)?.value||"";
+  if(v("rFrom")) list=list.filter(p=>(p.startDate||"")>=v("rFrom"));
+  if(v("rTo")) list=list.filter(p=>(p.startDate||"")<=v("rTo"));
+  if(v("rB")) list=list.filter(p=>p.building===v("rB"));
+  if(v("rCo")) list=list.filter(p=>p.company===v("rCo"));
+  if(v("rT")) list=list.filter(p=>p.typeCode===v("rT"));
+  if(v("rS")) list=list.filter(p=>p.status===v("rS"));
+  if(v("rSh")) list=list.filter(p=>p.shift===v("rSh"));
+  if(v("rRv")) list=list.filter(p=>p.reviewer===v("rRv"));
+  return list;
+}
+function applyReport(){
+  const list=REPORT_LIST=reportFilter();
+  const cnt=s=>list.filter(p=>p.status===s).length;
+  const typeCount={}; list.forEach(p=>typeCount[p.typeCode]=(typeCount[p.typeCode]||0)+1);
+  const coCount={}; list.forEach(p=>coCount[p.company]=(coCount[p.company]||0)+1);
+  const topT=Object.entries(typeCount).sort((a,b)=>b[1]-a[1])[0];
+  const topC=Object.entries(coCount).sort((a,b)=>b[1]-a[1])[0];
+  document.getElementById("rSum").innerHTML=[
+    ["Total Permits",list.length,"#1a73e8"],["Active",cnt("Active"),"#e8710a"],["Completed",cnt("Completed"),"#1e8e3e"],
+    ["Expired",cnt("Expired"),"#8a94a0"],["Needs Update",cnt("Needs Update"),"#d93025"],
+    ["Rejected / Void / Lost",cnt("Rejected")+cnt("Void")+cnt("Lost"),"#b3140a"],
+    ["Top Permit Type",topT?typeOf(topT[0]).code+" · "+topT[1]:"—","#7c4dff"],
+    ["Top Trade Partner",topC?topC[0]:"—","#00897b"]
+  ].map(([l,v,c])=>`<div class="sum" style="cursor:default;border-top:4px solid ${c}"><b style="font-size:${String(v).length>6?"15":"26"}px;color:${c}">${esc(String(v))}</b><span>${l}</span><i class="tick" style="background:${c}"></i></div>`).join("");
+  document.getElementById("rTbl").innerHTML=`<div class="tblwrap"><table class="tbl"><thead><tr>
+    <th>Start</th><th>Good Through</th><th>Permit #</th><th>Type</th><th>Company</th><th>Requested By</th><th>Bldg</th><th>Floor / Location</th><th>Shift</th><th>Status</th><th>Approved By</th></tr></thead>
+    <tbody>${list.map(p=>`<tr class="${urgCls(p)}"><td>${fmtD(p.startDate)}</td><td>${fmtD(p.goodThrough)}</td><td class="pnum">${esc(p.number)}</td>
+      <td>${esc(typeOf(p.typeCode).code)}</td><td>${esc(p.company)}</td><td>${esc(p.requestedBy)}</td><td>${esc(p.building)}</td>
+      <td>${esc(p.floor)}${p.location?" · "+esc(p.location):""}</td><td>${esc(p.shift)}</td><td>${badge(p.status)} ${ageChip(p)}</td><td>${esc(p.approvedBy||"")}</td></tr>`).join("")
+      ||'<tr><td colspan="11" class="empty">No permits match these filters.</td></tr>'}</tbody></table></div>`;
+}
+function exportCSV(excel){
+  const list=REPORT_LIST.length?REPORT_LIST:reportFilter();
+  const H=["Start Date","Expiration Date","Permit Number","Permit Type","Company","Requested By","Building","Floor / Location","Shift","Description","Jacobs Reviewer","Paperwork Submitted","Paperwork Approved","Status","Approval Date","Approved By","Closed Date","Comments"];
+  const rows=list.map(p=>[p.startDate,p.goodThrough,p.number,typeOf(p.typeCode).name+" ("+p.typeCode+")",p.company,p.requestedBy,
+    bldOf(p.building).name,[p.floor,p.area,p.location].filter(Boolean).join(" - "),p.shift,p.description,p.reviewer,
+    p.paperworkSubmitted||p.paperwork||"",p.paperworkApproved||"",p.status,
+    p.approvedAt?p.approvedAt.slice(0,10):"",p.approvedBy||"",p.closedAt?p.closedAt.slice(0,10):"",
+    [p.reviewComments,p.approvalConditions,p.rejectReason].filter(Boolean).join(" | ")]);
+  const q=v=>'"'+String(v??"").replace(/"/g,'""')+'"';
+  const csv="﻿"+[H,...rows].map(r=>r.map(q).join(",")).join("\r\n");
+  dl(new Blob([csv],{type:excel?"application/vnd.ms-excel":"text/csv"}),"Permit_Log_"+today()+(excel?".xls.csv":".csv"));
+}
+function exportByType(){
+  const list=REPORT_LIST.length?REPORT_LIST:reportFilter();
+  const H=["Start Date","Expiration Date","Permit Number","Company","Requested By","Building","Floor / Location","Shift","Description","Jacobs Reviewer","Paperwork Submitted","Paperwork Approved","Status","Approval Date","Approved By","Closed Date","Comments"];
+  const q=v=>'"'+String(v??"").replace(/"/g,'""')+'"';
+  const groups={}; list.forEach(p=>{(groups[p.typeCode]=groups[p.typeCode]||[]).push(p);});
+  let out=["﻿"];
+  DB.permitTypes.forEach(t=>{
+    const g=groups[t.code]; if(!g||!g.length) return;
+    out.push(""); out.push(q("=== "+t.name.toUpperCase()+" ("+t.code+") — "+g.length+" permits ==="));
+    out.push(H.map(q).join(","));
+    g.forEach(p=>out.push([p.startDate,p.goodThrough,p.number,p.company,p.requestedBy,bldOf(p.building).name,
+      [p.floor,p.area,p.location].filter(Boolean).join(" - "),p.shift,p.description,p.reviewer,
+      p.paperworkSubmitted||p.paperwork||"",p.paperworkApproved||"",p.status,
+      p.approvedAt?p.approvedAt.slice(0,10):"",p.approvedBy||"",p.closedAt?p.closedAt.slice(0,10):"",
+      [p.reviewComments,p.approvalConditions,p.rejectReason].filter(Boolean).join(" | ")].map(q).join(",")));
+  });
+  dl(new Blob([out.join("\r\n")],{type:"application/vnd.ms-excel"}),"Permit_Log_ByType_"+today()+".csv");
+}
+
+/* ---------- Cinematic intro (Hubtown-inspired, field-lightweight) ---------- */
+const SKYLINE_SVG=(cls,stroke)=>`<svg class="${cls}" viewBox="0 0 1200 200" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="${stroke}" stroke-width="2">
+  <path d="M0 200 V150 H70 V110 H150 V200"/>
+  <path d="M150 200 V80 H260 V200 M180 80 V60 H230 V80"/>
+  <path d="M260 200 V130 H340 V95 H420 V200"/>
+  <path d="M420 200 V70 H560 V200 M450 70 V45 H480 V70 M500 70 V45 H530 V70"/>
+  <path d="M560 200 V120 H660 V200"/>
+  <path d="M660 200 V90 H780 V140 H860 V200"/>
+  <path d="M860 200 V105 H960 V65 H1050 V200"/>
+  <path d="M1050 200 V140 H1200 V200"/>
+  <line x1="920" y1="65" x2="920" y2="8"/><line x1="920" y1="8" x2="1120" y2="8"/>
+  <line x1="1100" y1="8" x2="1100" y2="40"/><rect x="1090" y="40" width="20" height="16"/>
+  <line x1="920" y1="8" x2="880" y2="40"/>
+  <line x1="180" y1="110" x2="180" y2="20"/><line x1="180" y1="20" x2="60" y2="20"/><line x1="80" y1="20" x2="80" y2="50"/><rect x="72" y="50" width="16" height="13"/><line x1="180" y1="20" x2="215" y2="45"/>
+</svg>`;
+function showIntro(){
+  if(sessionStorage.getItem("ppp_intro")) return;
+  if(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches){ sessionStorage.setItem("ppp_intro","1"); return; }
+  sessionStorage.setItem("ppp_intro","1");
+  const words=[
+    `${T("WE BUILD")} <em>${T("BOLD")}</em>.`,
+    `${T("WE BUILD")} <em>${T("SAFE")}</em>.`,
+    `${T("WE BUILD")} <em>${T("TOGETHER")}</em>.`,
+    `${T("ONE PERMIT")} <em>${T("AT A TIME")}</em>.`];
+  const d=document.createElement("div"); d.id="intro";
+  d.innerHTML=`${SKYLINE_SVG("intro-sky","rgba(255,184,28,.55)")}
+    ${words.map((w,i)=>`<div class="intro-word" id="iw${i}">${w}</div>`).join("")}
+    <div class="intro-brand" id="ibrand"><div class="ib-badge">PP</div>
+      <h1>Project Permit Portal</h1><p>${T("Request. Review. Approve. Track.")}</p>
+      <button class="btn btn-y" style="margin-top:22px;min-width:250px" id="introGo">🚀 ${T("Start Permit Request")}</button></div>
+    <button id="introSkip">${T("Skip intro")} ⏭</button>`;
+  document.body.appendChild(d);
+  let done=false;
+  const end=(dest)=>{ if(done) return; done=true;
+    d.classList.add("lift"); setTimeout(()=>d.remove(),900);
+    if(dest) go(dest); };
+  document.getElementById("introSkip").onclick=()=>end();
+  document.getElementById("introGo").onclick=()=>end("types");
+  // unhurried pace — each statement breathes ~5s, brand holds, ~32s total, skip any time
+  const STEP=5200, HOLD=3400;
+  const step=(i)=>{ const el=document.getElementById("iw"+i); if(!el) return;
+    el.classList.add("in"); setTimeout(()=>el.classList.add("gone"),HOLD+900); };
+  words.forEach((w,i)=>setTimeout(()=>step(i),400+i*STEP));
+  setTimeout(()=>document.getElementById("ibrand")?.classList.add("in"),400+words.length*STEP);
+  setTimeout(()=>end(),400+words.length*STEP+10500);
+}
+
+/* ---------- Boot ---------- */
+loadDB();
+renderNav();
+if(!location.hash) location.hash="#/home";
+route();
+const introWillPlay = !sessionStorage.getItem("ppp_intro");
+showIntro();
+if(!sessionStorage.getItem("ppp_seen")){ sessionStorage.setItem("ppp_seen","1"); if(ROLE==="contractor"&&!MYCO) setTimeout(openRoleModal, introWillPlay?6100:0); }
+setInterval(()=>{
+  const changed=expireSweep();
+  alertSweep();
+  const v=location.hash.replace(/^#\/?/,"").split("/")[0];
+  if(changed||["dashboard","board","myreviews"].includes(v)){ window._keepScroll=true; route(); } // refresh timers WITHOUT moving the page
+}, 30000);
+</script>
+</body>
+</html>
