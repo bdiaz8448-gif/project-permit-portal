@@ -43,6 +43,8 @@ header{background:var(--navy-grad);color:#fff;position:sticky;top:0;z-index:50;b
 .logo small{display:block;font-size:10.5px;font-weight:600;color:#9fb0c6;letter-spacing:1.6px;text-transform:uppercase;margin-top:1px}
 .hdr-sp{flex:1}
 .rolewrap{display:flex;align-items:center;gap:8px}
+.themebtn{background:var(--navy2);border:1px solid #2c3e57;border-radius:99px;width:38px;height:34px;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:filter .15s}
+.themebtn:hover{filter:brightness(1.3)}
 .langwrap{display:flex;gap:0;border:1px solid #2c3e57;border-radius:99px;overflow:hidden}
 .langwrap .lang{background:var(--navy2);color:#8fa0b8;border:none;padding:7px 13px;font-size:12.5px;font-weight:800;letter-spacing:.5px}
 .langwrap .lang.on{background:var(--gold-grad);color:var(--navy)}
@@ -162,6 +164,11 @@ textarea.f-in{min-height:90px;resize:vertical}
 .sum b{font-size:27px;display:block;line-height:1.1;letter-spacing:-.8px;font-weight:800}
 .sum span{font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
 .sum .tick{width:26px;height:4px;border-radius:99px;display:block;margin-top:7px}
+.sumgrid.compact{grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px}
+.sumgrid.compact .sum{padding:10px 11px;border-radius:12px}
+.sumgrid.compact .sum b{font-size:21px}
+.sumgrid.compact .sum span{font-size:9.8px;letter-spacing:.2px}
+.sumgrid.compact .sum .tick{margin-top:5px;height:3px}
 
 /* ===== Tables & permit cards ===== */
 .tblwrap{overflow-x:auto;border-radius:12px;box-shadow:var(--shadow);background:#fff}
@@ -184,8 +191,10 @@ table.tbl tr:hover td{background:#f7f9fc}
 .filters .f-in{width:auto;min-width:130px;flex:1;min-height:44px;padding:8px 12px;font-size:14px}
 .filters input.f-in{min-width:170px}
 
-/* ===== Hero (landing) — blueprint style ===== */
-.hero{border-radius:26px;padding:38px 30px 32px;color:#fff;box-shadow:var(--shadow-lg);position:relative;overflow:hidden;border:1px solid rgba(255,184,28,.25);
+/* ===== Hero (landing) — animated construction site ===== */
+.hero{border-radius:22px;padding:38px 30px 96px;color:#fff;box-shadow:var(--shadow-lg);position:relative;overflow:hidden;
+  border:7px solid transparent;
+  border-image:repeating-linear-gradient(45deg,var(--yellow) 0 13px,#141d2b 13px 26px) 7;
   background:
     repeating-linear-gradient(0deg, rgba(122,160,220,.075) 0 1px, transparent 1px 36px),
     repeating-linear-gradient(90deg, rgba(122,160,220,.075) 0 1px, transparent 1px 36px),
@@ -194,7 +203,31 @@ table.tbl tr:hover td{background:#f7f9fc}
     linear-gradient(158deg,#17293f 0%, #0c1524 62%, #0a1220 100%)}
 .hero::before{content:"";position:absolute;top:-80px;right:-80px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(255,184,28,.24),transparent 70%);animation:heroGlow 6s ease-in-out infinite}
 @keyframes heroGlow{0%,100%{opacity:.8;transform:scale(1)}50%{opacity:1;transform:scale(1.12)}}
-.hero::after{content:"";position:absolute;bottom:0;left:0;right:0;height:6px;background:repeating-linear-gradient(45deg,var(--yellow) 0 14px,#1a2434 14px 28px)}
+/* --- living construction scene --- */
+.hero-site{position:absolute;bottom:0;left:0;right:0;width:100%;height:150px;pointer-events:none}
+.hs-win{animation:winOn 9s linear infinite;opacity:0}
+@keyframes winOn{0%,12%{opacity:0}18%,88%{opacity:1}94%,100%{opacity:0}}
+.hs-hook{animation:hookDrop 7s ease-in-out infinite}
+@keyframes hookDrop{0%,100%{transform:translateY(0)}45%,60%{transform:translateY(34px)}}
+.hs-arm{transform-origin:920px 14px;animation:armSway 11s ease-in-out infinite}
+@keyframes armSway{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-3.5deg)}}
+.hs-drone{animation:droneFly 16s linear infinite}
+@keyframes droneFly{0%{transform:translateX(-140px)}100%{transform:translateX(1340px)}}
+.hs-spark{animation:sparkle 1.6s ease-in-out infinite;transform-origin:center}
+@keyframes sparkle{0%,100%{opacity:.15}50%{opacity:1}}
+.hs-rise{animation:blockRise 9s ease-out infinite}
+@keyframes blockRise{0%,8%{opacity:0;transform:translateY(16px)}22%,86%{opacity:1;transform:none}96%,100%{opacity:0;transform:translateY(16px)}}
+@media (prefers-reduced-motion: reduce){.hs-win,.hs-hook,.hs-arm,.hs-drone,.hs-spark,.hs-rise,.hero::before{animation:none;opacity:1}}
+/* colored stat + action tiles */
+.hero-tile .ht-ico{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:8px}
+.hero-tile:nth-child(1) .ht-ico{background:linear-gradient(135deg,#e2edfd,#c3dafc)}
+.hero-tile:nth-child(2) .ht-ico{background:linear-gradient(135deg,#e0f2e5,#c2e5cc)}
+.hero-strip>div:nth-child(1){background:linear-gradient(160deg,#eaf1fe,#dbe7fb);border-color:#c3d7f5}
+.hero-strip>div:nth-child(1) b{color:#174ea6}
+.hero-strip>div:nth-child(2){background:linear-gradient(160deg,#e9f7ee,#d8efe0);border-color:#bfe3cc}
+.hero-strip>div:nth-child(2) b{color:#0f6f32}
+.hero-strip>div:nth-child(3){background:linear-gradient(160deg,#fdf3e2,#fae7c6);border-color:#f0d49a}
+.hero-strip>div:nth-child(3) b{color:#8a5a00}
 .hero-kicker{display:inline-flex;align-items:center;gap:7px;background:rgba(255,184,28,.13);border:1px solid rgba(255,184,28,.45);color:var(--yellow);font-size:12px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;border-radius:99px;padding:7px 15px;margin-bottom:16px;box-shadow:0 0 22px rgba(255,184,28,.15)}
 .hero h2{font-size:34px;font-weight:900;line-height:1.1;letter-spacing:-.9px;text-shadow:0 2px 20px rgba(0,0,0,.35)}
 .hero h2 em{font-style:normal;color:var(--yellow);text-shadow:0 0 28px rgba(255,184,28,.45)}
@@ -339,6 +372,54 @@ footer{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.82);b
 .list-row small{display:block;color:var(--muted);font-size:12.5px}
 .off{opacity:.45}
 .grp-h{background:var(--navy2);color:#fff;font-weight:800;font-size:13px;padding:8px 12px;border-radius:8px;margin:16px 0 8px;letter-spacing:.4px}
+/* ===== DARK MODE ===== */
+body.dark{--bg:#0b1220;--card:#152238;--text:#e8eef7;--muted:#9db0c8;--gray-l:#26364d;
+  background:
+    radial-gradient(1200px 500px at 85% -10%, #10203a 0%, transparent 60%),
+    radial-gradient(900px 420px at -10% 0%, #0e1b30 0%, transparent 55%),
+    var(--bg)}
+body.dark .card,body.dark .tcard,body.dark .pcard,body.dark .sum,body.dark .hero-tile,body.dark .modal,body.dark .tblwrap,body.dark .qrcell{background:#152238;border-color:rgba(255,255,255,.07);color:var(--text)}
+body.dark .btn-line,body.dark .seg button,body.dark .linkopt,body.dark .admin-tabs button{background:#1b2c47;border-color:#31456646;border-color:#314566;color:#c4d2e6}
+body.dark .admin-tabs button.on{background:var(--gold-grad);border-color:transparent;color:#0c1524}
+body.dark .seg button.on{background:var(--gold-grad);border-color:transparent;color:#0c1524}
+body.dark .seg.yn button.on.yes{background:var(--green);border-color:var(--green);color:#fff}
+body.dark .seg.yn button.on.no{background:#4a5768;border-color:#4a5768;color:#fff}
+body.dark .linkopt.on{background:var(--gold-grad);color:#0c1524;border-color:transparent}
+body.dark .f-in,body.dark select.f-in,body.dark textarea.f-in{background:#0f1c31;border-color:#314566;color:var(--text)}
+body.dark .f-in::placeholder{color:#647a97}
+body.dark .f-label{color:#c4d2e6}
+body.dark table.tbl td{border-top-color:#243550}
+body.dark table.tbl tr:hover td{background:#1a2a44}
+body.dark tr.row-warn td{background:#302a14!important}
+body.dark tr.row-urgent td{background:#361c1a!important}
+body.dark .pill-hint{background:#16294a;color:#9cc0f5}
+body.dark .warn-hint{background:#332b12;color:#e8c56a}
+body.dark .errbox{background:#3a1f1c;color:#f2a09a}
+body.dark footer{background:rgba(11,18,32,.85);border-top-color:#243550;color:#9db0c8}
+body.dark .tcard .ico{background:#1c2d49}
+body.dark .list-row{border-top-color:#243550}
+body.dark .tag{background:#1f3050;color:#b8c8de}
+body.dark .steps .bar{background:#26364d}
+body.dark .tk .cir{background:#26364d;color:#8399b5}
+body.dark .tk-line{background:#26364d}
+body.dark .age.ok{background:#173425;color:#7fd6a0}
+body.dark .age.neu{background:#233247;color:#9db0c8}
+body.dark .age.sch{background:#18304f;color:#8fb8f2}
+body.dark .hero-strip>div{background:#152238!important;border-color:#2c3e57!important}
+body.dark .hero-tile .ht-ico{background:#1c2d49!important}
+body.dark .st-Draft{background:#26364d;color:#9db0c8}
+body.dark .st-Expired{background:#26364d;color:#8fa0b8}
+body.dark .st-Submitted{background:#3a3110;color:#eec96a}
+body.dark .st-UnderReview{background:#16294a;color:#8fb8f2}
+body.dark .st-NeedsUpdate{background:#3a2a10;color:#f2b06a}
+body.dark .st-Approved{background:#14301f;color:#7fd6a0}
+body.dark .st-Completed{background:#1a2645;color:#a9bdf0}
+body.dark .st-Lost,body.dark .st-Rejected{background:#3a1c19;color:#f2938c}
+body.dark hr.div{border-top-color:#243550}
+body.dark .eq-hit{background:#12301f}
+body.dark .finder .finder-in{background:rgba(255,255,255,.05)}
+body.dark .empty{color:#8399b5}
+
 @media print{
   header,nav.mainnav,footer,.btn,.filters,.admin-tabs,.noprint{display:none!important}
   body{background:#fff}
@@ -361,6 +442,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.82);b
       <h1>Project Permit Portal<small>Request. Review. Approve. Track.</small></h1>
     </div>
     <div class="hdr-sp"></div>
+    <button class="themebtn" id="themeBtn" onclick="toggleTheme()" title="Dark / Light mode">🌙</button>
     <div id="langWrap" class="langwrap"></div>
     <div class="rolewrap">
       <button class="rolebtn" id="roleBtn" onclick="openRoleModal()"><span class="dot"></span><span id="roleLbl">Contractor</span> ▾</button>
@@ -398,7 +480,8 @@ RAD:["Is the controlled area barricaded and posted?","Has the RSO / Jacobs been 
 WC:["Has the walkable vs non-walkable area been verified on the plan?","Are weight limits confirmed for the work?","Is fall protection in place where required?","Are ceiling openings protected?"],
 BP:["Is the blast plan approved?","Have warning signals been communicated to the site?","Is the exclusion zone cleared and controlled?","Is the blaster licensed and authorized?"],
 ELEV:["Is fall protection required for this task?","Will workers be tied off 100% at height?","Is the equipment inspection current (MEWP / scaffold tag)?","Are ground conditions and outriggers verified?","Is a rescue plan in place for workers at height?"],
-EL:["Are the lift controls isolated or controlled?","Is use coordinated with the responsible owner?","Are load limits confirmed and posted?","Has the lift been inspected before use?"],
+EL:["Is fall protection maintained 100% during the transfer?","Is the landing point rated and safe to step onto?","Is the basket secured against movement?","Is a rescue plan in place?"],
+EL_NEW:["Is fall protection maintained 100% during the transfer?","Is the landing point rated and safe to step onto?","Is the basket secured against movement?","Is a rescue plan in place?"],
 BR:["Has the rigging plan been reviewed?","Is all rigging gear inspected and tagged?","Is the load path clear of personnel?","Are attachment points rated for the load?"]
 };
 
@@ -432,27 +515,22 @@ const SEED = {
   reviewers:[
     "JJ Jaramillo","Lorena Vickery","Drew Foster","Mike Fitzpatrick","Gary Workman","Shawn Patterson","Building HSE/CM (any available)"
   ].map((n,i)=>({id:"r"+(i+1), name:n, email:"", phone:"", active:true})),
-  permitTypes:[
-    {code:"HW", name:"Hot Work Permit", ico:"🔥", hr:true, desc:"Work involving sparks, heat, flame, welding, cutting, or grinding."},
-    {code:"CS", name:"Confined Space Permit", ico:"🕳️", hr:true, desc:"Work involving entry into a confined or restricted space."},
-    {code:"NCS", name:"Non-Confined Space Permit", ico:"📋", hr:false, desc:"Work requiring non-confined space permit review."},
-    {code:"LOTO", name:"Lockout / Tagout Permit", ico:"🔒", hr:true, desc:"Work involving energy isolation or hazardous energy control."},
-    {code:"ES", name:"Energized System Permit", ico:"⚡", hr:true, desc:"Work involving energized systems or live energy exposure."},
-    {code:"EXC", name:"Excavation and Trenching", ico:"⛏️", hr:false, desc:"Work involving digging, trenching, grading, or soil disturbance."},
-    {code:"OHPL", name:"Working Near Overhead Power Lines", ico:"🗼", hr:false, desc:"Work near overhead electrical lines or equipment."},
-    {code:"OP", name:"Opening and Penetration Permit", ico:"🧱", hr:true, desc:"Work involving floor, wall, ceiling, or system penetrations."},
-    {code:"RA", name:"Roof Access Permit", ico:"🏠", hr:false, desc:"Work requiring roof access or work on roof areas."},
-    {code:"GFG", name:"Grating / Flooring / Guardrail Removal", ico:"🚧", hr:false, desc:"Removal of walking surfaces or fall protection barriers."},
-    {code:"LB", name:"Line Break Permit", ico:"🔧", hr:true, desc:"Work involving opening piping, tubing, hoses, or systems."},
-    {code:"CL", name:"Critical Lift", ico:"🏗️", hr:true, desc:"Lifting activity requiring critical lift review."},
-    {code:"PT", name:"Pressure Testing", ico:"🌡️", hr:true, desc:"Testing involving pressure, stored energy, or temporary systems."},
-    {code:"PAT", name:"Powder-Actuated Tools", ico:"🔩", hr:false, desc:"Work involving powder-actuated fastening tools."},
-    {code:"RAD", name:"Radiography Site", ico:"☢️", hr:false, desc:"Work involving radiography or controlled access areas."},
-    {code:"WC", name:"Walkable Ceiling", ico:"🪜", hr:true, desc:"Work on or above walkable ceiling areas."},
-    {code:"BP", name:"Blasting Permit", ico:"💥", hr:false, desc:"Work involving blasting or explosive-related activity."},
-    {code:"ELEV", name:"Elevated Work Permit", ico:"🧗", hr:true, desc:"Work at height on platforms, scaffolds, MEWPs, or elevated surfaces."},
-    {code:"EL", name:"Existing Lift Permit", ico:"📦", hr:false, desc:"Work involving existing lift systems or lift-related controls."},
-    {code:"BR", name:"Bull Rigging", ico:"⛓️", hr:false, desc:"Rigging activity requiring specialized review."}
+  permitTypes:[ // one type per real permit form in the w4rw4 folder
+    {code:"HW", name:"Hot Work Permit", ico:"🔥", hr:true, desc:"Sparks, open flame, welding, cutting, grinding, or any spark-producing work."},
+    {code:"CS", name:"Confined Space Permit", ico:"🕳️", hr:true, desc:"Entry into tanks, pits, vessels, or excavations over 4 ft deep."},
+    {code:"NCS", name:"Non-Permit CSE (Data Sheet)", ico:"📋", hr:false, desc:"Entry into a space evaluated as non-permit confined space."},
+    {code:"LOTO", name:"Lockout / Tagout Permit", ico:"🔒", hr:true, desc:"Isolating or shutting off electrical, mechanical, pneumatic, or hydraulic energy."},
+    {code:"ES", name:"Energized Electrical Permit", ico:"⚡", hr:true, desc:"Work on or near energized electrical equipment or live exposure."},
+    {code:"EXC", name:"Excavation and Trenching", ico:"⛏️", hr:false, desc:"Digging, trenching, grading, or any soil disturbance."},
+    {code:"OP", name:"Opening and Penetration Permit", ico:"🧱", hr:true, desc:"Core drilling, cutting, or penetrating floors, walls, or ceilings."},
+    {code:"RA", name:"Roof Access Permit", ico:"🏠", hr:false, desc:"Accessing the roof or performing work on roof areas."},
+    {code:"GFG", name:"Grating / Floor Plate / Guardrail Removal", ico:"🚧", hr:false, desc:"Removing grating, floor plates, guardrails, or other walking/fall protection."},
+    {code:"LB", name:"Line Break Permit", ico:"🔧", hr:true, desc:"Opening pipes, tubing, hoses, or vessels that may hold pressure or chemicals."},
+    {code:"CL", name:"Critical Lift", ico:"🏗️", hr:true, desc:"Crane lifts requiring a critical lift / rigging / lifting plan."},
+    {code:"PT", name:"Pressure Testing", ico:"🌡️", hr:true, desc:"Pressure or leak testing of piping and systems — stored energy hazard."},
+    {code:"ELEV", name:"Elevated Work Permit", ico:"🧗", hr:true, desc:"Work at height on scaffolds, platforms, MEWPs, or elevated surfaces."},
+    {code:"EL", name:"Man-Basket Exiting Permit", ico:"🧺", hr:true, desc:"Exiting a man basket / aerial platform at height onto a structure."},
+    {code:"BR", name:"Bull Rigging Lift Permit", ico:"⛓️", hr:false, desc:"Rigging and moving loads without a crane — bull rigging operations."}
   ].map(t=>({...t, q:QSETS[t.code]||[], active:true})),
   permits:[], counters:{}
 };
@@ -543,6 +621,15 @@ function migrate(){
   if((DB._v||1)<8){
     if(!DB.equipment) DB.equipment=[];                  // site equipment registry — synced to the cloud
     DB._v=8; saveDB();
+  }
+  if((DB._v||1)<9){
+    // permit types must match the real permit forms — remove types with no form
+    DB.permitTypes=DB.permitTypes.filter(t=>!["WC","OHPL","RAD","BP","PAT"].includes(t.code));
+    const el=DB.permitTypes.find(t=>t.code==="EL");
+    if(el){ el.name="Man-Basket Exiting Permit"; el.ico="🧺"; el.hr=true; el.desc="Exiting a man basket / aerial platform at height onto a structure."; el.q=QSETS.EL_NEW.slice(); }
+    const ncs=DB.permitTypes.find(t=>t.code==="NCS"); if(ncs) ncs.name="Non-Permit CSE (Data Sheet)";
+    const es=DB.permitTypes.find(t=>t.code==="ES"); if(es) es.name="Energized Electrical Permit";
+    DB._v=9; saveDB();
   }
 }
 const EQUIP_TYPES=[
@@ -662,6 +749,14 @@ function setStatus(p,st,detail){
   saveDB();
 }
 
+/* ---------- Theme (dark / light) ---------- */
+let THEME=localStorage.getItem("ppp_theme")||"light";
+function applyTheme(){
+  document.body.classList.toggle("dark", THEME==="dark");
+  const b=document.getElementById("themeBtn"); if(b) b.textContent=THEME==="dark"?"☀️":"🌙";
+}
+function toggleTheme(){ THEME=THEME==="dark"?"light":"dark"; localStorage.setItem("ppp_theme",THEME); applyTheme(); }
+
 /* ---------- Language (EN/ES) ---------- */
 let LANG=localStorage.getItem("ppp_lang")||"en";
 function setLang(l){ LANG=l; localStorage.setItem("ppp_lang",l); renderNav(location.hash.replace(/^#\/?/,"").split("/")[0]); route(); }
@@ -727,7 +822,7 @@ const ES={
 "Your messaging app just opened with everyone already filled in — Jacobs lead, safety manager — message written. Just press":"Su aplicación de mensajes se abrió con todos los destinatarios listos — líder de Jacobs, gerente de seguridad — mensaje escrito. Solo presione",
 "Open the message again":"Abrir el mensaje otra vez",
 "Equipment":"Equipos","Equipment Tracker":"Rastreador de Equipos",
-"Found a machine in the way? Type its serial number — the owner pops up in seconds.":"¿Encontró una máquina estorbando? Escriba su número de serie — el dueño aparece en segundos.",
+"Don't know who a machine belongs to? Type the serial number and we'll show you the company and who's responsible.":"¿No sabe de quién es una máquina? Escriba el número de serie y le mostraremos la compañía y el responsable.",
 "Serial number, machine, or company…":"Número de serie, máquina o compañía…",
 "Searches serial numbers, equipment names, companies, and responsible persons — instantly, as you type.":"Busca números de serie, nombres de equipo, compañías y responsables — al instante, mientras escribe.",
 "Machines on record":"Máquinas registradas","In service":"En servicio","Out of service":"Fuera de servicio","Inspection overdue":"Inspección vencida",
@@ -1065,7 +1160,57 @@ VIEWS.home = ()=>{
   return `
 <div class="narrow" style="padding-top:6px">
   <div class="hero">
-    ${SKYLINE_SVG("hero-sky","rgba(255,184,28,.5)")}
+    <svg class="hero-site" viewBox="0 0 1200 200" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+      <g fill="none" stroke="rgba(255,184,28,.45)" stroke-width="2">
+        <path d="M0 200 V150 H70 V110 H150 V200"/>
+        <path d="M260 200 V130 H340 V95 H420 V200"/>
+        <path d="M560 200 V120 H660 V200"/>
+        <path d="M660 200 V90 H780 V140 H860 V200"/>
+        <path d="M1050 200 V140 H1200 V200"/>
+      </g>
+      <!-- building being built, floor by floor -->
+      <g>
+        <rect class="hs-rise" x="440" y="160" width="110" height="40" fill="rgba(255,184,28,.10)" stroke="rgba(255,184,28,.55)" stroke-width="2" style="animation-delay:0s"/>
+        <rect class="hs-rise" x="440" y="120" width="110" height="40" fill="rgba(255,184,28,.08)" stroke="rgba(255,184,28,.5)" stroke-width="2" style="animation-delay:1.2s"/>
+        <rect class="hs-rise" x="440" y="80" width="110" height="40" fill="rgba(255,184,28,.06)" stroke="rgba(255,184,28,.45)" stroke-width="2" style="animation-delay:2.4s"/>
+        <rect class="hs-rise" x="452" y="52" width="86" height="28" fill="none" stroke="rgba(255,184,28,.35)" stroke-width="2" stroke-dasharray="5 5" style="animation-delay:3.6s"/>
+      </g>
+      <!-- windows lighting up across the site -->
+      ${[ [285,145],[315,145],[285,170],[315,170],[360,115],[390,115],[585,140],[615,140],[690,110],[720,110],[750,110],[690,160],[720,160],[1090,160],[1120,160],[30,165],[95,130] ].map((w,i)=>`<rect class="hs-win" x="${w[0]}" y="${w[1]}" width="13" height="10" fill="rgba(255,196,74,.85)" style="animation-delay:${(i*0.7)%8}s"/>`).join("")}
+      <!-- welding sparks on the steel -->
+      <g fill="#ffd469">
+        <circle class="hs-spark" cx="825" cy="138" r="2.5" style="animation-delay:0s"/>
+        <circle class="hs-spark" cx="833" cy="132" r="1.8" style="animation-delay:.4s"/>
+        <circle class="hs-spark" cx="818" cy="130" r="1.5" style="animation-delay:.8s"/>
+      </g>
+      <!-- tower crane lifting a beam onto the new floor -->
+      <g stroke="rgba(255,184,28,.75)" stroke-width="2.5" fill="none">
+        <line x1="920" y1="200" x2="920" y2="14"/>
+        <g class="hs-arm">
+          <line x1="920" y1="14" x2="1140" y2="14"/>
+          <line x1="920" y1="14" x2="866" y2="42"/>
+          <line x1="980" y1="14" x2="920" y2="44"/>
+          <g class="hs-hook">
+            <line x1="1080" y1="14" x2="1080" y2="72"/>
+            <rect x="1052" y="72" width="56" height="12" fill="rgba(255,184,28,.85)" stroke="none"/>
+          </g>
+        </g>
+      </g>
+      <!-- second crane, far left -->
+      <g stroke="rgba(255,184,28,.4)" stroke-width="2" fill="none">
+        <line x1="185" y1="110" x2="185" y2="24"/><line x1="185" y1="24" x2="80" y2="24"/><line x1="185" y1="24" x2="240" y2="44"/>
+        <line x1="112" y1="24" x2="112" y2="52"/><rect x="102" y="52" width="20" height="14"/>
+      </g>
+      <!-- survey drone crossing the site -->
+      <g class="hs-drone">
+        <g stroke="rgba(180,205,235,.8)" stroke-width="2" fill="none">
+          <rect x="-16" y="30" width="32" height="8" rx="3" fill="rgba(180,205,235,.25)"/>
+          <line x1="-16" y1="30" x2="-26" y2="24"/><line x1="16" y1="30" x2="26" y2="24"/>
+          <ellipse cx="-26" cy="23" rx="10" ry="2.5"/><ellipse cx="26" cy="23" rx="10" ry="2.5"/>
+          <circle cx="0" cy="42" r="2" fill="#ffd469" stroke="none"/>
+        </g>
+      </g>
+    </svg>
     <div class="hero-kicker">⚡ ${T("Fast-track your permit")}</div>
     <h2>${T("Request a Permit in")}<br><em>${T("Under 2 Minutes")}</em></h2>
     <p>${T("Submit from your phone, tablet, computer, or kiosk. Save a walk to the permit office and track your request from the field.")}</p>
@@ -1111,10 +1256,29 @@ function filterTypes(q){ q=q.trim().toLowerCase();
 VIEWS.help = ()=>`
 <div class="mid">
   <h2 class="page">Not sure which permit you need?</h2>
-  <p class="sub">No problem — answer with your best description and Jacobs will point you to the right permit.</p>
+  <p class="sub">Match what you're doing to the list — or start a General Request and Jacobs will point you to the right permit.</p>
   <div class="card">
-    <div class="pill-hint">Quick guide: 🔥 sparks/welding/grinding → Hot Work · 🕳️ entering tanks/pits → Confined Space · 🔒 shutting off energy → LOTO · 🔧 opening pipes → Line Break · 🧱 drilling/cutting floors or walls → Opening &amp; Penetration · 🪜 working above ceilings → Walkable Ceiling</div>
-    <p style="font-size:14.5px;margin-bottom:12px">You can start a <b>General Request</b> — describe the work and Jacobs will confirm the permit type during review.</p>
+    <div class="section-t">Quick Guide — what triggers each permit</div>
+    ${[
+      ["🔥","Sparks, open flame, welding, cutting, or grinding","Hot Work Permit"],
+      ["🕳️","Entering tanks, pits, vessels, or excavations deeper than 4 ft","Confined Space Permit"],
+      ["🔒","Isolating or shutting off energy — electrical, mechanical, pneumatic, hydraulic","Lockout / Tagout"],
+      ["⚡","Working on or near energized electrical equipment","Energized Electrical Permit"],
+      ["⛏️","Digging, trenching, or disturbing soil","Excavation & Trenching"],
+      ["🔧","Opening pipes, tubing, hoses, or vessels that may hold pressure or chemicals","Line Break Permit"],
+      ["🧱","Core drilling, cutting, or penetrating floors, walls, or ceilings","Opening & Penetration"],
+      ["🏠","Going onto the roof for any work","Roof Access Permit"],
+      ["🚧","Removing grating, floor plates, or guardrails","Grating / Floor Plate / Guardrail Removal"],
+      ["🧗","Working at height on scaffolds, platforms, or MEWPs","Elevated Work Permit"],
+      ["🧺","Exiting a man basket at height onto a structure","Man-Basket Exiting Permit"],
+      ["🏗️","Crane lift needing a lift plan","Critical Lift"],
+      ["🌡️","Pressure or leak testing piping or systems","Pressure Testing"],
+      ["⛓️","Rigging and moving loads without a crane","Bull Rigging Lift Permit"]
+    ].map(([i,d,p])=>`<div class="list-row"><div style="font-size:20px;flex:none">${i}</div>
+      <div class="grow" style="font-size:13.8px">${d}</div>
+      <b style="font-size:13px;color:var(--blue-d);white-space:nowrap">→ ${p}</b></div>`).join("")}
+    <hr class="div">
+    <p style="font-size:14.5px;margin-bottom:12px">Still not sure? Start a <b>General Request</b> — describe the work and Jacobs will confirm the permit type during review.</p>
     <button class="btn btn-y btn-block" onclick="startForm('NCS')">Start a General Request</button>
     <div style="height:10px"></div>
     <button class="btn btn-ghost btn-block" onclick="go('types')">← Back to permit types</button>
@@ -1590,10 +1754,15 @@ VIEWS.dashboard = ()=>{
     <span class="tag" style="background:#e0f2e5;color:#0f6f32">✅ ${apToday} approved</span>
     <span class="tag" style="background:#dbe4f7;color:#1f3a72">🏁 ${cpToday} completed</span>
   </div>
-  <div class="sumgrid">${cards.map(([l,v,c,f])=>`
+  <div class="sumgrid compact">${cards.map(([l,v,c,f])=>`
     <div class="sum ${DASH_SEL===f?"on":""}" onclick="dashShow('${f}')"><b data-cnt="${v}">${v}</b><span>${l}</span><i class="tick" style="background:${c}"></i></div>`).join("")}
   </div>
-  <div class="hint" style="margin:-8px 0 14px">Tap any card to see those permits in the history section below — nothing disappears after approval.</div>
+  <div class="hint" style="margin:-8px 0 14px">Tap any card — those permits appear right below. Nothing disappears after approval.</div>
+
+  <div class="grp-h" id="histAnchor" style="margin-top:0">PERMIT HISTORY — <span id="histTitle"></span></div>
+  <div class="tblwrap" style="margin-bottom:16px"><table class="tbl"><thead><tr>
+    <th>Permit #</th><th>Type</th><th>Trade Partner</th><th>Bldg</th><th>Floor</th><th>Submitted</th><th>Approved By</th><th>Closed</th><th>Status</th><th></th>
+  </tr></thead><tbody id="histBody"></tbody></table></div>
 
   <div class="card tight">
     <div class="section-t">⚠️ High-Risk Quick Filters</div>
@@ -1612,11 +1781,6 @@ VIEWS.dashboard = ()=>{
   <div class="tblwrap"><table class="tbl"><thead><tr>
     <th>Waiting</th><th>Permit #</th><th>Type</th><th>Trade Partner</th><th>Bldg</th><th>Floor / Area</th><th>Shift</th><th>Submitted</th><th>Reviewer</th><th>Status</th><th></th>
   </tr></thead><tbody id="dashBody"></tbody></table></div>
-  <div style="height:20px"></div>
-  <div class="grp-h" id="histAnchor">PERMIT HISTORY — <span id="histTitle"></span></div>
-  <div class="tblwrap"><table class="tbl"><thead><tr>
-    <th>Permit #</th><th>Type</th><th>Trade Partner</th><th>Bldg</th><th>Floor</th><th>Submitted</th><th>Approved By</th><th>Closed</th><th>Status</th><th></th>
-  </tr></thead><tbody id="histBody"></tbody></table></div>
   <div style="height:20px"></div>
   <div class="grp-h">SNAPSHOT — open permits by category</div>
   <div class="card tight" id="dashBreak">${dashBreakdowns()}</div>`;
@@ -2234,7 +2398,7 @@ function loadSample(){
   mk("HW","Graycor","Andy Beltran","Ground Floor (GF)","North wall","Grinding and cutting rebar","Approved","Lorena Vickery","Days");
   mk("CS","InServ","Oscar Canacas","Waste Pit","Waste pit, tank T-2","Flooring installation in waste pit","Under Review","JJ Jaramillo","Days");
   mk("LOTO","BMWC","Chris Little","Second Floor (SF)","AHU room 2-B","Isolate AHU 91U21 for coil replacement","Submitted","Drew Foster","Days");
-  mk("WC","Merit","Sam Ortiz","Second Floor (SF)","Above corridor C-2","Cable tray install above walkable ceiling","Needs Update","Lorena Vickery","Days");
+  mk("ELEV","Merit","Sam Ortiz","Second Floor (SF)","Above corridor C-2","Cable tray install from scissor lift","Needs Update","Lorena Vickery","Days");
   mk("OP","Wayne Brothers","Wes Sells","Ground Floor (GF)","Slab near col. B-7","Core drill 4 in. penetrations for conduit","Submitted","JJ Jaramillo","Nights");
   mk("LB","SIC","Maria Gonzales","First Floor (FF)","CUB tie-in line 3","Open flanged joint for spool replacement","Approved","Drew Foster","Days");
   mk("HW","FPI","Jesse Ramos","First Floor (FF)","East mezzanine","Welding SS pipe supports","Completed","JJ Jaramillo","Days",d(-1),d(-1));
@@ -2254,7 +2418,7 @@ VIEWS.equipment = (arg,qs)=>{
   const down=eq.filter(e=>e.status==="Out of Service").length;
   return `
   <h2 class="page">🛰️ ${T("Equipment Tracker")}</h2>
-  <p class="sub">${T("Found a machine in the way? Type its serial number — the owner pops up in seconds.")}</p>
+  <p class="sub">${T("Don't know who a machine belongs to? Type the serial number and we'll show you the company and who's responsible.")}</p>
   <div class="finder card">
     <div class="finder-scan"></div>
     <input class="f-in finder-in" id="eqQ" placeholder="🔎 ${T("Serial number, machine, or company…")}" oninput="applyEqSearch()" autocomplete="off">
@@ -2669,6 +2833,7 @@ loadDB();
 renderNav();
 if(!location.hash) location.hash="#/home";
 route();
+applyTheme();
 const introWillPlay = !sessionStorage.getItem("ppp_intro");
 showIntro();
 if(!sessionStorage.getItem("ppp_seen")){ sessionStorage.setItem("ppp_seen","1"); if(ROLE==="contractor"&&!MYCO) setTimeout(openRoleModal, introWillPlay?6100:0); }
