@@ -192,9 +192,7 @@ table.tbl tr:hover td{background:#f7f9fc}
 .filters input.f-in{min-width:170px}
 
 /* ===== Hero (landing) — animated construction site ===== */
-.hero{border-radius:22px;padding:38px 30px 96px;color:#fff;box-shadow:var(--shadow-lg);position:relative;overflow:hidden;
-  border:7px solid transparent;
-  border-image:repeating-linear-gradient(45deg,var(--yellow) 0 13px,#141d2b 13px 26px) 7;
+.hero{border-radius:22px;padding:42px 34px 100px;color:#fff;box-shadow:var(--shadow-lg);position:relative;overflow:hidden;
   background:
     repeating-linear-gradient(0deg, rgba(122,160,220,.075) 0 1px, transparent 1px 36px),
     repeating-linear-gradient(90deg, rgba(122,160,220,.075) 0 1px, transparent 1px 36px),
@@ -203,6 +201,15 @@ table.tbl tr:hover td{background:#f7f9fc}
     linear-gradient(158deg,#17293f 0%, #0c1524 62%, #0a1220 100%)}
 .hero::before{content:"";position:absolute;top:-80px;right:-80px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(255,184,28,.24),transparent 70%);animation:heroGlow 6s ease-in-out infinite}
 @keyframes heroGlow{0%,100%{opacity:.8;transform:scale(1)}50%{opacity:1;transform:scale(1.12)}}
+/* marching caution-stripe frame */
+.hero-frame{position:absolute;inset:0;border-radius:22px;padding:8px;pointer-events:none;z-index:3;
+  background:repeating-linear-gradient(45deg,var(--yellow) 0 13px,#141d2b 13px 26px);
+  background-size:auto;
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation:frameMarch 1.6s linear infinite}
+@keyframes frameMarch{from{background-position:0 0}to{background-position:36.8px 0}}
+@media (prefers-reduced-motion: reduce){.hero-frame{animation:none}}
 /* --- living construction scene --- */
 .hero-site{position:absolute;bottom:0;left:0;right:0;width:100%;height:150px;pointer-events:none}
 .hs-win{animation:winOn 9s linear infinite;opacity:0}
@@ -211,8 +218,14 @@ table.tbl tr:hover td{background:#f7f9fc}
 @keyframes hookDrop{0%,100%{transform:translateY(0)}45%,60%{transform:translateY(34px)}}
 .hs-arm{transform-origin:920px 14px;animation:armSway 11s ease-in-out infinite}
 @keyframes armSway{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-3.5deg)}}
-.hs-drone{animation:droneFly 16s linear infinite}
-@keyframes droneFly{0%{transform:translateX(-140px)}100%{transform:translateX(1340px)}}
+.hs-drone{animation:droneFly 18s linear infinite}
+@keyframes droneFly{0%{transform:translateX(-160px)}100%{transform:translateX(1360px)}}
+.hs-bob{animation:droneBob 3.4s ease-in-out infinite}
+@keyframes droneBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+.hs-rotor{animation:rotorSpin .18s linear infinite;transform-origin:center}
+@keyframes rotorSpin{0%{transform:scaleX(1)}50%{transform:scaleX(.25)}100%{transform:scaleX(1)}}
+.hs-cargo{animation:cargoSway 3.4s ease-in-out infinite;transform-origin:0 34px}
+@keyframes cargoSway{0%,100%{transform:rotate(2.5deg)}50%{transform:rotate(-2.5deg)}}
 .hs-spark{animation:sparkle 1.6s ease-in-out infinite;transform-origin:center}
 @keyframes sparkle{0%,100%{opacity:.15}50%{opacity:1}}
 .hs-rise{animation:blockRise 9s ease-out infinite}
@@ -833,7 +846,128 @@ const ES={
 "No match — that serial isn't registered yet. Add it so next time it takes 5 seconds.":"Sin resultados — ese número de serie no está registrado. Agréguelo para que la próxima vez tome 5 segundos.",
 "No equipment registered yet. Tap + Add Equipment to start the registry.":"Aún no hay equipos registrados. Toque + Agregar Equipo para iniciar el registro.",
 "In Service":"En Servicio","Out of Service":"Fuera de Servicio",
-"Your equipment needs to be moved":"Su equipo necesita ser movido"
+"Your equipment needs to be moved":"Su equipo necesita ser movido",
+"Type it, or pick from the list…":"Escríbalo, o elija de la lista…",
+/* permit names */
+"Hot Work Permit":"Permiso de Trabajo en Caliente","Confined Space Permit":"Permiso de Espacio Confinado",
+"Non-Permit CSE (Data Sheet)":"Espacio Confinado Sin Permiso (Hoja de Datos)","Lockout / Tagout Permit":"Permiso de Bloqueo / Etiquetado (LOTO)",
+"Energized Electrical Permit":"Permiso Eléctrico Energizado","Excavation and Trenching":"Excavación y Zanjas",
+"Opening and Penetration Permit":"Permiso de Aberturas y Penetraciones","Roof Access Permit":"Permiso de Acceso al Techo",
+"Grating / Floor Plate / Guardrail Removal":"Retiro de Rejillas / Placas de Piso / Barandales","Line Break Permit":"Permiso de Apertura de Línea",
+"Critical Lift":"Izaje Crítico","Pressure Testing":"Prueba de Presión","Elevated Work Permit":"Permiso de Trabajo en Altura",
+"Man-Basket Exiting Permit":"Permiso de Salida de Canastilla","Bull Rigging Lift Permit":"Permiso de Izaje Bull Rigging","Bull Rigging":"Izaje Bull Rigging",
+/* permit descriptions */
+"Sparks, open flame, welding, cutting, grinding, or any spark-producing work.":"Chispas, llama abierta, soldadura, corte, esmerilado o cualquier trabajo que produzca chispas.",
+"Entry into tanks, pits, vessels, or excavations over 4 ft deep.":"Entrada a tanques, fosas, recipientes o excavaciones de más de 4 pies de profundidad.",
+"Entry into a space evaluated as non-permit confined space.":"Entrada a un espacio evaluado como espacio confinado sin permiso.",
+"Isolating or shutting off electrical, mechanical, pneumatic, or hydraulic energy.":"Aislar o cortar energía eléctrica, mecánica, neumática o hidráulica.",
+"Work on or near energized electrical equipment or live exposure.":"Trabajo en o cerca de equipo eléctrico energizado.",
+"Digging, trenching, grading, or any soil disturbance.":"Excavar, hacer zanjas, nivelar o cualquier movimiento de tierra.",
+"Core drilling, cutting, or penetrating floors, walls, or ceilings.":"Perforar, cortar o penetrar pisos, paredes o techos.",
+"Accessing the roof or performing work on roof areas.":"Acceder al techo o trabajar en áreas del techo.",
+"Removing grating, floor plates, guardrails, or other walking/fall protection.":"Retirar rejillas, placas de piso, barandales u otra protección contra caídas.",
+"Opening pipes, tubing, hoses, or vessels that may hold pressure or chemicals.":"Abrir tuberías, mangueras o recipientes que puedan contener presión o químicos.",
+"Crane lifts requiring a critical lift / rigging / lifting plan.":"Izajes con grúa que requieren plan de izaje crítico.",
+"Pressure or leak testing of piping and systems — stored energy hazard.":"Pruebas de presión o fugas en tuberías y sistemas — peligro de energía almacenada.",
+"Work at height on scaffolds, platforms, MEWPs, or elevated surfaces.":"Trabajo en altura en andamios, plataformas o superficies elevadas.",
+"Exiting a man basket / aerial platform at height onto a structure.":"Salir de una canastilla / plataforma aérea en altura hacia una estructura.",
+"Rigging and moving loads without a crane — bull rigging operations.":"Aparejar y mover cargas sin grúa — operaciones de bull rigging.",
+/* safety questions */
+"Will sparks, heat, or open flame be generated?":"¿Se generarán chispas, calor o llama abierta?",
+"Has the area been inspected for combustibles?":"¿Se inspeccionó el área en busca de combustibles?",
+"Is a fire extinguisher available?":"¿Hay un extintor disponible?",
+"Is fire watch required?":"¿Se requiere vigía de fuego?",
+"Has fire watch been assigned?":"¿Se asignó el vigía de fuego?",
+"Has the space been evaluated?":"¿Se evaluó el espacio?",
+"Is atmospheric monitoring required?":"¿Se requiere monitoreo atmosférico?",
+"Is rescue planning required?":"¿Se requiere plan de rescate?",
+"Is an attendant assigned?":"¿Hay un vigilante asignado?",
+"Has the space been evaluated and classified non-permit?":"¿Se evaluó y clasificó el espacio como sin permiso?",
+"Could conditions change during the work?":"¿Podrían cambiar las condiciones durante el trabajo?",
+"Is ventilation adequate?":"¿Es adecuada la ventilación?",
+"Is communication established with workers inside?":"¿Hay comunicación establecida con los trabajadores adentro?",
+"Has the energy source been identified?":"¿Se identificó la fuente de energía?",
+"Has an isolation plan been reviewed?":"¿Se revisó el plan de aislamiento?",
+"Is verification of zero energy required?":"¿Se requiere verificación de energía cero?",
+"Are all affected parties notified?":"¿Se notificó a todos los afectados?",
+"Is the energized work justified (no de-energized option)?":"¿Está justificado el trabajo energizado (sin opción de desenergizar)?",
+"Are only qualified electrical workers performing the task?":"¿Solo electricistas calificados realizan la tarea?",
+"Is arc-flash PPE selected for the incident energy?":"¿Se seleccionó EPP de arco eléctrico para la energía incidente?",
+"Are barriers and approach boundaries established?":"¿Se establecieron barreras y límites de aproximación?",
+"Have utilities been located and marked (811 / scans)?":"¿Se localizaron y marcaron las instalaciones subterráneas (811 / escaneos)?",
+"Is a protective system (sloping, shoring, box) in place?":"¿Hay un sistema de protección (talud, apuntalamiento, caja)?",
+"Is a competent person on site?":"¿Hay una persona competente en el sitio?",
+"Are spoil piles at least 2 ft from the edge?":"¿El material excavado está al menos a 2 pies del borde?",
+"Is ladder access within 25 ft of workers?":"¿Hay acceso por escalera a menos de 25 pies de los trabajadores?",
+"Has the area been scanned or reviewed?":"¿Se escaneó o revisó el área?",
+"Have drawings been reviewed?":"¿Se revisaron los planos?",
+"Are barricades required?":"¿Se requieren barricadas?",
+"Are exposed edges or floor openings protected?":"¿Están protegidos los bordes y aberturas de piso?",
+"Is roof access authorized and controlled?":"¿El acceso al techo está autorizado y controlado?",
+"Is fall protection in place for work near edges?":"¿Hay protección contra caídas cerca de los bordes?",
+"Are weather conditions acceptable?":"¿Las condiciones del clima son aceptables?",
+"Is a warning line / perimeter established?":"¿Se estableció una línea de advertencia / perímetro?",
+"Is the area below and around barricaded?":"¿El área abajo y alrededor está barricada?",
+"Is fall protection in use while the surface is removed?":"¿Se usa protección contra caídas mientras se retira la superficie?",
+"Will the opening be covered or guarded when unattended?":"¿La abertura se cubrirá o protegerá cuando esté sin vigilancia?",
+"Will reinstallation be verified before closing the permit?":"¿Se verificará la reinstalación antes de cerrar el permiso?",
+"Has the line been identified?":"¿Se identificó la línea?",
+"Has pressure been relieved?":"¿Se alivió la presión?",
+"Has the system been drained or flushed?":"¿Se drenó o purgó el sistema?",
+"Are chemical or stored-energy hazards present?":"¿Hay peligros químicos o de energía almacenada?",
+"Has the lift plan been reviewed and approved?":"¿Se revisó y aprobó el plan de izaje?",
+"Is the crane inspection current?":"¿La inspección de la grúa está vigente?",
+"Has all rigging been inspected?":"¿Se inspeccionó todo el aparejo?",
+"Is an exclusion zone established under the load path?":"¿Hay zona de exclusión bajo la trayectoria de la carga?",
+"Are wind and weather within limits?":"¿El viento y el clima están dentro de los límites?",
+"Is the correct gauge installed (right range, current calibration)?":"¿Está instalado el manómetro correcto (rango adecuado, calibración vigente)?",
+"Is a pressure relief valve installed and set correctly?":"¿Hay válvula de alivio instalada y ajustada correctamente?",
+"Is the test area barricaded off?":"¿El área de prueba está barricada?",
+"Have Jacobs and the client been notified?":"¿Se notificó a Jacobs y al cliente?",
+"Has the test procedure been reviewed?":"¿Se revisó el procedimiento de prueba?",
+"Is fall protection required for this task?":"¿Se requiere protección contra caídas para esta tarea?",
+"Will workers be tied off 100% at height?":"¿Los trabajadores estarán amarrados 100% en altura?",
+"Is the equipment inspection current (MEWP / scaffold tag)?":"¿La inspección del equipo está vigente (etiqueta de plataforma / andamio)?",
+"Are ground conditions and outriggers verified?":"¿Se verificaron las condiciones del terreno y los estabilizadores?",
+"Is a rescue plan in place for workers at height?":"¿Hay plan de rescate para trabajadores en altura?",
+"Is fall protection maintained 100% during the transfer?":"¿Se mantiene protección contra caídas 100% durante la transferencia?",
+"Is the landing point rated and safe to step onto?":"¿El punto de llegada es seguro y está clasificado para pisar?",
+"Is the basket secured against movement?":"¿La canastilla está asegurada contra movimiento?",
+"Is a rescue plan in place?":"¿Hay un plan de rescate?",
+"Has the rigging plan been reviewed?":"¿Se revisó el plan de aparejo?",
+"Is all rigging gear inspected and tagged?":"¿Todo el equipo de aparejo está inspeccionado y etiquetado?",
+"Is the load path clear of personnel?":"¿La trayectoria de la carga está libre de personal?",
+"Are attachment points rated for the load?":"¿Los puntos de anclaje están clasificados para la carga?",
+/* help page */
+"Not sure which permit you need?":"¿No está seguro de cuál permiso necesita?",
+"Match what you're doing to the list — or start a General Request and Jacobs will point you to the right permit.":"Compare lo que va a hacer con la lista — o inicie una Solicitud General y Jacobs le indicará el permiso correcto.",
+"Quick Guide — what triggers each permit":"Guía Rápida — qué requiere cada permiso",
+"Sparks, open flame, welding, cutting, or grinding":"Chispas, llama abierta, soldadura, corte o esmerilado",
+"Entering tanks, pits, vessels, or excavations deeper than 4 ft":"Entrar a tanques, fosas, recipientes o excavaciones de más de 4 pies",
+"Isolating or shutting off energy — electrical, mechanical, pneumatic, hydraulic":"Aislar o cortar energía — eléctrica, mecánica, neumática, hidráulica",
+"Working on or near energized electrical equipment":"Trabajar en o cerca de equipo eléctrico energizado",
+"Digging, trenching, or disturbing soil":"Excavar, hacer zanjas o mover tierra",
+"Opening pipes, tubing, hoses, or vessels that may hold pressure or chemicals":"Abrir tuberías, mangueras o recipientes que puedan tener presión o químicos",
+"Core drilling, cutting, or penetrating floors, walls, or ceilings":"Perforar, cortar o penetrar pisos, paredes o techos",
+"Going onto the roof for any work":"Subir al techo para cualquier trabajo",
+"Removing grating, floor plates, or guardrails":"Retirar rejillas, placas de piso o barandales",
+"Working at height on scaffolds, platforms, or MEWPs":"Trabajar en altura en andamios o plataformas",
+"Exiting a man basket at height onto a structure":"Salir de una canastilla en altura hacia una estructura",
+"Crane lift needing a lift plan":"Izaje con grúa que necesita plan de izaje",
+"Pressure or leak testing piping or systems":"Pruebas de presión o fugas en tuberías o sistemas",
+"Rigging and moving loads without a crane":"Aparejar y mover cargas sin grúa",
+"Still not sure? Start a":"¿Aún no está seguro? Inicie una",
+"General Request":"Solicitud General",
+"— describe the work and Jacobs will confirm the permit type during review.":"— describa el trabajo y Jacobs confirmará el tipo de permiso durante la revisión.",
+"Start a General Request":"Iniciar una Solicitud General","← Back to permit types":"← Volver a los tipos de permiso",
+/* labels & headers */
+"Permit Type":"Tipo de Permiso","Building / Floor":"Edificio / Piso","Trade Partner":"Empresa Colaboradora","Company":"Compañía",
+"Submitted":"Enviado","Good Through":"Válido Hasta","Dates":"Fechas","Work":"Trabajo","Jacobs Reviewer":"Revisor de Jacobs",
+"Search permit type…":"Buscar tipo de permiso…","Select floor…":"Seleccione el piso…",
+"Pop-ups: ON for this device":"Alertas: ACTIVAS en este equipo","Get pop-ups on this device":"Recibir alertas en este equipo",
+"Total Permits":"Permisos Totales","Active":"Activos","Completed":"Completados","Expired":"Vencidos","Needs Update":"Necesita Actualización",
+"Rejected / Void / Lost":"Rechazado / Anulado / Perdido","Top Permit Type":"Permiso Más Usado","Top Trade Partner":"Empresa con Más Permisos",
+"Permit Details":"Detalles del Permiso","Building":"Edificio"
 };
 function T(s){ return LANG==="en"? s : (ES[s]||s); }
 
@@ -1000,12 +1134,16 @@ function toast(msg,kind){
   setTimeout(()=>{ t.classList.remove("show"); setTimeout(()=>t.remove(),450); },4500);
 }
 function enableAlerts(){
-  if(!("Notification" in window)){ alert("This browser doesn't support pop-up alerts."); return; }
+  if(!("Notification" in window)){ toast("This browser doesn't support pop-up alerts.","t-red"); return; }
+  if(DB.settings.alerts&&Notification.permission==="granted"){
+    DB.settings.alerts=false; saveDB(); toast("🔕 Pop-ups OFF for this device.","t-dark"); route(); return;
+  }
   Notification.requestPermission().then(perm=>{
     if(perm==="granted"){ DB.settings.alerts=true; saveDB();
       new Notification("Permit Portal alerts on ✔",{body:"Keep this tab open — you'll get pop-ups for new and overdue permits."});
+      toast("🔔 Pop-ups ON — this device will chime when permits arrive or wait too long.","t-green");
       route();
-    } else alert("Alerts were blocked. Allow notifications for this site in your browser settings.");
+    } else toast("Pop-ups were blocked — allow notifications for this site in your browser settings.","t-red");
   });
 }
 function alertSweep(){
@@ -1160,6 +1298,7 @@ VIEWS.home = ()=>{
   return `
 <div class="narrow" style="padding-top:6px">
   <div class="hero">
+    <div class="hero-frame"></div>
     <svg class="hero-site" viewBox="0 0 1200 200" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
       <g fill="none" stroke="rgba(255,184,28,.45)" stroke-width="2">
         <path d="M0 200 V150 H70 V110 H150 V200"/>
@@ -1201,13 +1340,26 @@ VIEWS.home = ()=>{
         <line x1="185" y1="110" x2="185" y2="24"/><line x1="185" y1="24" x2="80" y2="24"/><line x1="185" y1="24" x2="240" y2="44"/>
         <line x1="112" y1="24" x2="112" y2="52"/><rect x="102" y="52" width="20" height="14"/>
       </g>
-      <!-- survey drone crossing the site -->
+      <!-- heavy-lift drone carrying a beam across the site -->
       <g class="hs-drone">
-        <g stroke="rgba(180,205,235,.8)" stroke-width="2" fill="none">
-          <rect x="-16" y="30" width="32" height="8" rx="3" fill="rgba(180,205,235,.25)"/>
-          <line x1="-16" y1="30" x2="-26" y2="24"/><line x1="16" y1="30" x2="26" y2="24"/>
-          <ellipse cx="-26" cy="23" rx="10" ry="2.5"/><ellipse cx="26" cy="23" rx="10" ry="2.5"/>
-          <circle cx="0" cy="42" r="2" fill="#ffd469" stroke="none"/>
+        <g class="hs-bob">
+          <!-- rotor arms -->
+          <line x1="-30" y1="22" x2="30" y2="22" stroke="#b7c9e2" stroke-width="3"/>
+          <!-- spinning rotors -->
+          <ellipse class="hs-rotor" cx="-30" cy="20" rx="16" ry="3" fill="rgba(210,225,245,.55)"/>
+          <ellipse class="hs-rotor" cx="30" cy="20" rx="16" ry="3" fill="rgba(210,225,245,.55)" style="animation-delay:.07s"/>
+          <circle cx="-30" cy="21" r="3" fill="#8fa6c4"/><circle cx="30" cy="21" r="3" fill="#8fa6c4"/>
+          <!-- body -->
+          <rect x="-14" y="22" width="28" height="12" rx="5" fill="#243a5c" stroke="#b7c9e2" stroke-width="2"/>
+          <rect x="-6" y="25" width="12" height="6" rx="2" fill="#ffb81c"/>
+          <circle cx="0" cy="37" r="2" fill="#ff5a4e"><animate attributeName="opacity" values="1;.2;1" dur="1.1s" repeatCount="indefinite"/></circle>
+          <!-- lifting cables + steel beam payload -->
+          <g class="hs-cargo">
+            <line x1="-10" y1="34" x2="-14" y2="58" stroke="#b7c9e2" stroke-width="1.6"/>
+            <line x1="10" y1="34" x2="14" y2="58" stroke="#b7c9e2" stroke-width="1.6"/>
+            <rect x="-24" y="58" width="48" height="9" rx="1.5" fill="#ffb81c" stroke="#141d2b" stroke-width="1.5"/>
+            <line x1="-24" y1="62.5" x2="24" y2="62.5" stroke="#141d2b" stroke-width="1.5"/>
+          </g>
         </g>
       </g>
     </svg>
@@ -1239,12 +1391,12 @@ VIEWS.types = ()=>{
   return `
   <h2 class="page">${T("Select Permit Type")}</h2>
   <p class="sub">${T("Choose the permit that best matches the work being performed.")}</p>
-  <div class="f-group"><input class="f-in" id="tSearch" placeholder="🔍  Search permit type…"></div>
+  <div class="f-group"><input class="f-in" id="tSearch" placeholder="🔍  ${T("Search permit type…")}"></div>
   <div class="tgrid" id="tGrid">
     ${DB.permitTypes.filter(t=>t.active).map(t=>`
-      <button class="tcard ${t.hr?"hr-flag":""}" data-name="${esc((t.name+" "+t.code).toLowerCase())}" onclick="startForm('${t.code}')">
+      <button class="tcard ${t.hr?"hr-flag":""}" data-name="${esc((t.name+" "+T(t.name)+" "+t.code).toLowerCase())}" onclick="startForm('${t.code}')">
         <div class="ico">${t.ico}</div>
-        <div><b>${esc(t.name)}</b><span class="code">${t.code}</span><p>${esc(t.desc)}</p></div>
+        <div><b>${esc(T(t.name))}</b><span class="code">${t.code}</span><p>${esc(T(t.desc))}</p></div>
       </button>`).join("")}
   </div>
   <div style="height:14px"></div>
@@ -1255,10 +1407,10 @@ function filterTypes(q){ q=q.trim().toLowerCase();
 
 VIEWS.help = ()=>`
 <div class="mid">
-  <h2 class="page">Not sure which permit you need?</h2>
-  <p class="sub">Match what you're doing to the list — or start a General Request and Jacobs will point you to the right permit.</p>
+  <h2 class="page">${T("Not sure which permit you need?")}</h2>
+  <p class="sub">${T("Match what you're doing to the list — or start a General Request and Jacobs will point you to the right permit.")}</p>
   <div class="card">
-    <div class="section-t">Quick Guide — what triggers each permit</div>
+    <div class="section-t">${T("Quick Guide — what triggers each permit")}</div>
     ${[
       ["🔥","Sparks, open flame, welding, cutting, or grinding","Hot Work Permit"],
       ["🕳️","Entering tanks, pits, vessels, or excavations deeper than 4 ft","Confined Space Permit"],
@@ -1275,13 +1427,13 @@ VIEWS.help = ()=>`
       ["🌡️","Pressure or leak testing piping or systems","Pressure Testing"],
       ["⛓️","Rigging and moving loads without a crane","Bull Rigging Lift Permit"]
     ].map(([i,d,p])=>`<div class="list-row"><div style="font-size:20px;flex:none">${i}</div>
-      <div class="grow" style="font-size:13.8px">${d}</div>
-      <b style="font-size:13px;color:var(--blue-d);white-space:nowrap">→ ${p}</b></div>`).join("")}
+      <div class="grow" style="font-size:13.8px">${T(d)}</div>
+      <b style="font-size:13px;color:var(--blue-d);white-space:nowrap">→ ${T(p)}</b></div>`).join("")}
     <hr class="div">
-    <p style="font-size:14.5px;margin-bottom:12px">Still not sure? Start a <b>General Request</b> — describe the work and Jacobs will confirm the permit type during review.</p>
-    <button class="btn btn-y btn-block" onclick="startForm('NCS')">Start a General Request</button>
+    <p style="font-size:14.5px;margin-bottom:12px">${T("Still not sure? Start a")} <b>${T("General Request")}</b> ${T("— describe the work and Jacobs will confirm the permit type during review.")}</p>
+    <button class="btn btn-y btn-block" onclick="startForm('NCS')">${T("Start a General Request")}</button>
     <div style="height:10px"></div>
-    <button class="btn btn-ghost btn-block" onclick="go('types')">← Back to permit types</button>
+    <button class="btn btn-ghost btn-block" onclick="go('types')">${T("← Back to permit types")}</button>
   </div>
 </div>`;
 
@@ -1321,7 +1473,7 @@ VIEWS.form = ()=>{
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
       <div class="ico" style="font-size:30px">${t.ico}</div>
       <div><h2 class="page" style="margin:0">${T(F.editingId?"Update Permit":"Request Permit")}</h2>
-      <p class="sub" style="margin:0">${esc(t.name)} — ${t.code}${F.editingId?` · <span class="pnum">${esc(F.number)}</span>`:""}</p></div>
+      <p class="sub" style="margin:0">${esc(T(t.name))} — ${t.code}${F.editingId?` · <span class="pnum">${esc(F.number)}</span>`:""}</p></div>
     </div>
     ${F.editingId?`<div class="warn-hint" style="margin-bottom:12px">Jacobs asked for an update on this permit. Fix the items below and resubmit.</div>`:
       `<p class="sub">${T("Complete the fields below. Jacobs will review your request before work begins.")}</p>`}
@@ -1384,7 +1536,7 @@ function stepLocation(){
   ${fld("building","Building",1,`<select class="f-in" onchange="F.building=this.value;F.floor='';F._leadAuto=false;rerenderForm()">
     ${DB.buildings.filter(b=>b.active).map(b=>`<option value="${b.code}" ${F.building===b.code?"selected":""}>${esc(b.name)}</option>`).join("")}</select>`)}
   ${fld("floor","Floor / Level",1,`<select class="f-in" onchange="pickFloor(this.value)">
-    <option value="">Select floor…</option>${floors.map(o=>`<option ${F.floor===o?"selected":""}>${esc(o)}</option>`).join("")}</select>`)}
+    <option value="">${T("Select floor…")}</option>${floors.map(o=>`<option ${F.floor===o?"selected":""}>${esc(o)}</option>`).join("")}</select>`)}
   ${fo&&fo.lead?`<div class="pill-hint">👷 Floor lead: <b>${esc(fo.lead)}</b> — auto-selected as your Jacobs reviewer.</div>`:""}
   ${fp?`<div class="f-group"><button class="btn btn-line btn-block" onclick="showPlan()">🗺️ View Floor Plan — ${esc(F.floor)}</button>
     <div class="hint">Look up your sector or room on the drawing, then enter it below.</div></div>`:""}
@@ -1462,16 +1614,16 @@ function stepReview(){
     :fo&&fo.lead?"":`<div class="hint" style="margin-bottom:8px">Don't know who reviews your area? Pick "Building HSE/CM (any available)".</div>`}
   ${fld("reviewer","Requested Jacobs Reviewer",1,sel("reviewer",DB.reviewers.filter(r=>r.active).map(r=>r.name)))}
   ${fld("notes","Additional notes for Jacobs",0,ta("notes","Anything Jacobs should know?"))}
-  <hr class="div"><div class="section-t">Quick check before you submit</div>
+  <hr class="div"><div class="section-t">${T("Quick check before you submit")}</div>
   <dl class="kv">
-    <dt>Permit Type</dt><dd>${t.ico} ${esc(t.name)} (${t.code})</dd>
-    <dt>Building / Floor</dt><dd>${esc(bldOf(F.building).name)} · ${esc(F.floor||"—")}</dd>
-    <dt>Location</dt><dd>${esc(F.location||"—")}</dd>
-    <dt>Company</dt><dd>${esc(F.company||"—")}</dd>
-    <dt>Requested By</dt><dd>${esc(F.requestedBy||"—")}</dd>
-    <dt>Shift</dt><dd>${esc(F.shift)}</dd>
-    <dt>Dates</dt><dd>${fmtD(F.startDate)} → ${fmtD(F.goodThrough)}</dd>
-    <dt>Work</dt><dd>${esc(F.description||"—")}</dd>
+    <dt>${T("Permit Type")}</dt><dd>${t.ico} ${esc(T(t.name))} (${t.code})</dd>
+    <dt>${T("Building / Floor")}</dt><dd>${esc(bldOf(F.building).name)} · ${esc(F.floor||"—")}</dd>
+    <dt>${T("Location")}</dt><dd>${esc(F.location||"—")}</dd>
+    <dt>${T("Company")}</dt><dd>${esc(F.company||"—")}</dd>
+    <dt>${T("Requested By")}</dt><dd>${esc(F.requestedBy||"—")}</dd>
+    <dt>${T("Shift")}</dt><dd>${esc(T(F.shift))}</dd>
+    <dt>${T("Dates")}</dt><dd>${fmtD(F.startDate)} → ${fmtD(F.goodThrough)}</dd>
+    <dt>${T("Work")}</dt><dd>${esc(F.description||"—")}</dd>
   </dl>`;
 }
 function validateStep(){
@@ -1567,12 +1719,12 @@ VIEWS.confirm = (id)=>{
         ${linked.map(o=>`<b class="pnum">${esc(o.number)}</b> (${esc(typeOf(o.typeCode).name)})`).join(" · ")}</div>`:"";})()}
       ${trackerHtml(p)}
       <dl class="kv">
-        <dt>Permit Type</dt><dd>${t.ico} ${esc(t.name)}</dd>
-        <dt>Contractor</dt><dd>${esc(p.company)}</dd>
-        <dt>Building / Floor</dt><dd>${esc(bldOf(p.building).name)} · ${esc(p.floor)}</dd>
-        <dt>Location</dt><dd>${esc(p.location)}</dd>
-        <dt>Submitted</dt><dd>${fmtDT(p.submittedAt)}</dd>
-        <dt>Good Through</dt><dd>${fmtD(p.goodThrough)}</dd>
+        <dt>${T("Permit Type")}</dt><dd>${t.ico} ${esc(T(t.name))}</dd>
+        <dt>${T("Trade Partner")}</dt><dd>${esc(p.company)}</dd>
+        <dt>${T("Building / Floor")}</dt><dd>${esc(bldOf(p.building).name)} · ${esc(p.floor)}</dd>
+        <dt>${T("Location")}</dt><dd>${esc(p.location)}</dd>
+        <dt>${T("Submitted")}</dt><dd>${fmtDT(p.submittedAt)}</dd>
+        <dt>${T("Good Through")}</dt><dd>${fmtD(p.goodThrough)}</dd>
       </dl>
     </div>
     ${autoMode?`<div class="card" style="text-align:left;border:2px solid var(--green);background:#f2faf4">
@@ -1646,9 +1798,9 @@ function applyStatusFilters(){
         <div style="display:flex;gap:7px;align-items:center">${ageChip(p)}${badge(p.status)}</div>
       </div>
       <div class="meta">
-        <div>Type: <b>${esc(t.name)}</b></div><div>Trade Partner: <b>${esc(p.company)}</b></div>
-        <div>Building: <b>${esc(bldOf(p.building).name)} · ${esc(p.floor)}</b></div><div>Requested By: <b>${esc(p.requestedBy)}</b></div>
-        <div>Submitted: <b>${fmtDT(p.submittedAt)}</b></div><div>Good Through: <b>${fmtD(p.goodThrough)}</b></div>
+        <div>${T("Permit Type")}: <b>${esc(T(t.name))}</b></div><div>${T("Trade Partner")}: <b>${esc(p.company)}</b></div>
+        <div>${T("Building")}: <b>${esc(bldOf(p.building).name)} · ${esc(p.floor)}</b></div><div>${T("Requested By")}: <b>${esc(p.requestedBy)}</b></div>
+        <div>${T("Submitted")}: <b>${fmtDT(p.submittedAt)}</b></div><div>${T("Good Through")}: <b>${fmtD(p.goodThrough)}</b></div>
       </div>
       ${p.status==="Needs Update"&&p.reviewComments?`<div class="warn-hint" style="margin-top:10px">✏️ <b>Jacobs needs the following update before approval:</b><br>${esc(p.reviewComments)}</div>`:""}
       <div class="btnrow" style="margin-top:12px">
@@ -1694,18 +1846,18 @@ VIEWS.view = (id)=>{
       <div style="margin-top:10px"><button class="btn btn-o btn-sm" onclick="editPermit('${p.id}')">Update Request</button></div></div>`:""}
     ${p.status==="Approved"||p.status==="Active"?`<div class="pill-hint">✅ Approved by ${esc(p.approvedBy||"Jacobs")} · ${fmtDT(p.approvedAt)}${p.approvalConditions?`<br><b>Conditions:</b> ${esc(p.approvalConditions)}`:""}</div>`:""}
     <div class="card">
-      <div class="section-t">Permit Details</div>
+      <div class="section-t">${T("Permit Details")}</div>
       <dl class="kv">
-        <dt>Permit Type</dt><dd>${t.ico} ${esc(t.name)} (${t.code})</dd>
-        <dt>Building / Floor</dt><dd>${esc(bldOf(p.building).name)} · ${esc(p.floor)}</dd>
-        <dt>Area</dt><dd>${esc(p.area||"—")}</dd>
-        <dt>Location</dt><dd>${esc(p.location)}</dd>
-        <dt>Company</dt><dd>${esc(p.company)}</dd>
-        <dt>Requested By</dt><dd>${esc(p.requestedBy)} · ${esc(p.phone||"")}</dd>
-        <dt>Shift</dt><dd>${esc(p.shift)}</dd>
-        <dt>Dates</dt><dd>${fmtD(p.startDate)} → ${fmtD(p.goodThrough)}</dd>
-        <dt>Work</dt><dd>${esc(p.description)}</dd>
-        <dt>Jacobs Reviewer</dt><dd>${esc(p.reviewer)}</dd>
+        <dt>${T("Permit Type")}</dt><dd>${t.ico} ${esc(T(t.name))} (${t.code})</dd>
+        <dt>${T("Building / Floor")}</dt><dd>${esc(bldOf(p.building).name)} · ${esc(p.floor)}</dd>
+        <dt>${T("Area / Room / Column Line")}</dt><dd>${esc(p.area||"—")}</dd>
+        <dt>${T("Location")}</dt><dd>${esc(p.location)}</dd>
+        <dt>${T("Company")}</dt><dd>${esc(p.company)}</dd>
+        <dt>${T("Requested By")}</dt><dd>${esc(p.requestedBy)} · ${esc(p.phone||"")}</dd>
+        <dt>${T("Shift")}</dt><dd>${esc(T(p.shift))}</dd>
+        <dt>${T("Dates")}</dt><dd>${fmtD(p.startDate)} → ${fmtD(p.goodThrough)}</dd>
+        <dt>${T("Work")}</dt><dd>${esc(p.description)}</dd>
+        <dt>${T("Jacobs Reviewer")}</dt><dd>${esc(p.reviewer)}</dd>
       </dl>
     </div>
     <div class="btnrow">
@@ -1743,7 +1895,7 @@ VIEWS.dashboard = ()=>{
   <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
     <div><h2 class="page">Jacobs Permit Dashboard</h2>
     <p class="sub">Everything waiting on Jacobs, plus today's live picture. ${DB.permits.length===0?'<b>No data yet — use Admin → Settings → Load Sample Data to demo.</b>':""}</p></div>
-    <button class="btn ${DB.settings.alerts?"btn-line":"btn-dark"} btn-sm noprint" onclick="enableAlerts()">${DB.settings.alerts?"🔔 Alerts on":"🔔 Enable pop-up alerts"}</button>
+    ${nActive?`<button class="btn ${DB.settings.alerts?"btn-line":"btn-dark"} btn-sm noprint" title="Pop-up notifications on this computer when permits arrive or wait too long" onclick="enableAlerts()">${DB.settings.alerts?"🔔 "+T("Pop-ups: ON for this device"):"🔔 "+T("Get pop-ups on this device")}</button>`:""}
   </div>
   ${!nActive?`<div class="pill-hint" style="background:#eef1f5;color:#5b6773">🔕 Notifications &amp; escalation timers are OFF ${DB.settings.notifyOn?"today (day schedule)":""} — board is in record-keeping mode. Turn on in Admin → Settings.</div>`:""}
   ${urgent?`<div class="errbox" style="display:block">🚨 <b>${urgent} permit${urgent>1?"s":""} past the ${r2}-minute mark after scheduled start</b> — needs Jacobs action now.</div>`:
@@ -1823,7 +1975,7 @@ function applyDashFilters(){
     const rowCls=nAct&&started&&["Submitted","Under Review"].includes(p.status)?(m>=r2?"row-urgent":m>=r1?"row-warn":""):"";
     return `<tr class="${rowCls}">
     <td>${ageChip(p)||"—"}</td>
-    <td class="pnum">${esc(p.number)}</td><td>${x.ico} ${esc(x.name)}</td><td>${esc(p.company)}</td>
+    <td class="pnum">${esc(p.number)}</td><td>${x.ico} ${esc(T(x.name))}</td><td>${esc(p.company)}</td>
     <td>${esc(p.building)}</td><td>${esc(p.floor)}${p.area?" · "+esc(p.area):""}</td><td>${esc(p.shift)}</td>
     <td>${fmtDT(p.submittedAt)}</td><td>${esc(p.reviewer)}</td><td>${badge(p.status)}</td>
     <td><button class="btn btn-b btn-sm" onclick="go('review','${p.id}')">Review</button></td></tr>`;}).join("")
@@ -2079,7 +2231,7 @@ function applyBoardFilters(){
   const rows=l=>`<div class="tblwrap"><table class="tbl"><thead><tr>
     <th>Permit #</th><th>Type</th><th>Trade Partner</th><th>Bldg</th><th>Floor / Area</th><th>Shift</th><th>Start</th><th>Good Through</th><th>Reviewer</th><th>Status</th><th></th></tr></thead>
     <tbody>${l.map(p=>{const x=typeOf(p.typeCode);return `<tr class="${urgCls(p)}">
-      <td class="pnum">${esc(p.number)}</td><td>${x.ico} ${esc(x.name)}</td><td>${esc(p.company)}</td>
+      <td class="pnum">${esc(p.number)}</td><td>${x.ico} ${esc(T(x.name))}</td><td>${esc(p.company)}</td>
       <td>${esc(p.building)}</td><td>${esc(p.floor)}${p.area?" · "+esc(p.area):""}</td><td>${esc(p.shift)}</td>
       <td>${fmtD(p.startDate)}</td><td>${fmtD(p.goodThrough)}</td><td>${esc(p.reviewer)}</td><td>${badge(p.status)} ${ageChip(p)}</td>
       <td><button class="btn ${urgCls(p)==="row-urgent"?"btn-r":"btn-line"} btn-sm" onclick="go('${ROLE==="jacobs"||ROLE==="admin"?"review":"view"}','${p.id}')">View</button></td></tr>`;}).join("")}</tbody></table></div>`;
@@ -2209,6 +2361,8 @@ function promptFields(title,fields,cb){
   modal(`<h3>${esc(title)}</h3>${fields.map(f=>`<div class="f-group"><label class="f-label">${esc(f.label)}</label>
     ${f.type==="textarea"?`<textarea class="f-in" id="pf_${f.key}">${esc(f.value||"")}</textarea>`
     :f.type==="select"?`<select class="f-in" id="pf_${f.key}"><option value="">—</option>${(f.opts||[]).map(o=>`<option ${f.value===o?"selected":""}>${esc(o)}</option>`).join("")}</select>`
+    :f.type==="combo"?`<input class="f-in" id="pf_${f.key}" list="dl_${f.key}" value="${esc(f.value||"")}" placeholder="${T("Type it, or pick from the list…")}" autocomplete="off">
+      <datalist id="dl_${f.key}">${(f.opts||[]).map(o=>`<option value="${esc(o)}">`).join("")}</datalist>`
     :`<input class="f-in" id="pf_${f.key}" value="${esc(f.value||"")}">`}
     ${f.hint?`<div class="hint">${f.hint}</div>`:""}</div>`).join("")}
     <div class="btnrow"><button class="btn btn-g" id="pfOk">✓ Save</button><button class="btn btn-line btn-cancel" onclick="closeModal()">Cancel</button></div>
@@ -2486,10 +2640,10 @@ function applyEqSearch(){
   }).join("");
 }
 const EQ_FIELDS=e=>[
-  {key:"type",label:"Equipment Type",type:"select",opts:EQUIP_TYPES.map(t=>t[0]),value:e?.type},
+  {key:"type",label:"Equipment Type",type:"combo",opts:EQUIP_TYPES.map(t=>t[0]),value:e?.type,hint:"Pick from the list or type your own."},
   {key:"name",label:"Make / Model (e.g., Genie GS-1930)",value:e?.name},
   {key:"serial",label:"Serial Number",value:e?.serial,hint:"The number on the machine's plate or sticker — this is how people will find it."},
-  {key:"company",label:"Trade Partner (owner)",type:"select",opts:DB.contractors.map(c=>c.name),value:e?.company||((ROLE==="contractor"||ROLE==="safety")?MYCO:"")},
+  {key:"company",label:"Trade Partner (owner)",type:"combo",opts:DB.contractors.map(c=>c.name),value:e?.company||((ROLE==="contractor"||ROLE==="safety")?MYCO:""),hint:"Start typing — your company will appear; or type a new one."},
   {key:"responsible",label:"Person Responsible",value:e?.responsible},
   {key:"phone",label:"Their Cell Phone",value:e?.phone},
   {key:"location",label:"Usual Location (building / floor / area)",value:e?.location},
@@ -2615,7 +2769,7 @@ VIEWS.reports = ()=>{
     <select class="f-in" id="rSh" onchange="applyReport()"><option value="">All shifts</option><option>Days</option><option>Nights</option></select>
     <select class="f-in" id="rRv" onchange="applyReport()"><option value="">All reviewers</option>${DB.reviewers.map(r=>`<option>${esc(r.name)}</option>`).join("")}</select>
   </div>
-  <div class="sumgrid" id="rSum"></div>
+  <div class="sumgrid compact" id="rSum"></div>
   <div class="btnrow noprint" style="margin-bottom:14px">
     <button class="btn btn-g" onclick="exportCSV(true)">📊 Export to Excel</button>
     <button class="btn btn-dark" onclick="exportCSV(false)">⬇ Export to CSV</button>
@@ -2652,7 +2806,7 @@ function applyReport(){
     ["Rejected / Void / Lost",cnt("Rejected")+cnt("Void")+cnt("Lost"),"#b3140a"],
     ["Top Permit Type",topT?typeOf(topT[0]).code+" · "+topT[1]:"—","#7c4dff"],
     ["Top Trade Partner",topC?topC[0]:"—","#00897b"]
-  ].map(([l,v,c])=>`<div class="sum" style="cursor:default;border-top:4px solid ${c}"><b style="font-size:${String(v).length>6?"15":"26"}px;color:${c}">${esc(String(v))}</b><span>${l}</span><i class="tick" style="background:${c}"></i></div>`).join("");
+  ].map(([l,v,c])=>`<div class="sum" style="cursor:default;border-top:3px solid ${c}"><b style="font-size:${String(v).length>6?"12.5":"21"}px;color:${c}">${esc(String(v))}</b><span>${T(l)}</span><i class="tick" style="background:${c}"></i></div>`).join("");
   document.getElementById("rTbl").innerHTML=`<div class="tblwrap"><table class="tbl"><thead><tr>
     <th>Start</th><th>Good Through</th><th>Permit #</th><th>Type</th><th>Company</th><th>Requested By</th><th>Bldg</th><th>Floor / Location</th><th>Shift</th><th>Status</th><th>Approved By</th></tr></thead>
     <tbody>${list.map(p=>`<tr class="${urgCls(p)}"><td>${fmtD(p.startDate)}</td><td>${fmtD(p.goodThrough)}</td><td class="pnum">${esc(p.number)}</td>
