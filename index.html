@@ -252,6 +252,30 @@ table.tbl tr:hover td{background:#f7f9fc}
 .hero-sky{position:absolute;bottom:6px;left:0;right:0;width:100%;height:90px;opacity:.5;pointer-events:none}
 @media (prefers-reduced-motion: reduce){#intro{display:none}}
 
+/* ===== Equipment finder — futuristic scan ===== */
+.finder{position:relative;overflow:hidden;border:2px solid rgba(255,184,28,.35)!important;background:var(--navy-grad)!important}
+.finder .finder-in{background:rgba(255,255,255,.06);border-color:rgba(255,184,28,.4);color:#fff;font-size:18px;min-height:58px;font-weight:700;letter-spacing:.5px}
+.finder .finder-in::placeholder{color:#8fa0b8}
+.finder .finder-in:focus{border-color:var(--yellow);box-shadow:0 0 0 4px rgba(255,184,28,.18),0 0 30px rgba(255,184,28,.25)}
+.finder .hint{color:#8fa0b8}
+.finder-scan{position:absolute;top:0;bottom:0;width:90px;background:linear-gradient(90deg,transparent,rgba(255,184,28,.10),transparent);animation:scanX 3.2s linear infinite;pointer-events:none}
+@keyframes scanX{from{left:-15%}to{left:110%}}
+.eq-card{transition:transform .12s}
+.eq-hit{border:2px solid var(--green);background:#f2faf4;box-shadow:0 6px 26px rgba(30,142,62,.25);animation:hitPop .4s cubic-bezier(.2,.8,.3,1.2)}
+@keyframes hitPop{from{transform:scale(.97);opacity:.5}to{transform:none;opacity:1}}
+.eq-found{display:inline-block;background:var(--green);color:#fff;font-size:11.5px;font-weight:900;letter-spacing:1.4px;border-radius:99px;padding:4px 13px;margin-bottom:10px}
+/* staggered entrances — everything glides in */
+.sumgrid .sum,.tgrid>*,.pcard{animation:pgIn .45s ease both}
+.sumgrid .sum:nth-child(2),.tgrid>*:nth-child(2){animation-delay:.05s}
+.sumgrid .sum:nth-child(3),.tgrid>*:nth-child(3){animation-delay:.1s}
+.sumgrid .sum:nth-child(4),.tgrid>*:nth-child(4){animation-delay:.15s}
+.sumgrid .sum:nth-child(5),.tgrid>*:nth-child(5){animation-delay:.2s}
+.sumgrid .sum:nth-child(6),.tgrid>*:nth-child(6){animation-delay:.25s}
+.sumgrid .sum:nth-child(7),.tgrid>*:nth-child(7){animation-delay:.3s}
+.sumgrid .sum:nth-child(8),.tgrid>*:nth-child(8){animation-delay:.35s}
+.grp-h{position:relative;overflow:hidden}
+.grp-h::after{content:"";position:absolute;top:0;bottom:0;width:60px;background:linear-gradient(90deg,transparent,rgba(255,184,28,.14),transparent);animation:scanX 4.5s linear infinite}
+
 /* ===== Toasts ===== */
 #toastHost{position:fixed;bottom:56px;left:0;right:0;z-index:200;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
 .toast{background:var(--navy-grad);color:#fff;border-radius:14px;padding:14px 22px;font-size:15px;font-weight:700;box-shadow:0 10px 34px rgba(4,10,20,.4);opacity:0;transform:translateY(16px) scale(.97);transition:opacity .3s,transform .3s;max-width:92vw;text-align:center;border:1px solid rgba(255,255,255,.14)}
@@ -516,7 +540,16 @@ function migrate(){
     if(!DB.settings.notifyMode) DB.settings.notifyMode="manual"; // "auto" = text opens ready-to-send on submit
     DB._v=7; saveDB();
   }
+  if((DB._v||1)<8){
+    if(!DB.equipment) DB.equipment=[];                  // site equipment registry — synced to the cloud
+    DB._v=8; saveDB();
+  }
 }
+const EQUIP_TYPES=[
+  ["Scissor Lift","🛗"],["Boom Lift","🦒"],["Aerial Lift","🪜"],["Forklift","🚜"],["Telehandler","🏗️"],
+  ["Crane","🏗️"],["Buggy / Cart","🛺"],["Skid Steer","🚧"],["Excavator","⛏️"],["Generator","🔌"],
+  ["Compressor","💨"],["Welder","🔥"],["Light Tower","💡"],["Pump","🌊"],["Scaffold","🪜"],["Other","⚙️"]];
+const eqIco=t=> (EQUIP_TYPES.find(e=>e[0]===t)||["","⚙️"])[1];
 /* ---------- Owner: delete permits to trash / restore ---------- */
 function ownerDeletePermit(id){
   if(!IS_OWNER){ toast("Only the Owner can delete permits.","t-red"); return; }
@@ -561,6 +594,7 @@ function logAccess(role,name,co){
 function configSnapshot(){
   return JSON.stringify({buildings:DB.buildings,floors:DB.floors,contractors:DB.contractors,
     permitTypes:DB.permitTypes,reviewers:DB.reviewers,permitDocs:DB.permitDocs,safetyUsers:DB.safetyUsers,
+    equipment:DB.equipment||[],
     settings:{...DB.settings}});
 }
 function logChange(action,detail,snapBefore){
@@ -574,7 +608,8 @@ function restoreSnapshot(i){
   if(!confirm("Restore the setup (buildings, floors, trade partners, permit types, reviewers, settings) to how it was BEFORE this change?\n\nPermits and their history are NOT touched.")) return;
   const snap=JSON.parse(e.snap);
   Object.assign(DB,{buildings:snap.buildings,floors:snap.floors,contractors:snap.contractors,
-    permitTypes:snap.permitTypes,reviewers:snap.reviewers,permitDocs:snap.permitDocs,safetyUsers:snap.safetyUsers||[]});
+    permitTypes:snap.permitTypes,reviewers:snap.reviewers,permitDocs:snap.permitDocs,safetyUsers:snap.safetyUsers||[],
+    equipment:snap.equipment||DB.equipment||[]});
   DB.settings={...DB.settings,...snap.settings};
   logChange("⏪ Configuration restored","Rolled back to before: "+e.action+" ("+fmtDT(e.at)+")");
   saveDB(); toast("⏪ Setup restored. Permits untouched.","t-blue"); route();
@@ -690,7 +725,20 @@ const ES={
 "Request. Review. Approve. Track.":"Solicite. Revise. Apruebe. Siga.","Skip intro":"Saltar intro",
 "Notification sent automatically":"Notificación enviada automáticamente",
 "Your messaging app just opened with everyone already filled in — Jacobs lead, safety manager — message written. Just press":"Su aplicación de mensajes se abrió con todos los destinatarios listos — líder de Jacobs, gerente de seguridad — mensaje escrito. Solo presione",
-"Open the message again":"Abrir el mensaje otra vez"
+"Open the message again":"Abrir el mensaje otra vez",
+"Equipment":"Equipos","Equipment Tracker":"Rastreador de Equipos",
+"Found a machine in the way? Type its serial number — the owner pops up in seconds.":"¿Encontró una máquina estorbando? Escriba su número de serie — el dueño aparece en segundos.",
+"Serial number, machine, or company…":"Número de serie, máquina o compañía…",
+"Searches serial numbers, equipment names, companies, and responsible persons — instantly, as you type.":"Busca números de serie, nombres de equipo, compañías y responsables — al instante, mientras escribe.",
+"Machines on record":"Máquinas registradas","In service":"En servicio","Out of service":"Fuera de servicio","Inspection overdue":"Inspección vencida",
+"Add Equipment":"Agregar Equipo","Belongs to":"Pertenece a","Responsible":"Responsable","Location":"Ubicación","Inspection due":"Inspección vence","OVERDUE":"VENCIDA",
+"Call":"Llamar","Text: please move it":"Texto: favor de moverlo","QR Tag":"Etiqueta QR","Equipment QR Tag":"Etiqueta QR del Equipo",
+"Scan to see who owns this machine":"Escanee para ver de quién es esta máquina","Print sticker":"Imprimir etiqueta",
+"FOUND — this is your machine":"ENCONTRADO — esta es la máquina",
+"No match — that serial isn't registered yet. Add it so next time it takes 5 seconds.":"Sin resultados — ese número de serie no está registrado. Agréguelo para que la próxima vez tome 5 segundos.",
+"No equipment registered yet. Tap + Add Equipment to start the registry.":"Aún no hay equipos registrados. Toque + Agregar Equipo para iniciar el registro.",
+"In Service":"En Servicio","Out of Service":"Fuera de Servicio",
+"Your equipment needs to be moved":"Su equipo necesita ser movido"
 };
 function T(s){ return LANG==="en"? s : (ES[s]||s); }
 
@@ -891,11 +939,12 @@ function route(){
   // role guards
   if(["dashboard","review","board","myreviews","forms"].includes(v) && ROLE==="contractor"){ openRoleModal("Jacobs sign-in required for that page."); return; }
   if(["dashboard","review","myreviews","types","form"].includes(v) && ROLE==="safety"){ openRoleModal("Safety managers have view access — permits are submitted by supervisors."); return; }
+  // equipment is open to every role — anyone on site can look up a machine
   if(["admin","reports"].includes(v) && ROLE!=="admin"){ openRoleModal("Admin sign-in required for that page."); return; }
   const keep=window._keepScroll; window._keepScroll=false;
   const y=window.scrollY;
   document.getElementById("app").innerHTML = fn(decodeURIComponent(arg||""), qs);
-  if(keep) window.scrollTo(0,y); else window.scrollTo(0,0);
+  if(keep) window.scrollTo(0,y); else { window.scrollTo(0,0); animateNums(); }
   const NAV_ALIAS={form:"types",help:"types",confirm:"status",view:"status",copy:"home",review:"dashboard",howto:ROLE==="contractor"?"howto":"dashboard"};
   renderNav(NAV_ALIAS[v]||v||"home");
   if(window._afterRender){ const f=window._afterRender; window._afterRender=null; f(); }
@@ -905,12 +954,12 @@ window.addEventListener("hashchange",route);
 /* ---------- Nav ---------- */
 function renderNav(cur){
   const items = ROLE==="contractor"
-    ? [["home","Home"],["types","New Permit"],["status","My Permits"],["howto","How-To"]]
+    ? [["home","Home"],["types","New Permit"],["status","My Permits"],["equipment","Equipment"],["howto","How-To"]]
     : ROLE==="safety"
-    ? [["status","My Company's Permits"],["board","Permit Board"],["forms","Permit Forms"],["howto","How-To"]]
+    ? [["status","My Company's Permits"],["board","Permit Board"],["equipment","Equipment"],["forms","Permit Forms"],["howto","How-To"]]
     : ROLE==="jacobs"
-    ? [["dashboard","Dashboard"],["myreviews","My Reviews"],["board","Permit Board"],["types","New Permit"],["status","All Permits"],["forms","Permit Forms"]]
-    : [["dashboard","Dashboard"],["myreviews","Reviews"],["board","Permit Board"],["status","All Permits"],["types","New Permit"],["forms","Permit Forms"],["admin","Admin"],["reports","Reports & Export"]];
+    ? [["dashboard","Dashboard"],["myreviews","My Reviews"],["board","Permit Board"],["types","New Permit"],["status","All Permits"],["equipment","Equipment"],["forms","Permit Forms"]]
+    : [["dashboard","Dashboard"],["myreviews","Reviews"],["board","Permit Board"],["status","All Permits"],["types","New Permit"],["equipment","Equipment"],["forms","Permit Forms"],["admin","Admin"],["reports","Reports & Export"]];
   document.getElementById("navIn").innerHTML = items.map(([v,l])=>
     `<a href="#/${v}" class="${cur===v?"on":""}">${T(l)}</a>`).join("");
   const lw=document.getElementById("langWrap");
@@ -920,6 +969,19 @@ function renderNav(cur){
     : ROLE==="safety" ? ((MYCO||"Trade Partner")+" · Safety")
     : ROLE==="jacobs" ? ("Jacobs · "+(MYNAME||"Reviewer"))
     : (IS_OWNER?"👑 Owner · ":"Admin · ")+(MYNAME||"");
+}
+
+/* ---------- Animated counters (futuristic count-up) ---------- */
+function animateNums(){
+  if(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  document.querySelectorAll("[data-cnt]").forEach(el=>{
+    const end=+el.dataset.cnt; if(isNaN(end)||end<=0) return;
+    const t0=performance.now(), dur=650;
+    const step=n=>{ const p=Math.min(1,(n-t0)/dur);
+      el.textContent=Math.round(end*(1-Math.pow(1-p,3)));
+      if(p<1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  });
 }
 
 /* ---------- Modal helpers ---------- */
@@ -1014,8 +1076,8 @@ VIEWS.home = ()=>{
     <button class="hero-tile" onclick="go('copy')"><span class="ht-ico">📄</span><b>${T("Copy a Previous Permit")}</b><small>${T("Yesterday's permit, today's date")}</small></button>
   </div>
   <div class="hero-strip">
-    <div><b>${active}</b><span>${T("permits live on site today")}</span></div>
-    <div><b>${DB.permitTypes.filter(x=>x.active).length}</b><span>${T("permit types available")}</span></div>
+    <div><b data-cnt="${active}">${active}</b><span>${T("permits live on site today")}</span></div>
+    <div><b data-cnt="${DB.permitTypes.filter(x=>x.active).length}">${DB.permitTypes.filter(x=>x.active).length}</b><span>${T("permit types available")}</span></div>
     <div><b>&lt;2<span style="font-size:15px">min</span></b><span>${T("average request time")}</span></div>
   </div>
   <div class="marquee"><div class="marquee-track">
@@ -1202,7 +1264,8 @@ function stepWork(){
   </div>
   ${fld("description","What work are you doing?",1,ta("description","Describe the work in plain language"))}
   <div class="f-row">
-    ${fld("equipment","Equipment or tools involved",0,inp("equipment","e.g., grinder, welder, scissor lift"))}
+    ${fld("equipment","Equipment or tools involved",0,`<input class="f-in" id="equipment" list="eqSug" value="${esc(F.equipment??"")}" placeholder="e.g., grinder, welder, scissor lift" onchange="F.equipment=this.value">
+      <datalist id="eqSug">${(DB.equipment||[]).filter(e=>!F.company||e.company===F.company).map(e=>`<option value="${esc((e.name||e.type)+" — SN "+e.serial)}">`).join("")}</datalist>`)}
     ${fld("workers","Number of workers",0,inp("workers","e.g., 4","number"))}
   </div>`;
 }
@@ -1528,7 +1591,7 @@ VIEWS.dashboard = ()=>{
     <span class="tag" style="background:#dbe4f7;color:#1f3a72">🏁 ${cpToday} completed</span>
   </div>
   <div class="sumgrid">${cards.map(([l,v,c,f])=>`
-    <div class="sum ${DASH_SEL===f?"on":""}" onclick="dashShow('${f}')"><b>${v}</b><span>${l}</span><i class="tick" style="background:${c}"></i></div>`).join("")}
+    <div class="sum ${DASH_SEL===f?"on":""}" onclick="dashShow('${f}')"><b data-cnt="${v}">${v}</b><span>${l}</span><i class="tick" style="background:${c}"></i></div>`).join("")}
   </div>
   <div class="hint" style="margin:-8px 0 14px">Tap any card to see those permits in the history section below — nothing disappears after approval.</div>
 
@@ -2180,6 +2243,133 @@ function loadSample(){
 }
 
 /* ============================================================
+   EQUIPMENT TRACKER — find any machine by serial number
+   ============================================================ */
+const canEditEq=e=> ROLE==="admin"||ROLE==="jacobs"||((ROLE==="contractor"||ROLE==="safety")&&e.company===MYCO);
+VIEWS.equipment = (arg,qs)=>{
+  window._afterRender=()=>{ applyEqSearch(); const s=document.getElementById("eqQ");
+    const pre=qs&&qs.get("eq"); if(pre&&s){ s.value=pre; applyEqSearch(); } };
+  const eq=DB.equipment||[];
+  const overdue=eq.filter(e=>e.inspDue&&e.inspDue<today()).length;
+  const down=eq.filter(e=>e.status==="Out of Service").length;
+  return `
+  <h2 class="page">🛰️ ${T("Equipment Tracker")}</h2>
+  <p class="sub">${T("Found a machine in the way? Type its serial number — the owner pops up in seconds.")}</p>
+  <div class="finder card">
+    <div class="finder-scan"></div>
+    <input class="f-in finder-in" id="eqQ" placeholder="🔎 ${T("Serial number, machine, or company…")}" oninput="applyEqSearch()" autocomplete="off">
+    <div class="hint" style="margin-top:8px">${T("Searches serial numbers, equipment names, companies, and responsible persons — instantly, as you type.")}</div>
+  </div>
+  <div class="sumgrid">
+    <div class="sum" style="cursor:default"><b data-cnt="${eq.length}">${eq.length}</b><span>${T("Machines on record")}</span><i class="tick" style="background:#1a73e8"></i></div>
+    <div class="sum" style="cursor:default"><b data-cnt="${eq.length-down}">${eq.length-down}</b><span>${T("In service")}</span><i class="tick" style="background:#1e8e3e"></i></div>
+    <div class="sum" style="cursor:default"><b data-cnt="${down}">${down}</b><span>${T("Out of service")}</span><i class="tick" style="background:#d93025"></i></div>
+    <div class="sum" style="cursor:default"><b data-cnt="${overdue}">${overdue}</b><span>${T("Inspection overdue")}</span><i class="tick" style="background:#e8710a"></i></div>
+  </div>
+  <div class="btnrow" style="margin:0 0 14px">
+    <button class="btn btn-y" onclick="eqAdd()">+ ${T("Add Equipment")}</button>
+  </div>
+  <div class="filters">
+    <select class="f-in" id="eqCo" onchange="applyEqSearch()"><option value="">All trade partners</option>${DB.contractors.map(c=>`<option>${esc(c.name)}</option>`).join("")}</select>
+    <select class="f-in" id="eqT" onchange="applyEqSearch()"><option value="">All types</option>${EQUIP_TYPES.map(t=>`<option>${esc(t[0])}</option>`).join("")}</select>
+    <select class="f-in" id="eqS" onchange="applyEqSearch()"><option value="">All statuses</option><option>In Service</option><option>Out of Service</option></select>
+  </div>
+  <div id="eqList"></div>`;
+};
+function applyEqSearch(){
+  const host=document.getElementById("eqList"); if(!host) return;
+  const q=(document.getElementById("eqQ")?.value||"").trim().toLowerCase();
+  const co=document.getElementById("eqCo")?.value||"", tp=document.getElementById("eqT")?.value||"", st=document.getElementById("eqS")?.value||"";
+  let list=(DB.equipment||[]).slice();
+  if(co) list=list.filter(e=>e.company===co);
+  if(tp) list=list.filter(e=>e.type===tp);
+  if(st) list=list.filter(e=>e.status===st);
+  if(q) list=list.filter(e=>[e.serial,e.name,e.company,e.responsible,e.type,e.location].join(" ").toLowerCase().includes(q));
+  // exact serial match floats to top with a FOUND flash
+  list.sort((a,b)=>{
+    const am=q&&(a.serial||"").toLowerCase()===q?-1:0, bm=q&&(b.serial||"").toLowerCase()===q?-1:0;
+    return am-bm || (a.company||"").localeCompare(b.company||"");
+  });
+  if(!list.length){
+    host.innerHTML=`<div class="empty"><div class="big-icon">🛰️</div>${q?T("No match — that serial isn't registered yet. Add it so next time it takes 5 seconds."):T("No equipment registered yet. Tap + Add Equipment to start the registry.")}</div>`;
+    return;
+  }
+  host.innerHTML=list.map(e=>{
+    const hit=q&&(e.serial||"").toLowerCase()===q;
+    const od=e.inspDue&&e.inspDue<today();
+    return `<div class="pcard eq-card ${hit?"eq-hit":""}">
+      ${hit?`<div class="eq-found">✔ ${T("FOUND — this is your machine")}</div>`:""}
+      <div class="top">
+        <div style="display:flex;align-items:center;gap:10px"><span style="font-size:24px">${eqIco(e.type)}</span>
+          <div><b style="font-size:16px">${esc(e.name||e.type)}</b>
+          <div style="font-size:12.5px;color:var(--muted);font-weight:700">${esc(e.type)} · <span class="pnum">SN ${esc(e.serial)}</span></div></div></div>
+        <span class="badge ${e.status==="Out of Service"?"st-Rejected":"st-Active"}">${esc(T(e.status||"In Service"))}</span>
+      </div>
+      <div class="meta">
+        <div>${T("Belongs to")}: <b>${esc(e.company)}</b></div>
+        <div>${T("Responsible")}: <b>${esc(e.responsible||"—")}</b></div>
+        <div>${T("Location")}: <b>${esc(e.location||"—")}</b></div>
+        <div>${T("Inspection due")}: <b style="${od?"color:var(--red)":""}">${e.inspDue?fmtD(e.inspDue):"—"}${od?" ⚠ "+T("OVERDUE"):""}</b></div>
+      </div>
+      <div class="btnrow" style="margin-top:12px">
+        ${e.phone?`<a class="btn btn-dark btn-sm" href="tel:${esc(e.phone)}">📞 ${T("Call")} ${esc(e.responsible||e.company)}</a>`:""}
+        ${e.phone?`<a class="btn btn-line btn-sm" href="${smsHref(e.phone,T("Your equipment needs to be moved")+": "+(e.name||e.type)+" (SN "+e.serial+") — "+(e.location||""))}">📱 ${T("Text: please move it")}</a>`:""}
+        <button class="btn btn-line btn-sm" onclick="eqTag('${e.id}')">🏷️ ${T("QR Tag")}</button>
+        ${canEditEq(e)?`<button class="btn btn-line btn-sm" onclick="eqEdit('${e.id}')">Edit</button>
+        <button class="btn btn-line btn-sm btn-cancel" onclick="eqDel('${e.id}')">Delete</button>`:""}
+      </div>
+    </div>`;
+  }).join("");
+}
+const EQ_FIELDS=e=>[
+  {key:"type",label:"Equipment Type",type:"select",opts:EQUIP_TYPES.map(t=>t[0]),value:e?.type},
+  {key:"name",label:"Make / Model (e.g., Genie GS-1930)",value:e?.name},
+  {key:"serial",label:"Serial Number",value:e?.serial,hint:"The number on the machine's plate or sticker — this is how people will find it."},
+  {key:"company",label:"Trade Partner (owner)",type:"select",opts:DB.contractors.map(c=>c.name),value:e?.company||((ROLE==="contractor"||ROLE==="safety")?MYCO:"")},
+  {key:"responsible",label:"Person Responsible",value:e?.responsible},
+  {key:"phone",label:"Their Cell Phone",value:e?.phone},
+  {key:"location",label:"Usual Location (building / floor / area)",value:e?.location},
+  {key:"status",label:"Status",type:"select",opts:["In Service","Out of Service"],value:e?.status||"In Service"},
+  {key:"inspDue",label:"Next Inspection Due (YYYY-MM-DD, optional)",value:e?.inspDue},
+  {key:"notes",label:"Notes",type:"textarea",value:e?.notes}];
+function eqTouch(){ DB.cfgU=Date.now(); }
+function eqAdd(){
+  promptFields("Add Equipment",EQ_FIELDS(),o=>{
+    if(!o.serial||!o.company){ toast("Serial number and trade partner are required.","t-red"); return; }
+    const dup=(DB.equipment||[]).find(x=>x.serial.toLowerCase()===o.serial.toLowerCase());
+    if(dup){ toast("⚠ SN "+esc(o.serial)+" is already registered to "+esc(dup.company)+".","t-orange"); return; }
+    DB.equipment.push({id:uid(),...o,addedBy:currentActor(),addedAt:new Date().toISOString()});
+    eqTouch(); toast("🏗️ "+esc(o.name||o.type)+" (SN "+esc(o.serial)+") registered for "+esc(o.company),"t-green");
+  });
+}
+function eqEdit(id){
+  const e=DB.equipment.find(x=>x.id===id); if(!e||!canEditEq(e)) return;
+  promptFields("Edit Equipment — SN "+e.serial,EQ_FIELDS(e),o=>{ Object.assign(e,o); eqTouch(); });
+}
+function eqDel(id){
+  const e=DB.equipment.find(x=>x.id===id); if(!e||!canEditEq(e)) return;
+  if(!confirm("Remove "+(e.name||e.type)+" (SN "+e.serial+") from the registry?")) return;
+  DB.equipment=DB.equipment.filter(x=>x.id!==id);
+  eqTouch(); if(ROLE==="admin") logChange("Equipment removed: SN "+e.serial,e.company);
+  saveDB(); route();
+}
+function eqTag(id){
+  const e=DB.equipment.find(x=>x.id===id); if(!e) return;
+  const base=location.origin==="null"||location.protocol==="file:"? location.href.split("#")[0].split("?")[0] : location.origin+location.pathname;
+  const url=base+"?eq="+encodeURIComponent(e.serial)+"#/equipment";
+  modal(`<h3 style="display:flex;justify-content:space-between;align-items:center">🏷️ ${T("Equipment QR Tag")}
+    <button class="btn btn-line btn-sm" onclick="closeModal()">✕</button></h3>
+    <div class="qrcell" style="border:none">
+      <b style="font-size:16px">${eqIco(e.type)} ${esc(e.name||e.type)}</b>
+      <div class="pnum" style="font-size:20px;margin:4px 0">SN ${esc(e.serial)}</div>
+      <div style="font-size:13px;font-weight:700">${esc(e.company)} · ${esc(e.responsible||"")}</div>
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=340x340&data=${encodeURIComponent(url)}" alt="QR" style="width:220px;height:220px">
+      <div class="lnk">${T("Scan to see who owns this machine")}</div>
+    </div>
+    <div class="btnrow"><button class="btn btn-dark" onclick="window.print()">🖨️ ${T("Print sticker")}</button></div>`);
+}
+
+/* ============================================================
    PERMIT FORMS LIBRARY (hard-copy PDFs to print or email)
    ============================================================ */
 VIEWS.forms = ()=>{
@@ -2400,7 +2590,8 @@ async function syncPull(){
       changed=true;
       const c=cfgRow.data||{};
       if(c.cfg){ Object.assign(DB,{buildings:c.cfg.buildings,floors:c.cfg.floors,contractors:c.cfg.contractors,
-        permitTypes:c.cfg.permitTypes,reviewers:c.cfg.reviewers,permitDocs:c.cfg.permitDocs,safetyUsers:c.cfg.safetyUsers||[]});
+        permitTypes:c.cfg.permitTypes,reviewers:c.cfg.reviewers,permitDocs:c.cfg.permitDocs,safetyUsers:c.cfg.safetyUsers||[],
+        equipment:c.cfg.equipment||DB.equipment||[]});
         DB.settings={...DB.settings,...c.cfg.settings}; }
       Object.entries(c.counters||{}).forEach(([k,v])=>{ DB.counters[k]=Math.max(DB.counters[k]||0,v); });
       DB.accessLog=mergeLogs(DB.accessLog,c.accessLog,500);
