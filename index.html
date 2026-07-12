@@ -39,7 +39,36 @@ a{color:var(--blue);text-decoration:none}
 header{background:var(--navy-grad);color:#fff;position:sticky;top:0;z-index:50;box-shadow:0 2px 20px rgba(4,10,20,.35);border-bottom:1px solid rgba(255,184,28,.28)}
 .hdr-in{max-width:1200px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .logo{display:flex;align-items:center;gap:11px;cursor:pointer}
-.logo-badge{width:40px;height:40px;border-radius:11px;background:var(--gold-grad);color:var(--navy);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:17px;letter-spacing:-.5px;flex:none;box-shadow:0 3px 10px rgba(255,184,28,.35),inset 0 1px 0 rgba(255,255,255,.45)}
+.logo{padding:5px 10px 5px 5px;border-radius:14px;transition:background .15s}
+.logo:hover{background:rgba(255,255,255,.07)}
+.logo-badge{width:40px;height:40px;border-radius:11px;background:var(--gold-grad);color:var(--navy);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:17px;letter-spacing:-.5px;flex:none;box-shadow:0 3px 10px rgba(255,184,28,.35),inset 0 1px 0 rgba(255,255,255,.45);position:relative}
+.logo-badge::before{content:"";position:absolute;inset:-4px;border-radius:14px;overflow:hidden;padding:2px;
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  background:conic-gradient(from 0deg, transparent 0 78%, #9dffc4 90%, transparent 100%);
+  animation:logoOrbit 3s linear infinite}
+@keyframes logoOrbit{to{transform:rotate(360deg)}}
+.logo-badge::after{content:"";position:absolute;top:-3px;right:-3px;width:9px;height:9px;border-radius:50%;background:#35e07c;box-shadow:0 0 8px #35e07c;animation:agePulse 1.8s infinite}
+/* header safety motto */
+.hdr-motto-wrap{display:flex;justify-content:center;align-items:center;min-width:0}
+.hdr-motto{text-align:center;line-height:1.25;padding:0 10px}
+.hdr-motto b{display:block;font-size:11px;letter-spacing:1.6px;color:var(--yellow);font-weight:900;white-space:nowrap}
+.hdr-motto span{display:block;font-size:10.5px;color:#9fb0c6;font-weight:600;letter-spacing:.4px;white-space:nowrap}
+@media(max-width:1120px){.hdr-motto{display:none}}
+/* hero personalized welcome */
+.hero-welcome{position:absolute;top:20px;right:22px;z-index:4;max-width:290px;text-align:right;background:rgba(255,255,255,.06);border:1px solid rgba(255,184,28,.3);border-radius:14px;padding:9px 14px;backdrop-filter:blur(6px)}
+.hero-welcome{font-size:13px;color:#e8eef7;font-weight:700}
+.hero-welcome b{color:var(--yellow)}
+.hero-welcome span{display:block;font-size:11.5px;color:#b9c5d6;font-weight:600;margin-top:2px}
+@media(max-width:700px){.hero-welcome{position:static;max-width:none;text-align:left;margin-bottom:14px}}
+/* glowing how-to button */
+.howto-btn{position:relative;display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#27a04a,#0f6f32);color:#fff;font-weight:800;font-size:15.5px;border:none;border-radius:14px;padding:15px 30px;min-height:52px;cursor:pointer;box-shadow:0 6px 20px rgba(30,142,62,.35);transition:transform .1s}
+.howto-btn:hover{transform:translateY(-1px)}
+.howto-ring{position:absolute;inset:-4px;border-radius:18px;padding:3px;overflow:hidden;pointer-events:none;
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0)}
+.howto-ring::before{content:"";position:absolute;inset:-60%;background:conic-gradient(transparent 0 72%, #9dffc4 86%, transparent 100%);animation:logoOrbit 2.4s linear infinite}
+@media (prefers-reduced-motion: reduce){.howto-ring::before,.logo-badge::before,.logo-badge::after{animation:none}}
 .logo h1{font-size:17.5px;font-weight:800;line-height:1.15;letter-spacing:-.2px}
 .logo small{display:block;font-size:10.5px;font-weight:600;color:#9fb0c6;letter-spacing:1.6px;text-transform:uppercase;margin-top:1px}
 .hdr-sp{flex:1}
@@ -450,7 +479,7 @@ body.dark .empty{color:#8399b5}
       <div class="logo-badge">PP</div>
       <h1>Project Permit Portal<small>Request. Review. Approve. Track.</small></h1>
     </div>
-    <div class="hdr-sp"></div>
+    <div class="hdr-sp hdr-motto-wrap"><div class="hdr-motto" id="hdrMotto"></div></div>
     <button class="themebtn" id="themeBtn" onclick="toggleTheme()" title="Dark / Light mode">🌙</button>
     <div id="langWrap" class="langwrap"></div>
     <div class="rolewrap">
@@ -758,6 +787,17 @@ function setStatus(p,st,detail){
   saveDB();
 }
 
+/* ---------- Daily welcome lines (rotate by weekday) ---------- */
+const WELCOMES=[
+  "Plan it safe — your crew follows your lead.",
+  "The best supervisors plan twice and work once.",
+  "A safe plan today is everyone home tonight.",
+  "Your permit is your plan. Make it a good one.",
+  "Strong teams are built on safe plans.",
+  "Take the two minutes — it protects your whole crew.",
+  "Lead the way: safe, smart, and home on time."
+];
+
 /* ---------- Theme (dark / light) ---------- */
 let THEME=localStorage.getItem("ppp_theme")||"light";
 function applyTheme(){
@@ -967,7 +1007,17 @@ const ES={
 "Person Responsible":"Persona Responsable","Safety Manager":"Gerente de Seguridad",
 "add one in Admin → Trade Partners":"agréguelo en Admin → Empresas",
 "Heads up: the phone numbers above print on the sticker and will be visible to anyone near the machine. Use work cell numbers.":"Atención: los teléfonos de arriba se imprimen en la etiqueta y serán visibles para cualquiera cerca de la máquina. Use números de trabajo.",
-"due in":"vence en","days":"días"
+"due in":"vence en","days":"días",
+"Request a Permit":"Solicite un Permiso","Welcome":"Bienvenido",
+"NO TASK IS MORE IMPORTANT THAN YOUR LIFE":"NINGUNA TAREA VALE MÁS QUE SU VIDA",
+"Plan the work · Work the plan · Everyone goes home":"Planee el trabajo · Trabaje el plan · Todos regresan a casa",
+"Plan it safe — your crew follows your lead.":"Planee con seguridad — su cuadrilla sigue su ejemplo.",
+"The best supervisors plan twice and work once.":"Los mejores supervisores planean dos veces y trabajan una.",
+"A safe plan today is everyone home tonight.":"Un plan seguro hoy es todos en casa esta noche.",
+"Your permit is your plan. Make it a good one.":"Su permiso es su plan. Hágalo bien.",
+"Strong teams are built on safe plans.":"Los equipos fuertes se construyen con planes seguros.",
+"Take the two minutes — it protects your whole crew.":"Tome los dos minutos — protege a toda su cuadrilla.",
+"Lead the way: safe, smart, and home on time.":"Marque el camino: seguro, inteligente y a casa a tiempo."
 };
 function T(s){ return LANG==="en"? s : (ES[s]||s); }
 
@@ -1206,6 +1256,8 @@ function renderNav(cur){
     `<a href="#/${v}" class="${cur===v?"on":""}">${T(l)}</a>`).join("");
   const lw=document.getElementById("langWrap");
   if(lw) lw.innerHTML=`<button class="lang ${LANG==="en"?"on":""}" onclick="setLang('en')">EN</button><button class="lang ${LANG==="es"?"on":""}" onclick="setLang('es')">ES</button>`;
+  const mo=document.getElementById("hdrMotto");
+  if(mo) mo.innerHTML=`<b>${T("NO TASK IS MORE IMPORTANT THAN YOUR LIFE")}</b><span>${T("Plan the work · Work the plan · Everyone goes home")}</span>`;
   document.getElementById("roleLbl").textContent =
     ROLE==="contractor" ? (MYCO||"Trade Partner")
     : ROLE==="safety" ? ((MYCO||"Trade Partner")+" · Safety")
@@ -1367,8 +1419,9 @@ VIEWS.home = ()=>{
         </g>
       </g>
     </svg>
+    ${MYNAME?`<div class="hero-welcome">👋 ${T("Welcome")}, <b>${esc(MYNAME)}</b><span>${T(WELCOMES[new Date().getDay()%WELCOMES.length])}</span></div>`:""}
     <div class="hero-kicker">⚡ ${T("Fast-track your permit")}</div>
-    <h2>${T("Request a Permit in")}<br><em>${T("Under 2 Minutes")}</em></h2>
+    <h2>${T("Request a Permit")}<br><em>${T("Under 2 Minutes")}</em></h2>
     <p>${T("Submit from your phone, tablet, computer, or kiosk. Save a walk to the permit office and track your request from the field.")}</p>
     <button class="btn btn-y btn-block" style="font-size:18px;min-height:62px;margin-top:18px" onclick="go('types')">🚀 &nbsp;${T("Start Permit Request")}</button>
   </div>
@@ -1384,7 +1437,9 @@ VIEWS.home = ()=>{
   <div class="marquee"><div class="marquee-track">
     ${Array(2).fill(`<span>${T("WE BUILD")} <em>${T("BOLD")}</em></span><b>◆</b><span>${T("WE BUILD")} <em>${T("SAFE")}</em></span><b>◆</b><span>${T("WE BUILD")} <em>${T("TOGETHER")}</em></span><b>◆</b><span>${T("ONE PERMIT")} <em>${T("AT A TIME")}</em></span><b>◆</b>`).join("")}
   </div></div>
-  <div class="center" style="margin-top:12px"><button class="btn btn-ghost" onclick="go('howto')">🎓 ${T("How to Request a Permit")}</button></div>
+  <div class="center" style="margin-top:16px">
+    <button class="howto-btn" onclick="go('howto')"><span class="howto-ring"></span>🎓 ${T("How to Request a Permit")}</button>
+  </div>
   <p class="sub center" style="font-size:12.5px;margin-top:14px">Scan a floor QR code to pre-fill your building and level automatically.<br>All permits require Jacobs review and approval before work begins.</p>
 </div>`;
 };
@@ -1514,7 +1569,7 @@ function rerenderForm(){ document.getElementById("app").innerHTML=VIEWS.form(); 
 function pickFloor(name){
   F.floor=name;
   const fo=floorObj(F.building,name);
-  if(fo&&fo.lead&&DB.reviewers.some(r=>r.name===fo.lead)){ F.reviewer=fo.lead; F._leadAuto=true; } else F._leadAuto=false;
+  if(fo&&fo.lead){ F.reviewer=fo.lead; F._leadAuto=true; } else F._leadAuto=false;
   rerenderForm();
 }
 function showPlan(){
@@ -1613,10 +1668,13 @@ function toggleLinked(c){ const i=F.linkedTypes.indexOf(c); if(i>=0) F.linkedTyp
 function stepReview(){
   const t=typeOf(F.typeCode);
   const fo=floorObj(F.building,F.floor);
+  // safety net: if the floor has a lead and nothing is picked yet, fill it in — no thinking required
+  if(!F.reviewer&&fo&&fo.lead){ F.reviewer=fo.lead; F._leadAuto=true; }
+  const revOpts=[...new Set([...DB.reviewers.filter(r=>r.active).map(r=>r.name), ...(F.reviewer?[F.reviewer]:[])])];
   return `<div class="section-t">Jacobs Review</div>
-  ${F._leadAuto&&F.reviewer?`<div class="pill-hint">👷 <b>${esc(F.reviewer)}</b> is the floor lead for ${esc(F.floor)} — we picked them for you. You can change it if needed.</div>`
+  ${F._leadAuto&&F.reviewer?`<div class="pill-hint">👷 <b>${esc(F.reviewer)}</b> is the floor lead for ${esc(F.floor)} — already filled in for you. Change it only if you need someone else.</div>`
     :fo&&fo.lead?"":`<div class="hint" style="margin-bottom:8px">Don't know who reviews your area? Pick "Building HSE/CM (any available)".</div>`}
-  ${fld("reviewer","Requested Jacobs Reviewer",1,sel("reviewer",DB.reviewers.filter(r=>r.active).map(r=>r.name)))}
+  ${fld("reviewer","Requested Jacobs Reviewer",1,sel("reviewer",revOpts))}
   ${fld("notes","Additional notes for Jacobs",0,ta("notes","Anything Jacobs should know?"))}
   <hr class="div"><div class="section-t">${T("Quick check before you submit")}</div>
   <dl class="kv">
@@ -1917,8 +1975,10 @@ VIEWS.dashboard = ()=>{
 
   <div class="grp-h" id="histAnchor" style="margin-top:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap">PERMIT HISTORY — <span id="histTitle"></span>
     <span style="flex:1"></span>
-    <input class="f-in noprint" type="date" value="${esc(DASH_D)}" onchange="DASH_D=this.value;window._keepScroll=true;route()" style="min-height:34px;padding:4px 10px;font-size:13px;width:auto;border-radius:8px">
-    <button class="btn btn-line btn-sm noprint" style="min-height:34px" onclick="DASH_D='';window._keepScroll=true;route()">All days</button>
+    <input class="f-in noprint" type="date" value="${esc(DASH_Da)}" onchange="DASH_Da=this.value;window._keepScroll=true;route()" style="min-height:34px;padding:4px 10px;font-size:13px;width:auto;border-radius:8px" title="From">
+    <span style="font-weight:800">→</span>
+    <input class="f-in noprint" type="date" value="${esc(DASH_Db)}" onchange="DASH_Db=this.value;window._keepScroll=true;route()" style="min-height:34px;padding:4px 10px;font-size:13px;width:auto;border-radius:8px" title="To">
+    <button class="btn btn-line btn-sm noprint" style="min-height:34px" onclick="DASH_Da='';DASH_Db='';window._keepScroll=true;route()">All days</button>
   </div>
   <div class="tblwrap" style="margin-bottom:16px"><table class="tbl"><thead><tr>
     <th>Permit #</th><th>Type</th><th>Trade Partner</th><th>Bldg</th><th>Floor</th><th>Submitted</th><th>Approved By</th><th>Closed</th><th>Status</th><th></th>
@@ -1945,7 +2005,7 @@ VIEWS.dashboard = ()=>{
   <div class="grp-h">SNAPSHOT — open permits by category</div>
   <div class="card tight" id="dashBreak">${dashBreakdowns()}</div>`;
 };
-let DASH_SEL="today", DASH_D=today();
+let DASH_SEL="today", DASH_Da=today(), DASH_Db=today();
 function dashShow(f){ DASH_SEL=f; route();
   setTimeout(()=>document.getElementById("histAnchor")?.scrollIntoView({behavior:"smooth",block:"start"}),80); }
 function renderDashHist(){
@@ -1953,9 +2013,9 @@ function renderDashHist(){
   if(DASH_SEL==="today"){ list=DB.permits.slice(); title="everything submitted (any current status)"; }
   else if(DASH_SEL==="DEAD"){ list=DB.permits.filter(p=>["Rejected","Void","Lost"].includes(p.status)); title="Rejected / Void / Lost"; }
   else { list=DB.permits.filter(p=>p.status===DASH_SEL); title=DASH_SEL; }
-  // one day at a time — the calendar goes back in time; "All days" clears it
-  if(DASH_D) list=list.filter(p=>(p.submittedAt||"").slice(0,10)===DASH_D||(p.startDate||"")===DASH_D);
-  const tt=document.getElementById("histTitle"); if(tt) tt.textContent=title+" ("+list.length+")"+(DASH_D?" — "+fmtD(DASH_D):" — all days");
+  // day or range — a week, a month, whatever; "All days" clears it
+  if(DASH_Da||DASH_Db) list=list.filter(p=>inRange(p.submittedAt,DASH_Da,DASH_Db)||inRange(p.startDate+"T",DASH_Da,DASH_Db));
+  const tt=document.getElementById("histTitle"); if(tt) tt.textContent=title+" ("+list.length+") — "+rangeLbl(DASH_Da,DASH_Db);
   const tb=document.getElementById("histBody"); if(!tb) return;
   tb.innerHTML=list.length? list.map(p=>{const x=typeOf(p.typeCode);return `<tr class="${urgCls(p)}">
     <td class="pnum">${esc(p.number)}</td><td>${x.ico} ${esc(x.code)}</td><td>${esc(p.company)}</td>
@@ -2336,35 +2396,36 @@ function adminEditSafetyUser(i){ const u=DB.safetyUsers[i]; promptFields("Edit S
 function adminDelSafetyUser(i){ const u=DB.safetyUsers[i];
   if(confirm('Remove safety access for "'+u.name+'" ('+u.company+')?')){
     const snap=configSnapshot(); DB.safetyUsers.splice(i,1); logChange("Deleted safety access: "+u.name,u.company,snap); saveDB(); route(); } }
-let ACT_D1=today(), ACT_CO="", ACT_D2=today();
-function actSet(k,v){ if(k==="d1")ACT_D1=v; if(k==="co")ACT_CO=v; if(k==="d2")ACT_D2=v; route(); }
+let ACT_D1a=today(), ACT_D1b=today(), ACT_CO="", ACT_D2a=today(), ACT_D2b=today();
+const inRange=(at,a,b)=>{ const d=(at||"").slice(0,10); if(a&&d<a) return false; if(b&&d>b) return false; return true; };
+const rangeLbl=(a,b)=> !a&&!b? "all days" : a===b? fmtD(a) : (a?fmtD(a):"…")+" → "+(b?fmtD(b):"…");
+function actSet(k,v){ ({d1a:()=>ACT_D1a=v,d1b:()=>ACT_D1b=v,co:()=>ACT_CO=v,d2a:()=>ACT_D2a=v,d2b:()=>ACT_D2b=v})[k](); route(); }
 function adminActivity(){
   const cos=[...new Set((DB.accessLog||[]).map(e=>e.co).filter(Boolean))].sort();
-  let logins=(DB.accessLog||[]);
-  if(ACT_D1) logins=logins.filter(e=>e.at.slice(0,10)===ACT_D1);
+  let logins=(DB.accessLog||[]).filter(e=>inRange(e.at,ACT_D1a,ACT_D1b));
   if(ACT_CO) logins=logins.filter(e=>e.co===ACT_CO);
-  let changes=(DB.adminLog||[]).map((e,i)=>({...e,_i:i}));
-  if(ACT_D2) changes=changes.filter(e=>e.at.slice(0,10)===ACT_D2);
-  return `<div class="section-t">👑 Owner View — Sign-in History</div>
-  <div class="hint" style="margin-bottom:8px">One day at a time — pick any date on the calendar to go back. Filter by company to see who's been using the portal.</div>
-  <div class="filters">
-    <input class="f-in" type="date" value="${esc(ACT_D1)}" onchange="actSet('d1',this.value)" title="Pick a day">
+  const changes=(DB.adminLog||[]).map((e,i)=>({...e,_i:i})).filter(e=>inRange(e.at,ACT_D2a,ACT_D2b));
+  const rangePick=(ka,kb,va,vb)=>`
+    <input class="f-in" type="date" value="${esc(va)}" onchange="actSet('${ka}',this.value)" title="From">
+    <span style="font-weight:800;color:var(--muted)">→</span>
+    <input class="f-in" type="date" value="${esc(vb)}" onchange="actSet('${kb}',this.value)" title="To">
+    <button class="btn btn-line btn-sm" onclick="actSet('${ka}','');actSet('${kb}','')">All days</button>`;
+  return `<div class="section-t">👑 Owner View — Sign-in History <span style="font-weight:600;color:var(--muted)">(${rangeLbl(ACT_D1a,ACT_D1b)})</span></div>
+  <div class="hint" style="margin-bottom:8px">Pick one day, or a range — a week, a whole month, whatever you need. Filter by company to see who's been using the portal.</div>
+  <div class="filters" style="align-items:center">
+    ${rangePick("d1a","d1b",ACT_D1a,ACT_D1b)}
     <select class="f-in" onchange="actSet('co',this.value)"><option value="">All companies</option>${cos.map(c=>`<option ${ACT_CO===c?"selected":""}>${esc(c)}</option>`).join("")}</select>
-    <button class="btn btn-line btn-sm" onclick="actSet('d1','')">Show all days</button>
   </div>
   <div class="tblwrap" style="margin-bottom:20px"><table class="tbl" style="min-width:520px"><thead><tr><th>When</th><th>Role</th><th>Name</th><th>Company</th></tr></thead><tbody>
-    ${logins.slice(0,200).map(e=>`<tr><td>${fmtDT(e.at)}</td><td><span class="tag">${esc(e.role)}</span></td><td>${esc(e.name)}</td><td>${esc(e.co||"—")}</td></tr>`).join("")||`<tr><td colspan="4" class="empty">No sign-ins ${ACT_D1?("on "+fmtD(ACT_D1)):"recorded"}${ACT_CO?" for "+esc(ACT_CO):""}.</td></tr>`}
+    ${logins.slice(0,300).map(e=>`<tr><td>${fmtDT(e.at)}</td><td><span class="tag">${esc(e.role)}</span></td><td>${esc(e.name)}</td><td>${esc(e.co||"—")}</td></tr>`).join("")||`<tr><td colspan="4" class="empty">No sign-ins for ${rangeLbl(ACT_D1a,ACT_D1b)}${ACT_CO?" · "+esc(ACT_CO):""}.</td></tr>`}
   </tbody></table></div>
-  <div class="section-t">👑 Admin Changes — with restore points</div>
-  <div class="hint" style="margin-bottom:8px">One day at a time. "⏪ Restore" rolls the setup back to before that change — permits and their audit trails are never touched.</div>
-  <div class="filters">
-    <input class="f-in" type="date" value="${esc(ACT_D2)}" onchange="actSet('d2',this.value)" title="Pick a day">
-    <button class="btn btn-line btn-sm" onclick="actSet('d2','')">Show all days</button>
-  </div>
+  <div class="section-t">👑 Admin Changes — with restore points <span style="font-weight:600;color:var(--muted)">(${rangeLbl(ACT_D2a,ACT_D2b)})</span></div>
+  <div class="hint" style="margin-bottom:8px">"⏪ Restore" rolls the setup back to before that change — permits and their audit trails are never touched.</div>
+  <div class="filters" style="align-items:center">${rangePick("d2a","d2b",ACT_D2a,ACT_D2b)}</div>
   ${changes.map(e=>`<div class="list-row"><div class="grow"><b>${esc(e.action)}</b>
     <small>${fmtDT(e.at)} · ${esc(e.by)}${e.detail?" · "+esc(e.detail).slice(0,120):""}</small></div>
     ${e.snap?`<button class="btn btn-line btn-sm" onclick="restoreSnapshot(${e._i})">⏪ Restore</button>`:""}</div>`).join("")
-    ||`<div class="hint">No admin changes ${ACT_D2?("on "+fmtD(ACT_D2)):"recorded"}.</div>`}`;
+    ||`<div class="hint">No admin changes for ${rangeLbl(ACT_D2a,ACT_D2b)}.</div>`}`;
 }
 function adminDel(coll,i){
   const item=DB[coll][i]; if(!item) return;
