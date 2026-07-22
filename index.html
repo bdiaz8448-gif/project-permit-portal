@@ -2953,9 +2953,10 @@ function exportByType(){
    LIVE CLOUD SYNC — every device sees the same permits
    (Supabase REST; localStorage stays as the offline cache)
    ============================================================ */
-const CLOUD={ url:"https://ltjvpodpdlmwvjmwuygm.supabase.co", key:"sb_publishable_DiH5dXOI8BpuPIvtClmZhg_ZDZjVTi3" };
+const CLOUD={ url:"https://ltjvpodpdlmwvjmwuygm.supabase.co", key:"sb_publishable_DiH5dXOI8BpuPIvtClmZhg_ZDZjVTi3",
+  portalKey:"ppp_AqooN2cKftT9KxzpSg1Y0RDmolFaQRJB" }; // row-level security gate — DB rejects requests without it
 const cloudOn=()=> CLOUD.url.startsWith("https://");
-const sbH=()=>({apikey:CLOUD.key,Authorization:"Bearer "+CLOUD.key,"Content-Type":"application/json"});
+const sbH=()=>({apikey:CLOUD.key,Authorization:"Bearer "+CLOUD.key,"x-portal-key":CLOUD.portalKey,"Content-Type":"application/json"});
 let lastPush=+(localStorage.getItem("ppp_lastpush")||0);
 let SYNC_STATE=cloudOn()?"sync":"off";
 let syncTimer=null, syncBusy=false;
