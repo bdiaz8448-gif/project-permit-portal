@@ -385,18 +385,31 @@ a.btn{text-decoration:none}
 .center{text-align:center}
 .pill-hint{background:#eef4ff;color:var(--blue-d);border-radius:10px;padding:11px 14px;font-size:13.5px;font-weight:600;margin-bottom:14px}
 .warn-hint{background:#fff8e6;color:#7a5b00;border-radius:10px;padding:11px 14px;font-size:13.5px;font-weight:600}
-.daygrid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px}
-@media(max-width:560px){.daygrid{grid-template-columns:repeat(4,1fr)}}
-.daychip{border:2px solid #d5dbe3;background:#fff;border-radius:12px;padding:9px 4px;text-align:center;cursor:pointer;transition:all .12s;font-family:inherit}
+.daygrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:5px}
+@media(max-width:560px){.daygrid{grid-template-columns:repeat(7,1fr);gap:3px}}
+.daychip{border:1.5px solid #d5dbe3;background:#fff;border-radius:9px;padding:5px 1px;text-align:center;cursor:pointer;transition:all .12s;font-family:inherit}
 .daychip:hover{border-color:var(--navy)}
-.daychip .dc-day{display:block;font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.3px;white-space:nowrap}
-.daychip .dc-date{display:block;font-size:15px;font-weight:800;color:var(--text);margin-top:2px}
+.daychip .dc-day{display:block;font-size:10px;font-weight:800;color:var(--muted);letter-spacing:.1px;white-space:nowrap}
+.daychip .dc-date{display:block;font-size:12.5px;font-weight:800;color:var(--text);margin-top:1px}
 .daychip.on{border-color:var(--navy);background:var(--navy)}
 .daychip.on .dc-day,.daychip.on .dc-date{color:#fff}
 .daychip.wknd{border-color:#f0c46a;background:#fffaf0}
 .daychip.wknd .dc-day{color:#a4780a}
 .daychip.wknd.on{border-color:#e8710a;background:#e8710a}
 .daychip.wknd.on .dc-day,.daychip.wknd.on .dc-date{color:#fff}
+.daychip.istoday{box-shadow:inset 0 -3px 0 var(--blue)}
+.daychip.istoday.on{box-shadow:none}
+.switch{display:inline-flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+.switch input{position:absolute;opacity:0;width:0;height:0}
+.switch .sl{position:relative;width:52px;height:30px;background:#c7ced8;border-radius:30px;transition:.18s;flex:0 0 auto}
+.switch .sl:before{content:"";position:absolute;left:3px;top:3px;width:24px;height:24px;background:#fff;border-radius:50%;transition:.18s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.switch input:checked + .sl{background:var(--green,#1f9d55)}
+.switch input:checked + .sl:before{transform:translateX(22px)}
+.switch-tx{font-weight:700;font-size:13.5px}
+.pf-preview{display:block;width:100%;max-height:220px;object-fit:contain;border:1px solid #dfe4ea;border-radius:10px;margin-bottom:8px;background:#f4f6f9}
+.pf-preview.empty{display:flex;align-items:center;justify-content:center;height:90px;color:var(--muted);font-size:13px}
+body.dark .pf-preview{background:#0f1c31;border-color:#314566}
+body.dark .switch .sl{background:#3a4a63}
 body.dark .daychip{background:#0f1c31;border-color:#314566}
 body.dark .daychip .dc-date{color:var(--text)}
 body.dark .daychip.wknd{background:#2a2213;border-color:#7a5f1e}
@@ -710,8 +723,27 @@ function migrate(){
     DB.buildings.forEach(b=>{ if(b.lead===undefined) b.lead=""; });
     DB._v=13; saveDB();
   }
+  if((DB._v||1)<14){
+    // floor-leads ON/OFF per building + separate Saturday & Sunday reviewers + per-floor drawings
+    DB.buildings.forEach(b=>{
+      if(b.floorLeadsOn===undefined) b.floorLeadsOn=true;              // DSM-4 style: floor leads active by default
+      if(b.weekendLeadSat===undefined) b.weekendLeadSat=b.weekendLead||"";
+      if(b.weekendLeadSun===undefined) b.weekendLeadSun=b.weekendLead||"";
+    });
+    DB.floors.forEach(f=>{
+      if(f.weekendLeadSat===undefined) f.weekendLeadSat=f.weekendLead||"";
+      if(f.weekendLeadSun===undefined) f.weekendLeadSun=f.weekendLead||"";
+      if(f.plan===undefined) f.plan="";                               // uploaded drawing (data URL)
+    });
+    DB.contractors.forEach(c=>{
+      if(c.weekendReviewerSat===undefined) c.weekendReviewerSat=c.weekendReviewer||"";
+      if(c.weekendReviewerSun===undefined) c.weekendReviewerSun=c.weekendReviewer||"";
+    });
+    DB._v=14; saveDB();
+  }
 }
 const isWeekend=ds=>{ if(!ds) return false; const d=new Date(ds+"T00:00:00"); const g=d.getDay(); return g===0||g===6; };
+const dowOf=ds=>{ if(!ds) return -1; return new Date(ds+"T00:00:00").getDay(); };   // 0=Sun … 6=Sat
 const ymd=d=>{ const p=n=>String(n).padStart(2,"0"); return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate()); };
 /* ---------- Hand-drawn permit icons (inline SVG, scale with font-size, work in light+dark) ---------- */
 const _svg=b=>`<svg viewBox="0 0 24 24" style="width:1.12em;height:1.12em;vertical-align:-.19em;display:inline-block">${b}</svg>`;
@@ -830,7 +862,7 @@ const FLOORPLANS={
   "D4|Ground Floor (GF)":"assets/d4-ground.jpg","D4|Ground Floor Interstitial":"assets/d4-ground-int.jpg",
   "D4|First Floor (FF)":"assets/d4-first.jpg","D4|First Floor Interstitial":"assets/d4-first-int.jpg",
   "D4|Second Floor (SF)":"assets/d4-second.jpg","D4|Second Floor Interstitial":"assets/d4-second-int.jpg"};
-const floorPlanFor=(b,f)=> FLOORPLANS[b+"|"+f]||null;
+const floorPlanFor=(b,f)=>{ const fo=floorObj(b,f); if(fo&&fo.plan) return fo.plan; return FLOORPLANS[b+"|"+f]||null; };
 const floorObj=(b,name)=> DB.floors.find(f=>f.b===b&&f.name===name);
 function saveDB(){ localStorage.setItem(KEY, JSON.stringify(DB)); scheduleSync(); }
 const saveDBLocal=()=> localStorage.setItem(KEY, JSON.stringify(DB));
@@ -1094,6 +1126,10 @@ const ES={
 "No Jacobs lead is set for this yet — pick your reviewer on the review step, or ask your admin to assign one.":"Aún no hay un líder de Jacobs asignado — elija su revisor en el paso de revisión, o pida a su administrador que asigne uno.",
 "today":"hoy",
 "Sun":"Dom","Mon":"Lun","Tue":"Mar","Wed":"Mié","Thu":"Jue","Fri":"Vie","Sat":"Sáb",
+"Saturday":"Sábado","Sunday":"Domingo","routed to the weekend lead automatically.":"enviado automáticamente al líder de fin de semana.",
+"View Floor Plan":"Ver Plano del Piso","Open the drawing, find your sector or room, then type it below.":"Abra el dibujo, encuentre su sector o cuarto, luego escríbalo abajo.",
+"No drawing loaded for this floor yet — an admin can add one under Admin ▸ Floors.":"Aún no hay dibujo para este piso — un administrador puede agregarlo en Admin ▸ Pisos.",
+"No drawing yet":"Aún no hay dibujo","Remove drawing":"Quitar dibujo","On":"Encendido","Off":"Apagado",
 "already filled in for you. Change it only if you need someone else.":"ya está llenado para usted. Cámbielo solo si necesita a otra persona.",
 "Don't know who reviews your area? Pick \"Building HSE/CM (any available)\".":"¿No sabe quién revisa su área? Elija \"Building HSE/CM (cualquiera disponible)\".",
 "Weekend work":"Trabajo de fin de semana","Routed to the weekend lead":"Dirigido al líder de fin de semana",
@@ -1663,30 +1699,38 @@ function segYN(id,label,req){
 function rerenderForm(){ document.getElementById("app").innerHTML=VIEWS.form(); }
 
 /* ---------- Who reviews this permit? Clear priority chain ----------
-   WEEKEND (Sat/Sun) supersedes everything:  company weekend → floor weekend → building weekend
-   WEEKDAY:                                  building lead → floor lead → company superintendent
-   (each step falls to the next if empty) ------------------------------------------------------- */
+   WEEKEND supersedes everything, and Saturday vs Sunday can be different people:
+       company weekend(day) → floor weekend(day) → building weekend(day)
+   WEEKDAY:
+       building lead → floor lead (only if the building's floor-leads switch is ON) → company superintendent
+   When floor leads are OFF and the company has no assigned superintendent, it falls to the building lead, else blank.
+   (each step falls to the next when empty) ---------------------------------------------------------- */
 function autoReviewer(){
   const co=DB.contractors.find(c=>c.name===F.company);
   const fo=floorObj(F.building,F.floor);
   const b=bldOf(F.building);
-  if(isWeekend(F.startDate)){
-    if(co&&co.weekendReviewer) return {name:co.weekendReviewer, src:"company-wknd", label:"🗓️ "+esc(co.name)+"'s weekend Jacobs lead"};
-    if(fo&&fo.weekendLead) return {name:fo.weekendLead, src:"floor-wknd", label:"🗓️ weekend lead for "+esc(F.floor)};
-    if(b&&b.weekendLead) return {name:b.weekendLead, src:"bldg-wknd", label:"🗓️ weekend lead for "+esc(b.name)};
+  const g=dowOf(F.startDate); const isSat=g===6, isSun=g===0;
+  const dayName=isSat?"Saturday":"Sunday";
+  // pick Saturday-vs-Sunday value, falling back to the old single weekend field
+  const wk=(sat,sun,legacy)=> (isSat?sat:sun)||legacy||"";
+  if(isSat||isSun){
+    if(co){ const n=wk(co.weekendReviewerSat,co.weekendReviewerSun,co.weekendReviewer); if(n) return {name:n, src:"company-wknd", label:"🗓️ "+esc(co.name)+"'s "+dayName+" Jacobs lead"}; }
+    if(fo){ const n=wk(fo.weekendLeadSat,fo.weekendLeadSun,fo.weekendLead); if(n) return {name:n, src:"floor-wknd", label:"🗓️ "+dayName+" lead for "+esc(F.floor)}; }
+    if(b){ const n=wk(b.weekendLeadSat,b.weekendLeadSun,b.weekendLead); if(n) return {name:n, src:"bldg-wknd", label:"🗓️ "+dayName+" lead for "+esc(b.name)}; }
   }
   if(b&&b.lead) return {name:b.lead, src:"building", label:"building lead for "+esc(b.name)};
-  if(fo&&fo.lead) return {name:fo.lead, src:"floor", label:"floor lead for "+esc(F.floor)};
+  const floorLeadsOn = b ? (b.floorLeadsOn!==false) : true;
+  if(floorLeadsOn && fo && fo.lead) return {name:fo.lead, src:"floor", label:"floor lead for "+esc(F.floor)};
   if(co&&co.reviewer) return {name:co.reviewer, src:"company", label:esc(co.name)+"'s assigned Jacobs superintendent"};
-  return null;
+  return null;   // nothing assigned → requester picks on the review step
 }
 function dayChips(){
   const names=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
   let out="";
   for(let i=0;i<7;i++){ const d=new Date(); d.setDate(d.getDate()+i);
     const ds=ymd(d), dow=d.getDay(), wknd=(dow===0||dow===6);
-    out+=`<button class="daychip ${F.startDate===ds?"on":""} ${wknd?"wknd":""}" onclick="pickDay('${ds}')" type="button">
-      <span class="dc-day">${wknd?"🗓️ ":""}${T(names[dow])}${i===0?" ("+T("today")+")":""}</span>
+    out+=`<button class="daychip ${F.startDate===ds?"on":""} ${wknd?"wknd":""} ${i===0?"istoday":""}" onclick="pickDay('${ds}')" type="button" title="${i===0?T('today'):esc(T(names[dow]))}">
+      <span class="dc-day">${T(names[dow])}</span>
       <span class="dc-date">${d.getMonth()+1}/${d.getDate()}</span></button>`;
   }
   return out;
@@ -1726,12 +1770,14 @@ function stepLocation(){
     <option value="">${T("Select floor…")}</option>${floors.map(o=>`<option ${F.floor===o?"selected":""}>${esc(o)}</option>`).join("")}</select>`)}
   <div class="f-group"><label class="f-label">${T("What day are you working?")}<span class="req">*</span></label>
     <div class="daygrid">${dayChips()}</div>
-    <div class="hint">${isWeekend(F.startDate)?"🗓️ "+T("Weekend work — this permit goes to the weekend lead automatically."):T("Pick your work day. Weekend days route to the weekend lead automatically — nobody else gets bothered.")}</div></div>
+    <div class="hint">${(()=>{const g=dowOf(F.startDate); if(g===6||g===0) return "🗓️ "+(g===6?T("Saturday"):T("Sunday"))+" — "+T("routed to the weekend lead automatically."); return T("Pick your work day. Weekend days route to the weekend lead automatically — nobody else gets bothered.");})()}</div></div>
   ${(()=>{const a=autoReviewer(); if(!a) return `<div class="pill-hint" style="background:#fff8e6;color:#7a5b00">⚠️ ${T("No Jacobs lead is set for this yet — pick your reviewer on the review step, or ask your admin to assign one.")}</div>`;
     const wk=a.src.indexOf("wknd")>-1;
     return `<div class="pill-hint"${wk?' style="background:#fff8e6;color:#7a5b00"':''}>${wk?"🗓️":"👷"} <b>${esc(a.name)}</b> — ${a.label} — ${T("auto-selected as your Jacobs reviewer")}.</div>`;})()}
-  ${fp?`<div class="f-group"><button class="btn btn-line btn-block" onclick="showPlan()">🗺️ View Floor Plan — ${esc(F.floor)}</button>
-    <div class="hint">Look up your sector or room on the drawing, then enter it below.</div></div>`:""}
+  ${F.floor?(fp
+    ? `<div class="f-group"><button class="btn btn-dark btn-block" onclick="showPlan()">🗺️ ${T("View Floor Plan")} — ${esc(F.floor)}</button>
+        <div class="hint">${T("Open the drawing, find your sector or room, then type it below.")}</div></div>`
+    : `<div class="pill-hint">🗺️ ${T("No drawing loaded for this floor yet — an admin can add one under Admin ▸ Floors.")}</div>`):""}
   ${fld("area","Area / Room / Column Line",0,`<input class="f-in" id="area" list="areaSug" value="${esc(F.area??"")}" placeholder="Start typing — sectors &amp; rooms suggest themselves" onchange="F.area=this.value">
     <datalist id="areaSug">${areas.map(a=>`<option value="${esc(a)}">`).join("")}</datalist>`)}
   ${fld("location","Specific Work Location",1,inp("location","Where exactly is the work?"))}`;
@@ -2462,22 +2508,29 @@ function adminTab(){
   const delBtn=(coll,i)=>`<button class="btn btn-r btn-sm" onclick="adminDel('${coll}',${i})">Delete</button>`;
   if(ADMIN_TAB==="buildings") return `
     <div class="btnrow" style="margin:0 0 8px"><button class="btn btn-y btn-sm" onclick="adminAddBuilding()">+ Add Building</button></div>
-    <div class="hint" style="margin-bottom:8px">🗓️ Set a <b>Weekend Jacobs Lead</b> per building — on Saturdays and Sundays, permits route to them. Change it each week for whoever's covering.</div>
-    ${DB.buildings.map((b,i)=>row(esc(b.name),"Code: "+esc(b.code)+(b.weekendLead?'<br>🗓️ Weekend lead: '+esc(b.weekendLead):'<br><span style="color:var(--muted)">no weekend lead set</span>'),
+    <div class="hint" style="margin-bottom:8px">Toggle <b>floor leads ON/OFF</b> per building, and set separate <b>Saturday & Sunday</b> weekend leads. Change them each week for whoever's covering.</div>
+    ${DB.buildings.map((b,i)=>row(esc(b.name),"Code: "+esc(b.code)
+      +(b.floorLeadsOn!==false?'<br>✅ Floor leads ON':'<br>⛔ Floor leads OFF — routes by contractor superintendent')
+      +(b.lead?'<br>👷 Building lead: '+esc(b.lead):'')
+      +wkndLabel(b.weekendLeadSat,b.weekendLeadSun,b.weekendLead),
       `<button class="btn btn-line btn-sm" onclick="adminEditBuilding(${i})">Edit</button>${delBtn("buildings",i)}`)).join("")}`;
   if(ADMIN_TAB==="floors") return `
     <div class="btnrow" style="margin:0 0 8px"><button class="btn btn-y btn-sm" onclick="adminAddFloor()">+ Add Floor</button></div>
     <div class="hint" style="margin-bottom:8px">👷 Set a <b>Floor Lead</b> (Mon–Fri) and optionally a <b>🗓️ Weekend Lead</b> on each floor. Add sectors/rooms so the Area field suggests them.</div>
     ${DB.buildings.map(b=>`<div class="grp-h">${esc(b.name)}</div>
       ${DB.floors.map((f,i)=>f.b!==b.code?"":row(esc(f.name),
-        (f.lead?"👷 Lead: "+esc(f.lead):'<span style="color:var(--orange)">⚠ no floor lead assigned</span>')+(f.weekendLead?" · 🗓️ Wknd: "+esc(f.weekendLead):"")+(f.areas&&f.areas.length?" · "+f.areas.length+" areas":""),
+        (f.lead?"👷 Lead: "+esc(f.lead):'<span style="color:var(--orange)">⚠ no floor lead assigned</span>')
+        +wkndLabel(f.weekendLeadSat,f.weekendLeadSun,f.weekendLead)
+        +((f.plan||FLOORPLANS[b.code+"|"+f.name])?' · 🗺️ drawing loaded':' · <span style="color:var(--muted)">no drawing</span>')
+        +(f.areas&&f.areas.length?" · "+f.areas.length+" areas":""),
         `<button class="btn btn-line btn-sm" onclick="adminEditFloor(${i})">Edit</button>${delBtn("floors",i)}`)).join("")||'<div class="hint">No floors yet — add one.</div>'}`).join("")}`;
   if(ADMIN_TAB==="contractors") return `
     <div class="btnrow" style="margin:0 0 8px"><button class="btn btn-y btn-sm" onclick="adminAddContractor()">+ Add Trade Partner</button></div>
     <div class="hint" style="margin-bottom:8px">🦺 Add each trade partner's <b>Safety Manager</b> — they get a notification every time their crew submits a permit, and they can sign in as "Trade Partner Safety" to see all their company's permits.</div>
     ${DB.contractors.map((c,i)=>row(esc(c.name),
       esc([c.contact,c.phone,c.email].filter(Boolean).join(" · "))
-      +(c.reviewer?'<br>👷 Jacobs superintendent: '+esc(c.reviewer)+(c.weekendReviewer?" · 🗓️ Wknd: "+esc(c.weekendReviewer):""):(c.weekendReviewer?'<br>🗓️ Weekend: '+esc(c.weekendReviewer):''))
+      +(c.reviewer?'<br>👷 Jacobs superintendent: '+esc(c.reviewer):'')
+      +wkndLabel(c.weekendReviewerSat,c.weekendReviewerSun,c.weekendReviewer)
       +(c.safName?'<br>🦺 Safety: '+esc(c.safName)+(c.safPhone?" · "+esc(c.safPhone):""):'<br><span style="color:var(--orange)">⚠ no safety manager — notifications unavailable</span>'),
       `<button class="btn btn-line btn-sm" onclick="adminEditContractor(${i})">Edit</button>${delBtn("contractors",i)}`)).join("")}`;
   if(ADMIN_TAB==="admins") return `
@@ -2581,19 +2634,53 @@ function adminAddType(){
       q:o.q?o.q.split("\n").map(s=>s.trim()).filter(Boolean):[]});
   });
 }
+let PF_IMG={};
+function pfLoadImg(key,input){
+  const file=input.files&&input.files[0]; if(!file) return;
+  const rd=new FileReader();
+  rd.onload=e=>{ const img=new Image(); img.onload=()=>{
+    const maxW=1500; let w=img.width,h=img.height; if(w>maxW){ h=Math.round(h*maxW/w); w=maxW; }
+    const cv=document.createElement("canvas"); cv.width=w; cv.height=h;
+    cv.getContext("2d").drawImage(img,0,0,w,h);
+    PF_IMG[key]=cv.toDataURL("image/jpeg",0.72);
+    const prev=document.getElementById("pfimg_prev_"+key);
+    if(prev){ const im=document.createElement("img"); im.src=PF_IMG[key]; im.className="pf-preview"; im.id="pfimg_prev_"+key; prev.replaceWith(im); }
+    const rm=document.getElementById("pfimg_rm_"+key); if(rm) rm.style.display="";
+  }; img.src=e.target.result; };
+  rd.readAsDataURL(file);
+}
+function pfClearImg(key){ PF_IMG[key]=""; const prev=document.getElementById("pfimg_prev_"+key);
+  if(prev){ const dv=document.createElement("div"); dv.className="pf-preview empty"; dv.id="pfimg_prev_"+key; dv.textContent=T("No drawing yet"); prev.replaceWith(dv); }
+  const rm=document.getElementById("pfimg_rm_"+key); if(rm) rm.style.display="none";
+  const inp=document.getElementById("pf_"+key); if(inp) inp.value="";
+}
 function promptFields(title,fields,cb){
+  PF_IMG={}; fields.forEach(f=>{ if(f.type==="image") PF_IMG[f.key]=f.value||""; });
   modal(`<h3>${esc(title)}</h3>${fields.map(f=>`<div class="f-group"><label class="f-label">${esc(f.label)}</label>
     ${f.type==="textarea"?`<textarea class="f-in" id="pf_${f.key}">${esc(f.value||"")}</textarea>`
-    :f.type==="select"?`<select class="f-in" id="pf_${f.key}"><option value="">—</option>${(f.opts||[]).map(o=>`<option ${f.value===o?"selected":""}>${esc(o)}</option>`).join("")}</select>`
+    :f.type==="select"?(()=>{ const opts=(f.opts||[]).slice(); if(f.value&&opts.indexOf(f.value)<0) opts.unshift(f.value);
+        return `<select class="f-in" id="pf_${f.key}"><option value="">${esc(f.placeholder||"— none —")}</option>${opts.map(o=>`<option ${f.value===o?"selected":""}>${esc(o)}</option>`).join("")}</select>`; })()
     :f.type==="combo"?`<input class="f-in" id="pf_${f.key}" list="dl_${f.key}" value="${esc(f.value||"")}" placeholder="${T("Type it, or pick from the list…")}" autocomplete="off">
       <datalist id="dl_${f.key}">${(f.opts||[]).map(o=>`<option value="${esc(o)}">`).join("")}</datalist>`
+    :f.type==="toggle"?`<label class="switch"><input type="checkbox" id="pf_${f.key}" ${f.value?"checked":""}><span class="sl"></span><span class="switch-tx" id="pf_txt_${f.key}">${f.value?esc(f.onLabel||T("On")):esc(f.offLabel||T("Off"))}</span></label>`
+    :f.type==="image"?`<div id="pfimg_wrap_${f.key}">
+        ${f.value?`<img src="${f.value}" class="pf-preview" id="pfimg_prev_${f.key}">`:`<div class="pf-preview empty" id="pfimg_prev_${f.key}">${T("No drawing yet")}</div>`}
+        <input type="file" accept="image/*" class="f-in" id="pf_${f.key}" onchange="pfLoadImg('${f.key}',this)" style="padding:8px">
+        <button type="button" class="btn btn-line btn-sm" id="pfimg_rm_${f.key}" style="margin-top:6px;${f.value?"":"display:none"}" onclick="pfClearImg('${f.key}')">${T("Remove drawing")}</button></div>`
     :f.type==="date"?`<input class="f-in" id="pf_${f.key}" type="date" value="${esc(f.value||"")}">`
     :`<input class="f-in" id="pf_${f.key}" value="${esc(f.value||"")}">`}
     ${f.hint?`<div class="hint">${f.hint}</div>`:""}</div>`).join("")}
     <div class="btnrow"><button class="btn btn-g" id="pfOk">✓ Save</button><button class="btn btn-line btn-cancel" onclick="closeModal()">Cancel</button></div>
     <div class="hint center" style="margin-top:8px">Press <b>Enter</b> to save.</div>`);
+  // live toggle label
+  fields.filter(f=>f.type==="toggle").forEach(f=>{ const cb2=document.getElementById("pf_"+f.key); const tx=document.getElementById("pf_txt_"+f.key);
+    if(cb2&&tx) cb2.addEventListener("change",()=>tx.textContent=cb2.checked?(f.onLabel||T("On")):(f.offLabel||T("Off"))); });
   const ok=()=>{
-    const out={}; fields.forEach(f=>out[f.key]=document.getElementById("pf_"+f.key).value.trim());
+    const out={}; fields.forEach(f=>{ const el=document.getElementById("pf_"+f.key);
+      if(f.type==="toggle") out[f.key]=!!(el&&el.checked);
+      else if(f.type==="image") out[f.key]=PF_IMG[f.key]!==undefined?PF_IMG[f.key]:(f.value||"");
+      else out[f.key]=el?el.value.trim():"";
+    });
     closeModal();
     const snap = ROLE==="admin" ? configSnapshot() : "";
     cb(out);
@@ -2602,16 +2689,24 @@ function promptFields(title,fields,cb){
   };
   document.getElementById("pfOk").onclick=ok;
   const mo=document.querySelector(".modal");
-  mo.addEventListener("keydown",e=>{ if(e.key==="Enter"&&e.target.tagName!=="TEXTAREA"){ e.preventDefault(); ok(); } });
+  mo.addEventListener("keydown",e=>{ if(e.key==="Enter"&&e.target.tagName!=="TEXTAREA"&&e.target.type!=="file"){ e.preventDefault(); ok(); } });
   setTimeout(()=>document.getElementById("pf_"+fields[0].key)?.focus(),60);
 }
+const RNAMES=()=>DB.reviewers.map(r=>r.name);
+function wkndLabel(sat,sun,legacy){ sat=sat||legacy||""; sun=sun||legacy||"";
+  if(!sat&&!sun) return '<br><span style="color:var(--muted)">no weekend lead set</span>';
+  return '<br>🗓️ '+(sat?'Sat: '+esc(sat):'Sat: —')+' · '+(sun?'Sun: '+esc(sun):'Sun: —'); }
 const BUILDING_FIELDS=b=>[
   {key:"name",label:"Building Name",value:b?.name},
   {key:"code",label:"Building Code (e.g., D3)",value:b?.code},
-  {key:"lead",label:"Building Lead (weekday, optional) — supersedes floor & company",type:"combo",opts:DB.reviewers.map(r=>r.name),value:b?.lead,
-   hint:"If set, this person reviews EVERY weekday permit in the building — above floor leads and company superintendents. Leave blank when the building uses floor leads instead (like DSM-4)."},
-  {key:"weekendLead",label:"🗓️ Weekend Jacobs Lead (Sat/Sun) — whole building",type:"combo",opts:DB.reviewers.map(r=>r.name),value:b?.weekendLead,
-   hint:"On weekends, permits in this building route to this person unless a floor or trade partner has its own weekend lead. Change it each week for whoever's covering."},
+  {key:"floorLeadsOn",label:"Is this building set up for floor leads?",type:"toggle",onLabel:"✅ Floor leads ON — route by floor",offLabel:"⛔ Floor leads OFF — route by contractor's Jacobs superintendent",value:b?(b.floorLeadsOn!==false):true,
+   hint:"ON (early in the job): each floor's lead reviews that floor's weekday permits. OFF (later, when floor leads roll off): the system skips floor leads and routes to the Jacobs superintendent assigned to each trade partner instead."},
+  {key:"lead",label:"Building Lead (weekday, optional) — supersedes floor & company",type:"select",opts:RNAMES(),value:b?.lead,
+   hint:"If set, this person reviews EVERY weekday permit in the building — above floor leads and company superintendents. Leave blank when the building uses floor leads or per-contractor superintendents."},
+  {key:"weekendLeadSat",label:"🗓️ Saturday Jacobs Lead — whole building",type:"select",opts:RNAMES(),value:b?.weekendLeadSat,
+   hint:"Covers Saturday permits in this building unless a floor or trade partner has its own Saturday lead."},
+  {key:"weekendLeadSun",label:"🗓️ Sunday Jacobs Lead — whole building",type:"select",opts:RNAMES(),value:b?.weekendLeadSun,
+   hint:"Covers Sunday permits — can be a different person than Saturday."},
   {key:"safLead",label:"Jacobs Safety Lead — Name",value:b?.safLead,hint:"Notified on every permit in this building that requires Jacobs Safety sign-off (Confined Space, Pressure Test, Roof Access, Elevated Work, Man-Basket…)."},
   {key:"safPhone",label:"Jacobs Safety Lead — Cell Phone",value:b?.safPhone},
   {key:"safEmail",label:"Jacobs Safety Lead — Email",value:b?.safEmail}];
@@ -2620,22 +2715,28 @@ function adminEditBuilding(i){ const b=DB.buildings[i]; promptFields("Edit Build
 const FLOOR_FIELDS=f=>[
   {key:"name",label:"Floor Name (e.g., First Floor Interstitial)",value:f?.name},
   {key:"b",label:"Building Code (e.g., D4)",value:f?.b},
-  {key:"lead",label:"Floor Lead — Jacobs reviewer for this floor",type:"select",opts:DB.reviewers.map(r=>r.name),value:f?.lead,
-   hint:"Auto-fills the Jacobs Reviewer when contractors pick this floor (Mon–Fri)."},
-  {key:"weekendLead",label:"🗓️ Weekend Floor Lead (Sat/Sun, optional)",type:"combo",opts:DB.reviewers.map(r=>r.name),value:f?.weekendLead,
-   hint:"On weekends, this floor routes here instead of the weekday lead. Leave blank to use the building's weekend lead."},
+  {key:"lead",label:"Floor Lead — Jacobs reviewer for this floor",type:"select",opts:RNAMES(),value:f?.lead,
+   hint:"Auto-fills the Jacobs Reviewer when contractors pick this floor (Mon–Fri) — only while the building's floor-leads switch is ON."},
+  {key:"weekendLeadSat",label:"🗓️ Saturday Floor Lead (optional)",type:"select",opts:RNAMES(),value:f?.weekendLeadSat,
+   hint:"Saturday coverage for this floor. Leave blank to fall back to the building's Saturday lead."},
+  {key:"weekendLeadSun",label:"🗓️ Sunday Floor Lead (optional)",type:"select",opts:RNAMES(),value:f?.weekendLeadSun,
+   hint:"Sunday coverage — can differ from Saturday."},
+  {key:"plan",label:"🗺️ Floor Plan Drawing (optional)",type:"image",value:f?.plan,
+   hint:"Upload the floor's drawing (JPG/PNG). Requesters can open it on the permit form to pinpoint their work area. Auto-shrunk to save space."},
   {key:"areas",label:"Areas / rooms / sectors (one per line — suggested while contractors type)",type:"textarea",value:(f?.areas||[]).join("\n")}];
-function adminAddFloor(){ promptFields("Add Floor",FLOOR_FIELDS(),o=>{ if(o.name&&o.b) DB.floors.push({id:uid(),b:o.b.toUpperCase(),name:o.name,lead:o.lead||"",areas:o.areas?o.areas.split("\n").map(s=>s.trim()).filter(Boolean):[],active:true}); }); }
-function adminEditFloor(i){ const f=DB.floors[i]; promptFields("Edit Floor",FLOOR_FIELDS(f),o=>{ f.name=o.name||f.name; f.b=(o.b||f.b).toUpperCase(); f.lead=o.lead||""; f.areas=o.areas?o.areas.split("\n").map(s=>s.trim()).filter(Boolean):[]; }); }
+function adminAddFloor(){ promptFields("Add Floor",FLOOR_FIELDS(),o=>{ if(o.name&&o.b) DB.floors.push({id:uid(),b:o.b.toUpperCase(),name:o.name,lead:o.lead||"",weekendLeadSat:o.weekendLeadSat||"",weekendLeadSun:o.weekendLeadSun||"",plan:o.plan||"",areas:o.areas?o.areas.split("\n").map(s=>s.trim()).filter(Boolean):[],active:true}); }); }
+function adminEditFloor(i){ const f=DB.floors[i]; promptFields("Edit Floor",FLOOR_FIELDS(f),o=>{ f.name=o.name||f.name; f.b=(o.b||f.b).toUpperCase(); f.lead=o.lead||""; f.weekendLeadSat=o.weekendLeadSat||""; f.weekendLeadSun=o.weekendLeadSun||""; f.plan=o.plan||""; f.areas=o.areas?o.areas.split("\n").map(s=>s.trim()).filter(Boolean):[]; }); }
 const CONTRACTOR_FIELDS=c=>[
   {key:"name",label:"Trade Partner Name",value:c?.name},
   {key:"contact",label:"Primary Contact",value:c?.contact},
   {key:"phone",label:"Phone",value:c?.phone},
   {key:"email",label:"Email",value:c?.email},
-  {key:"reviewer",label:"Assigned Jacobs Superintendent (optional)",type:"combo",opts:DB.reviewers.map(r=>r.name),value:c?.reviewer,
-   hint:"Weekday fallback: used when the floor has no floor lead (and the building has no building lead). This is the superintendent who owns this trade partner's contract."},
-  {key:"weekendReviewer",label:"🗓️ Weekend Jacobs Superintendent (Sat/Sun, optional)",type:"combo",opts:DB.reviewers.map(r=>r.name),value:c?.weekendReviewer,
-   hint:"On weekends, this company's permits route here. Highest priority of all weekend routing."},
+  {key:"reviewer",label:"Assigned Jacobs Superintendent",type:"select",opts:RNAMES(),value:c?.reviewer,
+   hint:"The superintendent who owns this trade partner's contract. Reviews their weekday permits when the building's floor leads are OFF (or a floor has no lead). Pick a name from the list."},
+  {key:"weekendReviewerSat",label:"🗓️ Saturday Jacobs Superintendent (optional)",type:"select",opts:RNAMES(),value:c?.weekendReviewerSat,
+   hint:"Covers this company's Saturday permits — highest priority of all Saturday routing."},
+  {key:"weekendReviewerSun",label:"🗓️ Sunday Jacobs Superintendent (optional)",type:"select",opts:RNAMES(),value:c?.weekendReviewerSun,
+   hint:"Covers Sunday permits — can be a different person than Saturday."},
   {key:"safName",label:"Safety Manager — Name",value:c?.safName,hint:"Gets notified whenever this trade partner submits a permit."},
   {key:"safPhone",label:"Safety Manager — Cell Phone",value:c?.safPhone},
   {key:"safEmail",label:"Safety Manager — Email",value:c?.safEmail}];
