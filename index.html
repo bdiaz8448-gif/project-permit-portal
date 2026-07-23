@@ -669,7 +669,49 @@ function migrate(){
     const es=DB.permitTypes.find(t=>t.code==="ES"); if(es) es.name="Energized Electrical Permit";
     DB._v=9; saveDB();
   }
+  if((DB._v||1)<10){
+    // custom drawn icons that actually look like the equipment
+    Object.entries(SVGICONS).forEach(([code,svg])=>{ const t=DB.permitTypes.find(x=>x.code===code); if(t) t.ico=svg; });
+    DB._v=10; saveDB();
+  }
 }
+/* ---------- Hand-drawn permit icons (inline SVG, scale with font-size, work in light+dark) ---------- */
+const _svg=b=>`<svg viewBox="0 0 24 24" style="width:1.12em;height:1.12em;vertical-align:-.19em;display:inline-block">${b}</svg>`;
+const SVGICONS={
+  // Bull Rigging — lever chain hoist / come-along
+  BR:_svg(`<path d="M12 1.5c1.4 0 2.5 1.1 2.5 2.5S13.4 6.5 12 6.5" fill="none" stroke="#2f6ad0" stroke-width="1.7" stroke-linecap="round"/>
+    <rect x="7.5" y="6.3" width="9" height="6" rx="1.5" fill="#d93025"/><rect x="9" y="7.6" width="6" height="1.4" rx=".7" fill="#ffd0cb"/>
+    <line x1="12" y1="12.3" x2="12" y2="18.5" stroke="#8a94a0" stroke-width="1.5" stroke-dasharray="1.4 1.1"/>
+    <path d="M12 18.6c-1.3 0-2.3 1-2.3 2.3s1 2.3 2.3 2.3" fill="none" stroke="#f0a500" stroke-width="1.7" stroke-linecap="round"/>`),
+  // Man-Basket Exiting — orange basket rail, yellow lanyard tied to overhead cable
+  EL:_svg(`<line x1="1.5" y1="4" x2="22.5" y2="4" stroke="#8a94a0" stroke-width="1.7"/>
+    <circle cx="12" cy="4" r="1.2" fill="#5b6773"/>
+    <line x1="12" y1="4.5" x2="12" y2="12.5" stroke="#ffb81c" stroke-width="2.1" stroke-linecap="round"/>
+    <circle cx="12" cy="13" r="1.5" fill="#f0a500"/>
+    <path d="M4 14.5h16v6.5H4z" fill="none" stroke="#f5821f" stroke-width="2" stroke-linejoin="round"/>
+    <line x1="4" y1="17.8" x2="20" y2="17.8" stroke="#f5821f" stroke-width="1.4"/>`),
+  // Elevated Work — worker in harness on a lifeline
+  ELEV:_svg(`<line x1="12" y1="1" x2="12" y2="5.2" stroke="#f5821f" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M8.5 5.5h7l-1 2.2h-5z" fill="#ffb81c"/><circle cx="12" cy="8.6" r="2" fill="#f2c9a0"/>
+    <rect x="8.7" y="10.4" width="6.6" height="7.2" rx="1.6" fill="#1a73e8"/>
+    <path d="M10 10.6l4 6.6M14 10.6l-4 6.6" stroke="#f5821f" stroke-width="1.3"/>
+    <rect x="9.4" y="17.4" width="2" height="5.4" rx=".8" fill="#22303f"/><rect x="12.6" y="17.4" width="2" height="5.4" rx=".8" fill="#22303f"/>`),
+  // Pressure Testing — gauge on a manifold
+  PT:_svg(`<rect x="2" y="16.5" width="20" height="4" rx="1.6" fill="#5b6773"/>
+    <rect x="10.6" y="12" width="2.8" height="5" fill="#5b6773"/>
+    <circle cx="12" cy="8" r="6" fill="#fff" stroke="#22303f" stroke-width="1.7"/>
+    <line x1="12" y1="8" x2="15.3" y2="4.9" stroke="#d93025" stroke-width="1.7" stroke-linecap="round"/>
+    <circle cx="12" cy="8" r="1.1" fill="#22303f"/>
+    <line x1="5" y1="20.5" x2="5" y2="22.5" stroke="#5b6773" stroke-width="1.6"/><line x1="19" y1="20.5" x2="19" y2="22.5" stroke="#5b6773" stroke-width="1.6"/>`),
+  // Opening & Penetration — drill boring into a wall
+  OP:_svg(`<rect x="1.5" y="2.5" width="5" height="19" rx="1" fill="#c3ccd8"/>
+    <path d="M6.5 6v12" stroke="#9aa6b4" stroke-width="1"/>
+    <rect x="14" y="8" width="7.5" height="6.5" rx="1.6" fill="#d93025"/>
+    <rect x="17.5" y="14.3" width="3" height="6" rx="1.1" fill="#22303f"/>
+    <rect x="8.5" y="10.3" width="6" height="1.9" fill="#5b6773"/>
+    <path d="M8.5 10.3l0 1.9" stroke="#8a94a0"/>
+    <circle cx="7.4" cy="11.25" r="1.3" fill="#ffb81c"/>`)
+};
 const EQUIP_TYPES=[
   ["Scissor Lift","🛗"],["Boom Lift","🦒"],["Aerial Lift","🪜"],["Forklift","🚜"],["Telehandler","🏗️"],
   ["Crane","🏗️"],["Buggy / Cart","🛺"],["Skid Steer","🚧"],["Excavator","⛏️"],["Generator","🔌"],
@@ -2506,7 +2548,7 @@ function adminAddReviewer(){ promptFields("Add Jacobs Reviewer",REVIEWER_FIELDS(
 function adminEditReviewer(i){ const r=DB.reviewers[i]; promptFields("Edit Reviewer",REVIEWER_FIELDS(r),o=>Object.assign(r,o)); }
 function adminEditType(i){ const t=DB.permitTypes[i];
   promptFields("Edit Permit Type — "+t.code,[{key:"name",label:"Permit Name",value:t.name},
-    {key:"ico",label:"Icon — paste any emoji",value:t.ico,hint:"🔥 ⚡ 🔧 🪜 ⛏️ 🏗️ 🧗 🕳️ 🧱 💥 🚧 ☢️ 📦 ⛓️ 🌡️ 🛠️ 🥽 🚨 🧯 🪛"},
+    {key:"ico",label:"Icon — paste any emoji",value:(t.ico||"").startsWith("<svg")?"":t.ico,hint:(t.ico||"").startsWith("<svg")?"This type has a custom drawn icon. Leave blank to keep it, or paste an emoji to replace it.":"🔥 ⚡ 🔧 🪜 ⛏️ 🏗️ 🧗 🕳️ 🧱 💥 🚧 ☢️ 📦 ⛓️ 🌡️ 🛠️ 🥽 🚨 🧯 🪛"},
     {key:"desc",label:"Description",value:t.desc},
     {key:"safetyReq",label:"Requires Jacobs Safety sign-off?",type:"select",opts:["Yes","No"],value:t.safetyReq?"Yes":"No",
      hint:"Yes = the building's Jacobs Safety Lead is notified and must sign before work."},
