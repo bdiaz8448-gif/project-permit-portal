@@ -674,6 +674,11 @@ function migrate(){
     Object.entries(SVGICONS).forEach(([code,svg])=>{ const t=DB.permitTypes.find(x=>x.code===code); if(t) t.ico=svg; });
     DB._v=10; saveDB();
   }
+  if((DB._v||1)<11){
+    // each trade partner can have an assigned Jacobs superintendent (company-based routing)
+    DB.contractors.forEach(c=>{ if(c.reviewer===undefined) c.reviewer=""; });
+    DB._v=11; saveDB();
+  }
 }
 /* ---------- Hand-drawn permit icons (inline SVG, scale with font-size, work in light+dark) ---------- */
 const _svg=b=>`<svg viewBox="0 0 24 24" style="width:1.12em;height:1.12em;vertical-align:-.19em;display:inline-block">${b}</svg>`;
@@ -1046,6 +1051,12 @@ const ES={
 "Total Permits":"Permisos Totales","Active":"Activos","Completed":"Completados","Expired":"Vencidos","Needs Update":"Necesita Actualización",
 "Rejected / Void / Lost":"Rechazado / Anulado / Perdido","Top Permit Type":"Permiso Más Usado","Top Trade Partner":"Empresa con Más Permisos",
 "Permit Details":"Detalles del Permiso","Building":"Edificio",
+"Floor lead":"Líder del Piso","auto-selected as your Jacobs reviewer":"seleccionado automáticamente como su revisor de Jacobs",
+"your company's assigned Jacobs superintendent, already selected":"el superintendente de Jacobs asignado a su empresa, ya seleccionado",
+"Jacobs superintendent":"superintendente de Jacobs","auto-selected as your reviewer":"seleccionado automáticamente como su revisor",
+"auto-selected":"seleccionado automáticamente",
+"already filled in for you. Change it only if you need someone else.":"ya está llenado para usted. Cámbielo solo si necesita a otra persona.",
+"Don't know who reviews your area? Pick \"Building HSE/CM (any available)\".":"¿No sabe quién revisa su área? Elija \"Building HSE/CM (cualquiera disponible)\".",
 "Person Responsible":"Persona Responsable","Safety Manager":"Gerente de Seguridad",
 "add one in Admin → Trade Partners":"agréguelo en Admin → Empresas",
 "Heads up: the phone numbers above print on the sticker and will be visible to anyone near the machine. Use work cell numbers.":"Atención: los teléfonos de arriba se imprimen en la etiqueta y serán visibles para cualquiera cerca de la máquina. Use números de trabajo.",
@@ -1608,12 +1619,22 @@ function segYN(id,label,req){
 }
 function rerenderForm(){ document.getElementById("app").innerHTML=VIEWS.form(); }
 
-function pickFloor(name){
-  F.floor=name;
-  const fo=floorObj(F.building,name);
-  if(fo&&fo.lead){ F.reviewer=fo.lead; F._leadAuto=true; } else F._leadAuto=false;
-  rerenderForm();
+/* ---------- Who reviews this permit? Company assignment wins, then floor lead ---------- */
+function autoReviewer(){
+  const co=DB.contractors.find(c=>c.name===F.company);
+  if(co&&co.reviewer) return {name:co.reviewer, src:"company", label:esc(co.name)+"'s assigned Jacobs superintendent"};
+  const fo=floorObj(F.building,F.floor);
+  if(fo&&fo.lead) return {name:fo.lead, src:"floor", label:"floor lead for "+esc(F.floor)};
+  return null;
 }
+function applyAutoReviewer(){
+  if(F._revManual) return;           // user hand-picked — leave it alone
+  const a=autoReviewer();
+  if(a){ F.reviewer=a.name; F._revAuto=true; F._revSrc=a.src; F._revLabel=a.label; }
+}
+function pickFloor(name){ F.floor=name; applyAutoReviewer(); rerenderForm(); }
+function pickCompany(v){ F.company=v; applyAutoReviewer(); rerenderForm(); }
+function pickReviewer(v){ F.reviewer=v; F._revManual=true; F._revAuto=false; rerenderForm(); }
 function showPlan(){
   const src=floorPlanFor(F.building,F.floor); if(!src) return;
   modal(`<div style="max-width:none">
@@ -1634,11 +1655,12 @@ function stepLocation(){
   const fp=floorPlanFor(F.building,F.floor);
   return `<div class="section-t">Work Location</div>
   ${qs.get("b")?`<div class="pill-hint">📍 Pre-filled from QR code — confirm it's right.</div>`:""}
-  ${fld("building","Building",1,`<select class="f-in" onchange="F.building=this.value;F.floor='';F._leadAuto=false;rerenderForm()">
+  ${fld("building","Building",1,`<select class="f-in" onchange="F.building=this.value;F.floor='';applyAutoReviewer();rerenderForm()">
     ${DB.buildings.filter(b=>b.active).map(b=>`<option value="${b.code}" ${F.building===b.code?"selected":""}>${esc(b.name)}</option>`).join("")}</select>`)}
   ${fld("floor","Floor / Level",1,`<select class="f-in" onchange="pickFloor(this.value)">
     <option value="">${T("Select floor…")}</option>${floors.map(o=>`<option ${F.floor===o?"selected":""}>${esc(o)}</option>`).join("")}</select>`)}
-  ${fo&&fo.lead?`<div class="pill-hint">👷 Floor lead: <b>${esc(fo.lead)}</b> — auto-selected as your Jacobs reviewer.</div>`:""}
+  ${(()=>{const a=autoReviewer(); return a&&a.src==="floor"?`<div class="pill-hint">👷 ${T("Floor lead")}: <b>${esc(a.name)}</b> — ${T("auto-selected as your Jacobs reviewer")}.</div>`
+    :a&&a.src==="company"?`<div class="pill-hint">👷 <b>${esc(a.name)}</b> — ${T("your company's assigned Jacobs superintendent, already selected")}.</div>`:"";})()}
   ${fp?`<div class="f-group"><button class="btn btn-line btn-block" onclick="showPlan()">🗺️ View Floor Plan — ${esc(F.floor)}</button>
     <div class="hint">Look up your sector or room on the drawing, then enter it below.</div></div>`:""}
   ${fld("area","Area / Room / Column Line",0,`<input class="f-in" id="area" list="areaSug" value="${esc(F.area??"")}" placeholder="Start typing — sectors &amp; rooms suggest themselves" onchange="F.area=this.value">
@@ -1648,8 +1670,9 @@ function stepLocation(){
 function stepContractor(){
   const co=DB.contractors.find(c=>c.name===F.company)||{};
   return `<div class="section-t">${T("Trade Partner Information")}</div>
-  ${fld("company","Trade Partner Company",1,`<select class="f-in" onchange="F.company=this.value;rerenderForm()">
+  ${fld("company","Trade Partner Company",1,`<select class="f-in" onchange="pickCompany(this.value)">
     <option value="">Select…</option>${DB.contractors.filter(c=>c.active).map(c=>`<option ${F.company===c.name?"selected":""}>${esc(c.name)}</option>`).join("")}</select>`)}
+  ${co.reviewer?`<div class="pill-hint">👷 <b>${esc(co.reviewer)}</b> — ${esc(F.company)} ${T("Jacobs superintendent")} — ${T("auto-selected as your reviewer")}.</div>`:""}
   ${co.safName?`<div class="pill-hint">🦺 ${esc(co.safName)} (${esc(F.company)} ${T("safety manager")}) ${T("will also be notified of this permit.")}</div>`:""}
   ${fld("requestedBy","Requested By",1,inp("requestedBy","Your name"))}
   <div class="f-row">
@@ -1709,14 +1732,13 @@ function stepPaper(){
 function toggleLinked(c){ const i=F.linkedTypes.indexOf(c); if(i>=0) F.linkedTypes.splice(i,1); else F.linkedTypes.push(c); rerenderForm(); }
 function stepReview(){
   const t=typeOf(F.typeCode);
-  const fo=floorObj(F.building,F.floor);
-  // safety net: if the floor has a lead and nothing is picked yet, fill it in — no thinking required
-  if(!F.reviewer&&fo&&fo.lead){ F.reviewer=fo.lead; F._leadAuto=true; }
+  applyAutoReviewer(); // safety net — fill from company or floor if not hand-picked
   const revOpts=[...new Set([...DB.reviewers.filter(r=>r.active).map(r=>r.name), ...(F.reviewer?[F.reviewer]:[])])];
   return `<div class="section-t">Jacobs Review</div>
-  ${F._leadAuto&&F.reviewer?`<div class="pill-hint">👷 <b>${esc(F.reviewer)}</b> is the floor lead for ${esc(F.floor)} — already filled in for you. Change it only if you need someone else.</div>`
-    :fo&&fo.lead?"":`<div class="hint" style="margin-bottom:8px">Don't know who reviews your area? Pick "Building HSE/CM (any available)".</div>`}
-  ${fld("reviewer","Requested Jacobs Reviewer",1,sel("reviewer",revOpts))}
+  ${F._revAuto&&F.reviewer?`<div class="pill-hint">👷 <b>${esc(F.reviewer)}</b> — ${F._revLabel||T("auto-selected")} — ${T("already filled in for you. Change it only if you need someone else.")}</div>`
+    :!F.reviewer?`<div class="hint" style="margin-bottom:8px">${T("Don't know who reviews your area? Pick \"Building HSE/CM (any available)\".")}</div>`:""}
+  ${fld("reviewer","Requested Jacobs Reviewer",1,`<select class="f-in" onchange="pickReviewer(this.value)">
+    <option value="">Select…</option>${revOpts.map(o=>`<option ${F.reviewer===o?"selected":""}>${esc(o)}</option>`).join("")}</select>`)}
   ${fld("notes","Additional notes for Jacobs",0,ta("notes","Anything Jacobs should know?"))}
   <hr class="div"><div class="section-t">${T("Quick check before you submit")}</div>
   <dl class="kv">
@@ -2384,6 +2406,7 @@ function adminTab(){
     <div class="hint" style="margin-bottom:8px">🦺 Add each trade partner's <b>Safety Manager</b> — they get a notification every time their crew submits a permit, and they can sign in as "Trade Partner Safety" to see all their company's permits.</div>
     ${DB.contractors.map((c,i)=>row(esc(c.name),
       esc([c.contact,c.phone,c.email].filter(Boolean).join(" · "))
+      +(c.reviewer?'<br>👷 Jacobs superintendent: '+esc(c.reviewer):'')
       +(c.safName?'<br>🦺 Safety: '+esc(c.safName)+(c.safPhone?" · "+esc(c.safPhone):""):'<br><span style="color:var(--orange)">⚠ no safety manager — notifications unavailable</span>'),
       `<button class="btn btn-line btn-sm" onclick="adminEditContractor(${i})">Edit</button>${delBtn("contractors",i)}`)).join("")}`;
   if(ADMIN_TAB==="admins") return `
@@ -2532,6 +2555,8 @@ const CONTRACTOR_FIELDS=c=>[
   {key:"contact",label:"Primary Contact",value:c?.contact},
   {key:"phone",label:"Phone",value:c?.phone},
   {key:"email",label:"Email",value:c?.email},
+  {key:"reviewer",label:"Assigned Jacobs Superintendent (optional)",type:"combo",opts:DB.reviewers.map(r=>r.name),value:c?.reviewer,
+   hint:"When anyone from this company requests a permit, this reviewer auto-fills — it takes priority over the floor lead. Leave blank to use the floor lead instead."},
   {key:"safName",label:"Safety Manager — Name",value:c?.safName,hint:"Gets notified whenever this trade partner submits a permit."},
   {key:"safPhone",label:"Safety Manager — Cell Phone",value:c?.safPhone},
   {key:"safEmail",label:"Safety Manager — Email",value:c?.safEmail}];
