@@ -788,6 +788,13 @@ function migrate(){
     }
     DB._v=16; saveDB();
   }
+  if((DB._v||1)<17){
+    // Repair every building whose code was renamed but whose floors kept the old code.
+    DB.buildings.forEach(b=>{ (LEGACY_CODES[b.code]||[]).forEach(oc=>{
+      DB.floors.forEach(f=>{ if(f.b===oc) f.b=b.code; });   // adopt orphaned floors into the current code
+    }); });
+    DB._v=17; saveDB();
+  }
 }
 const isWeekend=ds=>{ if(!ds) return false; const d=new Date(ds+"T00:00:00"); const g=d.getDay(); return g===0||g===6; };
 const dowOf=ds=>{ if(!ds) return -1; return new Date(ds+"T00:00:00").getDay(); };   // 0=Sun … 6=Sat
@@ -919,7 +926,13 @@ const floorPlanFor=(b,f)=>{ const fo=floorObj(b,f); if(fo&&fo.plan) return fo.pl
   if(FLOORPLANS[b+"|"+f]) return FLOORPLANS[b+"|"+f];
   if(isDSM4(b)&&DSM4PLANS[f]) return DSM4PLANS[f];
   return null; };
-const floorObj=(b,name)=> DB.floors.find(f=>f.b===b&&f.name===name);
+// Some building codes were renamed over time while their floors kept the old code.
+// This maps a current code → any legacy codes its floors might still be stored under.
+const LEGACY_CODES={ "DSM4":["D4"], "DSM3":["D3"], "HB2":["HB"], "CUB-E":["CUB"] };
+function codeVariants(code){ return [code].concat(LEGACY_CODES[code]||[]); }
+// All active floors for a building, resilient to legacy codes (so the permit form always finds them).
+function floorsOfBuilding(code){ const v=codeVariants(code); return DB.floors.filter(f=>v.indexOf(f.b)>=0&&f.active); }
+const floorObj=(b,name)=>{ const v=codeVariants(b); return DB.floors.find(f=>v.indexOf(f.b)>=0&&f.name===name); };
 function saveDB(){ localStorage.setItem(KEY, JSON.stringify(DB)); scheduleSync(); }
 const saveDBLocal=()=> localStorage.setItem(KEY, JSON.stringify(DB));
 const uid=()=> "p"+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
@@ -1834,7 +1847,7 @@ function showPlan(){
   document.querySelector(".modal").style.maxWidth="min(1100px,96vw)";
 }
 function stepLocation(){
-  const floors=DB.floors.filter(f=>f.b===F.building&&f.active).map(f=>f.name);
+  const floors=floorsOfBuilding(F.building).map(f=>f.name);
   const qs=new URLSearchParams(location.search);
   const fo=floorObj(F.building,F.floor);
   const areas=(fo&&fo.areas&&fo.areas.length)?fo.areas:[];
