@@ -413,7 +413,10 @@ a.btn{text-decoration:none}
 body.dark .wknd-fld{background:#2a2213;border-color:#7a5f1e}
 body.dark .wknd-fld .f-label{color:#e6b449}
 .lvl-row{border:1.5px solid #dfe4ea;border-radius:12px;padding:12px;margin-bottom:12px;background:#fafbfc}
-.lvl-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.lvl-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px}
+.lvl-btns{display:flex;gap:4px;flex-shrink:0}
+.lvl-btns .btn{padding:5px 9px}
+.lvl-btns .btn[disabled]{opacity:.35;cursor:default}
 .f-label.sm{font-size:12.5px;margin-top:8px;display:block}
 body.dark .lvl-row{background:#132540;border-color:#314566}
 body.dark .pf-preview{background:#0f1c31;border-color:#314566}
@@ -770,6 +773,19 @@ function migrate(){
       DB.floors.forEach(f=>{ if(f.b===code && !f.plan && DSM4PLANS[f.name]) f.plan=DSM4PLANS[f.name]; });
     }
     DB._v=15; saveDB();
+  }
+  if((DB._v||1)<16){
+    // put DSM-4's levels in natural order (ground → interstitial → level 1 → …); admins can reorder freely after this
+    const b4=DB.buildings.find(x=>/^dsm-?4$/i.test(x.name));
+    if(b4){
+      const code=b4.code;
+      const order=["Ground Floor (GF)","Ground Floor Interstitial","First Floor (FF)","First Floor Interstitial","Second Floor (SF)","Second Floor Interstitial","Roof","Exterior / Outside DSM4"];
+      const rank=n=>{ const i=order.indexOf(n); return i<0?900:i; };
+      const others=DB.floors.filter(f=>f.b!==code);
+      const mine=DB.floors.filter(f=>f.b===code).sort((a,b)=>rank(a.name)-rank(b.name));
+      DB.floors=others.concat(mine);
+    }
+    DB._v=16; saveDB();
   }
 }
 const isWeekend=ds=>{ if(!ds) return false; const d=new Date(ds+"T00:00:00"); const g=d.getDay(); return g===0||g===6; };
@@ -1172,7 +1188,9 @@ const ES={
 "Level":"Nivel","Remove":"Quitar","Level name, e.g., Ground Floor (GF)":"Nombre del nivel, ej. Planta Baja (GF)","Mon–Fri":"Lun–Vie",
 "Areas / sectors (optional, one per line)":"Áreas / sectores (opcional, uno por línea)","Levels in this building":"Niveles en este edificio",
 "Add each level, its floor lead, and its drawing. These are the floors requesters pick from on the permit form.":"Agregue cada nivel, su líder de piso y su dibujo. Estos son los pisos que los solicitantes eligen en el formulario.",
-"Add Level":"Agregar Nivel","Add Building":"Agregar Edificio","Edit Building":"Editar Edificio","Building Name":"Nombre del Edificio","Building Code (e.g., D3)":"Código del Edificio (ej. D3)",
+"Add Level":"Agregar Nivel","Move up":"Subir","Move down":"Bajar",
+"Add each level, its floor lead, and its drawing. Use ▲ ▼ to put them in the order you want — that same order shows on the permit form.":"Agregue cada nivel, su líder de piso y su dibujo. Use ▲ ▼ para ordenarlos como quiera — ese mismo orden aparece en el formulario.",
+"Add Building":"Agregar Edificio","Edit Building":"Editar Edificio","Building Name":"Nombre del Edificio","Building Code (e.g., D3)":"Código del Edificio (ej. D3)",
 "Is this building set up for floor leads?":"¿Este edificio está configurado con líderes de piso?",
 "ON: each level's floor lead reviews that level's weekday permits. OFF: the system routes to the Jacobs superintendent assigned to each trade partner instead.":"ENCENDIDO: el líder de cada nivel revisa los permisos entre semana de ese nivel. APAGADO: el sistema los envía al superintendente de Jacobs asignado a cada empresa colaboradora.",
 "✅ Floor leads ON — route by level":"✅ Líderes de piso ENCENDIDO — enviar por nivel","⛔ Floor leads OFF — route by contractor superintendent":"⛔ Líderes de piso APAGADO — enviar al superintendente del contratista",
@@ -2754,8 +2772,14 @@ function revOptionsHtml(cur){ const opts=RNAMES().slice(); if(cur&&opts.indexOf(
   return `<option value="">${T("— none —")}</option>`+opts.map(o=>`<option ${cur===o?"selected":""}>${esc(o)}</option>`).join(""); }
 let BLD_LEVELS=[];
 function levelRowHtml(idx,lv){
+  const last=BLD_LEVELS.length-1;
   return `<div class="lvl-row" id="lvlrow_${idx}">
-    <div class="lvl-head"><b>🏢 ${T("Level")} ${idx+1}</b><button type="button" class="btn btn-line btn-sm" onclick="bldRemoveLevel(${idx})">✕ ${T("Remove")}</button></div>
+    <div class="lvl-head"><b>🏢 ${T("Level")} ${idx+1}</b>
+      <span class="lvl-btns">
+        <button type="button" class="btn btn-line btn-sm" title="${T("Move up")}" onclick="bldMoveLevel(${idx},-1)" ${idx===0?"disabled":""}>▲</button>
+        <button type="button" class="btn btn-line btn-sm" title="${T("Move down")}" onclick="bldMoveLevel(${idx},1)" ${idx===last?"disabled":""}>▼</button>
+        <button type="button" class="btn btn-line btn-sm" onclick="bldRemoveLevel(${idx})">✕ ${T("Remove")}</button>
+      </span></div>
     <input class="f-in" placeholder="${T("Level name, e.g., Ground Floor (GF)")}" value="${esc(lv.name||"")}" oninput="BLD_LEVELS[${idx}].name=this.value">
     <label class="f-label sm">${T("Floor Lead")} <span style="font-weight:400;color:var(--muted)">(${T("Mon–Fri")})</span></label>
     <select class="f-in" onchange="BLD_LEVELS[${idx}].lead=this.value">${revOptionsHtml(lv.lead||"")}</select>
@@ -2765,9 +2789,12 @@ function levelRowHtml(idx,lv){
     <label class="f-label sm">${T("Areas / sectors (optional, one per line)")}</label>
     <textarea class="f-in" style="min-height:56px" oninput="BLD_LEVELS[${idx}].areas=this.value">${esc(lv.areas||"")}</textarea></div>`;
 }
-function bldAddLevel(){ BLD_LEVELS.push({name:"",lead:"",plan:"",areas:""}); const host=document.getElementById("bld_levels");
-  if(host) host.insertAdjacentHTML("beforeend", levelRowHtml(BLD_LEVELS.length-1, BLD_LEVELS[BLD_LEVELS.length-1])); }
-function bldRemoveLevel(idx){ BLD_LEVELS[idx]=null; const el=document.getElementById("lvlrow_"+idx); if(el) el.remove(); }
+function renderLevels(){ const host=document.getElementById("bld_levels"); if(host) host.innerHTML=BLD_LEVELS.map((lv,idx)=>levelRowHtml(idx,lv)).join(""); }
+function bldAddLevel(){ BLD_LEVELS.push({name:"",lead:"",plan:"",areas:""}); renderLevels();
+  const host=document.getElementById("bld_levels"); if(host&&host.lastElementChild) host.lastElementChild.scrollIntoView({behavior:"smooth",block:"center"}); }
+function bldRemoveLevel(idx){ BLD_LEVELS.splice(idx,1); renderLevels(); }
+function bldMoveLevel(idx,dir){ const j=idx+dir; if(j<0||j>=BLD_LEVELS.length) return;
+  const t=BLD_LEVELS[idx]; BLD_LEVELS[idx]=BLD_LEVELS[j]; BLD_LEVELS[j]=t; renderLevels(); }
 function bldLoadLevelImg(idx,input){ const file=input.files&&input.files[0]; if(!file||!BLD_LEVELS[idx]) return;
   const rd=new FileReader(); rd.onload=e=>{ const img=new Image(); img.onload=()=>{
     const maxW=1500; let w=img.width,h=img.height; if(w>maxW){ h=Math.round(h*maxW/w); w=maxW; }
@@ -2800,7 +2827,7 @@ function openBuildingEditor(i){
       <label class="switch"><input type="checkbox" id="bld_flo" ${(b?(b.floorLeadsOn!==false):true)?"checked":""}><span class="sl"></span><span class="switch-tx" id="bld_flo_tx"></span></label>
       <div class="hint">${T("ON: each level's floor lead reviews that level's weekday permits. OFF: the system routes to the Jacobs superintendent assigned to each trade partner instead.")}</div></div>
     <div class="section-t" style="margin-top:8px">🏢 ${T("Levels in this building")}</div>
-    <div class="hint" style="margin-bottom:8px">${T("Add each level, its floor lead, and its drawing. These are the floors requesters pick from on the permit form.")}</div>
+    <div class="hint" style="margin-bottom:8px">${T("Add each level, its floor lead, and its drawing. Use ▲ ▼ to put them in the order you want — that same order shows on the permit form.")}</div>
     <div id="bld_levels">${BLD_LEVELS.map((lv,idx)=>levelRowHtml(idx,lv)).join("")}</div>
     <button type="button" class="btn btn-line btn-block" onclick="bldAddLevel()">➕ ${T("Add Level")}</button>
     <div class="btnrow" style="margin-top:12px"><button class="btn btn-g" onclick="saveBuildingEditor(${i==null?"null":i})">✓ ${T("Save")}</button><button class="btn btn-line btn-cancel" onclick="closeModal()">${T("Cancel")}</button></div>`);
@@ -2821,15 +2848,15 @@ function saveBuildingEditor(i){
   if(i!=null){ b=DB.buildings[i]; oldCode=b.code; Object.assign(b,data); }
   else { b=Object.assign({active:true},data); DB.buildings.push(b); }
   if(oldCode&&oldCode!==code) DB.floors.forEach(f=>{ if(f.b===oldCode) f.b=code; });   // keep levels linked if code renamed
-  // sync the level list → DB.floors for this building
+  // rebuild this building's floors in the EXACT order shown in the editor (so reordering sticks)
   const levels=BLD_LEVELS.filter(lv=>lv&&lv.name&&lv.name.trim());
-  const keep=levels.map(lv=>lv.name.trim());
-  DB.floors=DB.floors.filter(f=> f.b!==code || keep.indexOf(f.name)>=0 );
-  levels.forEach(lv=>{ const nm=lv.name.trim(); const areas=lv.areas?lv.areas.split("\n").map(s=>s.trim()).filter(Boolean):[];
-    let f=DB.floors.find(x=>x.b===code&&x.name===nm);
-    if(f){ f.lead=lv.lead||""; f.plan=lv.plan||""; f.areas=areas; f.active=true; }
-    else DB.floors.push({id:uid(), b:code, name:nm, lead:lv.lead||"", plan:lv.plan||"", areas, active:true});
+  const others=DB.floors.filter(f=>f.b!==code);
+  const rebuilt=levels.map(lv=>{ const nm=lv.name.trim(); const areas=lv.areas?lv.areas.split("\n").map(s=>s.trim()).filter(Boolean):[];
+    const f=DB.floors.find(x=>x.b===code&&x.name===nm);
+    if(f){ f.lead=lv.lead||""; f.plan=lv.plan||""; f.areas=areas; f.active=true; return f; }
+    return {id:uid(), b:code, name:nm, lead:lv.lead||"", plan:lv.plan||"", areas, active:true};
   });
+  DB.floors=others.concat(rebuilt);
   closeModal();
   if(ROLE==="admin") logChange(i!=null?"Edit Building":"Add Building", name, snap);
   saveDB(); route();
