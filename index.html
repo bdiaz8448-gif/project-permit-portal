@@ -418,6 +418,9 @@ body.dark .wknd-fld .f-label{color:#e6b449}
 .lvl-btns{display:flex;gap:4px;flex-shrink:0}
 .lvl-btns .btn{padding:8px 11px;font-weight:700}
 .lvl-btns .btn[disabled]{opacity:.35;cursor:default}
+.lbl-edit{background:#fff3d6;border:1px solid #e6b449;border-radius:6px;padding:1px 6px;font-size:12px;cursor:pointer;margin-left:4px;line-height:1.4}
+.lbl-edit:hover{background:#ffe7a8}
+body.dark .lbl-edit{background:#3a2f12;border-color:#7a5f1e}
 .f-label.sm{font-size:12.5px;margin-top:8px;display:block}
 body.dark .lvl-row{background:#132540;border-color:#314566}
 body.dark .pf-preview{background:#0f1c31;border-color:#314566}
@@ -933,6 +936,25 @@ function codeVariants(code){ return [code].concat(LEGACY_CODES[code]||[]); }
 // All active floors for a building, resilient to legacy codes (so the permit form always finds them).
 function floorsOfBuilding(code){ const v=codeVariants(code); return DB.floors.filter(f=>v.indexOf(f.b)>=0&&f.active); }
 const floorObj=(b,name)=>{ const v=codeVariants(b); return DB.floors.find(f=>v.indexOf(f.b)>=0&&f.name===name); };
+// Owner-editable field labels for the building editor's oversight roles.
+const DEFAULT_LABELS={
+  cm:"🏗️ Building Construction Manager (optional)",
+  lead:"General Superintendent — overrides floor leads",
+  saturday:"🗓️ Saturday Jacobs Lead — whole building",
+  sunday:"🗓️ Sunday Jacobs Lead — whole building",
+  safety:"Jacobs Safety Lead — Name" };
+function LBL(key){ const c=(DB.settings.roleLabels||{})[key]; return c||DEFAULT_LABELS[key]||key; }
+function labelWithEdit(key){ return `<span id="lbl_${key}">${esc(LBL(key))}</span>${IS_OWNER?` <button type="button" class="lbl-edit" title="Rename this label (Owner only)" onclick="renameRoleLabel('${key}')">✏️</button>`:""}`; }
+function renameRoleLabel(key){
+  if(!IS_OWNER){ toast("Only the Owner can rename field labels.","t-dark"); return; }
+  const nw=prompt("Rename this field label:", LBL(key)); if(nw==null) return;
+  const snap=configSnapshot();
+  DB.settings.roleLabels=DB.settings.roleLabels||{};
+  DB.settings.roleLabels[key]=nw.trim()||DEFAULT_LABELS[key];
+  logChange("Renamed field label", key+" → "+DB.settings.roleLabels[key], snap);
+  saveDB();
+  const span=document.getElementById("lbl_"+key); if(span) span.textContent=LBL(key);  // live update, no data loss
+}
 function saveDB(){ localStorage.setItem(KEY, JSON.stringify(DB)); scheduleSync(); }
 const saveDBLocal=()=> localStorage.setItem(KEY, JSON.stringify(DB));
 const uid=()=> "p"+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
@@ -1215,6 +1237,12 @@ const ES={
 "Jacobs Safety Lead — Name":"Líder de Seguridad Jacobs — Nombre",
 "Notified on every permit in this building that needs Jacobs Safety sign-off (Confined Space, Pressure Test, Roof Access, Elevated Work, Man-Basket…).":"Notificado en cada permiso del edificio que requiere firma de Seguridad de Jacobs (Espacio Confinado, Prueba de Presión, Acceso a Techo, Trabajo en Altura, Canastilla…).",
 "Safety Lead — Cell":"Seguridad — Celular","Safety Lead — Email":"Seguridad — Correo","Floor Lead":"Líder de Piso","A building needs a name and a code.":"Un edificio necesita nombre y código.",
+"You're the Owner — tap a pencil to rename any of these role labels.":"Usted es el Propietario — toque un lápiz para renombrar cualquiera de estas etiquetas.",
+"A boss over the whole building. Shown for reference — only notified if you turn on escalation below.":"Un jefe de todo el edificio. Se muestra como referencia — solo se le notifica si activa la escalación abajo.",
+"Over the whole building. Set this when ONE person should review every weekday permit here. Leave blank to use floor leads / contractor superintendents.":"Sobre todo el edificio. Configúrelo cuando UNA persona deba revisar cada permiso entre semana. Déjelo en blanco para usar líderes de piso / superintendentes del contratista.",
+"Escalation — notify the bosses if no one responds (manual)":"Escalación — notificar a los jefes si nadie responde (manual)",
+"Escalate to the General Superintendent":"Escalar al Superintendente General","Escalate to the Construction Manager":"Escalar al Gerente de Construcción",
+"When ON, the reviewer sees one-tap buttons to notify these bosses once a permit sits too long. Off by default — the bosses only get pulled in when the floor lead or contractor superintendent doesn't respond.":"Cuando está ENCENDIDO, el revisor ve botones para notificar a estos jefes cuando un permiso espera demasiado. Apagado por defecto — los jefes solo se involucran cuando el líder de piso o el superintendente del contratista no responde.",
 "Building Construction Manager (optional)":"Gerente de Construcción del Edificio (opcional)",
 "Oversight role for the whole building. Shown for reference — NOT notified unless you turn it on for them later.":"Rol de supervisión de todo el edificio. Se muestra como referencia — NO se le notifica a menos que lo active más tarde.",
 "Over the whole building. Only set this when ONE person should review every weekday permit here. Not notified unless you turn it on for them. Leave blank to use floor leads / contractor superintendents.":"Sobre todo el edificio. Configúrelo solo cuando UNA persona deba revisar cada permiso entre semana aquí. No se le notifica a menos que lo active. Déjelo en blanco para usar líderes de piso / superintendentes del contratista.",
@@ -1347,6 +1375,14 @@ function reviewerNotifyPanel(p){
     ${pendingNow&&m>=r2&&(s.adminPhone||s.adminEmail)?`<hr class="div">
       <p style="font-size:13.5px;font-weight:700;color:var(--red)">🚨 Waiting ${m} min — notify the permit office:</p>
       ${notifyBtns(s.adminPhone,s.adminEmail,"URGENT — permit "+p.number+" not approved",msgEscalation(p),s.adminName||"Permit Office")}`:""}
+    ${pendingNow&&m>=r1?(()=>{ const b=bldOf(p.building); let html="";
+      if(b.escalateGS&&b.lead){ const gs=DB.reviewers.find(x=>x.name===b.lead)||{};
+        html+=`<hr class="div"><p style="font-size:13.5px;font-weight:700;color:#7a2fd6">👷 ${esc((LBL("lead").split("—")[0]).trim())} — ${esc(b.lead)}:</p>`+
+          (gs.phone||gs.email?notifyBtns(gs.phone,gs.email,"Escalation — permit "+p.number+" not approved",msgEscalation(p),b.lead):`<div class="hint">⚠ No phone/email on file for ${esc(b.lead)} — add it in Admin → Jacobs Reviewers.</div>`); }
+      if(b.escalateCM&&b.cm){ const cm=DB.reviewers.find(x=>x.name===b.cm)||{};
+        html+=`<hr class="div"><p style="font-size:13.5px;font-weight:700;color:#7a2fd6">🏗️ ${esc((LBL("cm").split("(")[0]).replace("🏗️","").trim())} — ${esc(b.cm)}:</p>`+
+          (cm.phone||cm.email?notifyBtns(cm.phone,cm.email,"Escalation — permit "+p.number+" not approved",msgEscalation(p),b.cm):`<div class="hint">⚠ No phone/email on file for ${esc(b.cm)} — add it in Admin → Jacobs Reviewers.</div>`); }
+      return html; })():""}
     ${(()=>{const co=DB.contractors.find(c=>c.name===p.company)||{};
       return co.safName?`<hr class="div"><p style="font-size:13.5px;font-weight:700">🦺 Notify ${esc(p.company)}'s safety manager:</p>
       ${notifyBtns(co.safPhone,co.safEmail,"Permit notice: "+p.number+" ("+p.company+")",msgForReviewer(p),co.safName)}`:"";})()}
@@ -2612,8 +2648,8 @@ function adminTab(){
       const draw=fls.filter(f=>f.plan||FLOORPLANS[b.code+"|"+f.name]).length;
       return row(esc(b.name),"Code: "+esc(b.code)
       +(b.floorLeadsOn!==false?'<br>✅ Floor leads ON — routes by level':'<br>⛔ Floor leads OFF — routes by contractor superintendent')
-      +(b.cm?'<br>🏗️ Construction manager: '+esc(b.cm):'')
-      +(b.lead?'<br>👷 Building lead (override): '+esc(b.lead):'')
+      +(b.cm?'<br>🏗️ Construction manager: '+esc(b.cm)+(b.escalateCM?' · 🚨 escalation on':''):'')
+      +(b.lead?'<br>👷 General superintendent (override): '+esc(b.lead)+(b.escalateGS?' · 🚨 escalation on':''):'')
       +wkndLabel(b.weekendLeadSat,b.weekendLeadSun,b.weekendLead)
       +'<br>🏢 '+fls.length+' level'+(fls.length===1?'':'s')+' · 🗺️ '+draw+' drawing'+(draw===1?'':'s'),
       `<button class="btn btn-line btn-sm" onclick="adminEditBuilding(${i})">Edit</button>${delBtn("buildings",i)}`); }).join("")}`;
@@ -2823,26 +2859,35 @@ function bldLoadLevelImg(idx,input){ const file=input.files&&input.files[0]; if(
     BLD_LEVELS[idx].plan=cv.toDataURL("image/jpeg",0.72);
     const prev=document.getElementById("lvlprev_"+idx); if(prev){ const im=document.createElement("img"); im.src=BLD_LEVELS[idx].plan; im.className="pf-preview"; im.id="lvlprev_"+idx; prev.replaceWith(im); }
   }; img.src=e.target.result; }; rd.readAsDataURL(file); }
+let BLD_EDIT_IDX=null;
 function openBuildingEditor(i){
+  BLD_EDIT_IDX=i;
   const b = i!=null ? DB.buildings[i] : null;
   const code = b?b.code:"";
   BLD_LEVELS = b ? DB.floors.filter(f=>f.b===code).map(f=>({name:f.name,lead:f.lead||"",plan:f.plan||"",areas:(f.areas||[]).join("\n")})) : [];
+  const ownerTip = IS_OWNER ? `<div class="hint" style="margin-bottom:10px">✏️ ${T("You're the Owner — tap a pencil to rename any of these role labels.")}</div>` : "";
   modal(`<h3>${b?T("Edit Building"):T("Add Building")}</h3>
+    ${ownerTip}
     <div class="f-group"><label class="f-label">${T("Building Name")}</label><input class="f-in" id="bld_name" value="${esc(b?.name||"")}"></div>
     <div class="f-group"><label class="f-label">${T("Building Code (e.g., D3)")}</label><input class="f-in" id="bld_code" value="${esc(code)}"></div>
-    <div class="f-group"><label class="f-label">🏗️ ${T("Building Construction Manager (optional)")}</label>
+    <div class="f-group"><label class="f-label">${labelWithEdit("cm")}</label>
       <select class="f-in" id="bld_cm">${revOptionsHtml(b?.cm||"")}</select>
-      <div class="hint">${T("Oversight role for the whole building. Shown for reference — NOT notified unless you turn it on for them later.")}</div></div>
-    <div class="f-group"><label class="f-label">${T("Building Lead (weekday, optional) — OVERRIDES floor leads")}</label>
+      <div class="hint">${T("A boss over the whole building. Shown for reference — only notified if you turn on escalation below.")}</div></div>
+    <div class="f-group"><label class="f-label">${labelWithEdit("lead")}</label>
       <select class="f-in" id="bld_lead">${revOptionsHtml(b?.lead||"")}</select>
-      <div class="hint">${T("Over the whole building. Only set this when ONE person should review every weekday permit here. Not notified unless you turn it on for them. Leave blank to use floor leads / contractor superintendents.")}</div></div>
-    <div class="f-group wknd-fld"><label class="f-label">🗓️ ${T("Saturday Jacobs Lead — whole building")}</label><select class="f-in" id="bld_sat">${revOptionsHtml(b?.weekendLeadSat||"")}</select></div>
-    <div class="f-group wknd-fld"><label class="f-label">🗓️ ${T("Sunday Jacobs Lead — whole building")}</label><select class="f-in" id="bld_sun">${revOptionsHtml(b?.weekendLeadSun||"")}</select>
+      <div class="hint">${T("Over the whole building. Set this when ONE person should review every weekday permit here. Leave blank to use floor leads / contractor superintendents.")}</div></div>
+    <div class="f-group wknd-fld"><label class="f-label">${labelWithEdit("saturday")}</label><select class="f-in" id="bld_sat">${revOptionsHtml(b?.weekendLeadSat||"")}</select></div>
+    <div class="f-group wknd-fld"><label class="f-label">${labelWithEdit("sunday")}</label><select class="f-in" id="bld_sun">${revOptionsHtml(b?.weekendLeadSun||"")}</select>
       <div class="hint">${T("Weekend permits anywhere in this building route to these people. Sunday can differ from Saturday.")}</div></div>
-    <div class="f-group"><label class="f-label">${T("Jacobs Safety Lead — Name")}</label><input class="f-in" id="bld_safn" value="${esc(b?.safLead||"")}">
+    <div class="f-group"><label class="f-label">${labelWithEdit("safety")}</label><input class="f-in" id="bld_safn" value="${esc(b?.safLead||"")}">
       <div class="hint">${T("Notified on every permit in this building that needs Jacobs Safety sign-off (Confined Space, Pressure Test, Roof Access, Elevated Work, Man-Basket…).")}</div></div>
     <div class="f-row"><div class="f-group"><label class="f-label">${T("Safety Lead — Cell")}</label><input class="f-in" id="bld_safp" value="${esc(b?.safPhone||"")}"></div>
       <div class="f-group"><label class="f-label">${T("Safety Lead — Email")}</label><input class="f-in" id="bld_safe" value="${esc(b?.safEmail||"")}"></div></div>
+    <hr class="div">
+    <div class="f-group"><label class="f-label">🚨 ${T("Escalation — notify the bosses if no one responds (manual)")}</label>
+      <label class="switch"><input type="checkbox" id="bld_escgs" ${b?.escalateGS?"checked":""}><span class="sl"></span><span class="switch-tx">${T("Escalate to the General Superintendent")}</span></label>
+      <label class="switch" style="margin-top:8px"><input type="checkbox" id="bld_esccm" ${b?.escalateCM?"checked":""}><span class="sl"></span><span class="switch-tx">${T("Escalate to the Construction Manager")}</span></label>
+      <div class="hint">${T("When ON, the reviewer sees one-tap buttons to notify these bosses once a permit sits too long. Off by default — the bosses only get pulled in when the floor lead or contractor superintendent doesn't respond.")}</div></div>
     <hr class="div">
     <div class="f-group"><label class="f-label">${T("Is this building set up for floor leads?")}</label>
       <label class="switch"><input type="checkbox" id="bld_flo" ${(b?(b.floorLeadsOn!==false):true)?"checked":""}><span class="sl"></span><span class="switch-tx" id="bld_flo_tx"></span></label>
@@ -2863,6 +2908,7 @@ function saveBuildingEditor(i){
   if(!name||!code){ alert(T("A building needs a name and a code.")); return; }
   const snap = ROLE==="admin" ? configSnapshot() : "";
   const data={ name, code, floorLeadsOn:document.getElementById("bld_flo").checked, cm:document.getElementById("bld_cm").value, lead:document.getElementById("bld_lead").value,
+    escalateGS:document.getElementById("bld_escgs").checked, escalateCM:document.getElementById("bld_esccm").checked,
     weekendLeadSat:document.getElementById("bld_sat").value, weekendLeadSun:document.getElementById("bld_sun").value,
     safLead:document.getElementById("bld_safn").value.trim(), safPhone:document.getElementById("bld_safp").value.trim(), safEmail:document.getElementById("bld_safe").value.trim() };
   let b, oldCode=null;
