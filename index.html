@@ -385,6 +385,22 @@ a.btn{text-decoration:none}
 .center{text-align:center}
 .pill-hint{background:#eef4ff;color:var(--blue-d);border-radius:10px;padding:11px 14px;font-size:13.5px;font-weight:600;margin-bottom:14px}
 .warn-hint{background:#fff8e6;color:#7a5b00;border-radius:10px;padding:11px 14px;font-size:13.5px;font-weight:600}
+.daygrid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px}
+@media(max-width:560px){.daygrid{grid-template-columns:repeat(4,1fr)}}
+.daychip{border:2px solid #d5dbe3;background:#fff;border-radius:12px;padding:9px 4px;text-align:center;cursor:pointer;transition:all .12s;font-family:inherit}
+.daychip:hover{border-color:var(--navy)}
+.daychip .dc-day{display:block;font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.3px;white-space:nowrap}
+.daychip .dc-date{display:block;font-size:15px;font-weight:800;color:var(--text);margin-top:2px}
+.daychip.on{border-color:var(--navy);background:var(--navy)}
+.daychip.on .dc-day,.daychip.on .dc-date{color:#fff}
+.daychip.wknd{border-color:#f0c46a;background:#fffaf0}
+.daychip.wknd .dc-day{color:#a4780a}
+.daychip.wknd.on{border-color:#e8710a;background:#e8710a}
+.daychip.wknd.on .dc-day,.daychip.wknd.on .dc-date{color:#fff}
+body.dark .daychip{background:#0f1c31;border-color:#314566}
+body.dark .daychip .dc-date{color:var(--text)}
+body.dark .daychip.wknd{background:#2a2213;border-color:#7a5f1e}
+body.dark .daychip.on{background:var(--navy);border-color:#4a6ea8}
 .audit{border-left:3px solid var(--gray-l);padding-left:14px}
 .audit .ev{margin-bottom:12px;position:relative}
 .audit .ev::before{content:"";width:11px;height:11px;border-radius:50%;background:var(--navy);position:absolute;left:-20.5px;top:4px;border:2px solid #fff}
@@ -689,8 +705,14 @@ function migrate(){
     DB.buildings.forEach(b=>{ if(b.weekendLead===undefined) b.weekendLead=""; });
     DB._v=12; saveDB();
   }
+  if((DB._v||1)<13){
+    // optional building-wide weekday lead — supersedes floor & company when set
+    DB.buildings.forEach(b=>{ if(b.lead===undefined) b.lead=""; });
+    DB._v=13; saveDB();
+  }
 }
 const isWeekend=ds=>{ if(!ds) return false; const d=new Date(ds+"T00:00:00"); const g=d.getDay(); return g===0||g===6; };
+const ymd=d=>{ const p=n=>String(n).padStart(2,"0"); return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate()); };
 /* ---------- Hand-drawn permit icons (inline SVG, scale with font-size, work in light+dark) ---------- */
 const _svg=b=>`<svg viewBox="0 0 24 24" style="width:1.12em;height:1.12em;vertical-align:-.19em;display:inline-block">${b}</svg>`;
 const SVGICONS={
@@ -1066,6 +1088,12 @@ const ES={
 "your company's assigned Jacobs superintendent, already selected":"el superintendente de Jacobs asignado a su empresa, ya seleccionado",
 "Jacobs superintendent":"superintendente de Jacobs","auto-selected as your reviewer":"seleccionado automáticamente como su revisor",
 "auto-selected":"seleccionado automáticamente",
+"What day are you working?":"¿Qué día va a trabajar?",
+"Pick your work day. Weekend days route to the weekend lead automatically — nobody else gets bothered.":"Elija su día de trabajo. Los fines de semana se envían automáticamente al líder de fin de semana — no se molesta a nadie más.",
+"Weekend work — this permit goes to the weekend lead automatically.":"Trabajo de fin de semana — este permiso va automáticamente al líder de fin de semana.",
+"No Jacobs lead is set for this yet — pick your reviewer on the review step, or ask your admin to assign one.":"Aún no hay un líder de Jacobs asignado — elija su revisor en el paso de revisión, o pida a su administrador que asigne uno.",
+"today":"hoy",
+"Sun":"Dom","Mon":"Lun","Tue":"Mar","Wed":"Mié","Thu":"Jue","Fri":"Vie","Sat":"Sáb",
 "already filled in for you. Change it only if you need someone else.":"ya está llenado para usted. Cámbielo solo si necesita a otra persona.",
 "Don't know who reviews your area? Pick \"Building HSE/CM (any available)\".":"¿No sabe quién revisa su área? Elija \"Building HSE/CM (cualquiera disponible)\".",
 "Weekend work":"Trabajo de fin de semana","Routed to the weekend lead":"Dirigido al líder de fin de semana",
@@ -1634,9 +1662,10 @@ function segYN(id,label,req){
 }
 function rerenderForm(){ document.getElementById("app").innerHTML=VIEWS.form(); }
 
-/* ---------- Who reviews this permit? ----------
-   Weekend (Sat/Sun start): company weekend → floor weekend → building weekend, then fall through.
-   Weekday: company superintendent → floor lead. ------------------------------------------------ */
+/* ---------- Who reviews this permit? Clear priority chain ----------
+   WEEKEND (Sat/Sun) supersedes everything:  company weekend → floor weekend → building weekend
+   WEEKDAY:                                  building lead → floor lead → company superintendent
+   (each step falls to the next if empty) ------------------------------------------------------- */
 function autoReviewer(){
   const co=DB.contractors.find(c=>c.name===F.company);
   const fo=floorObj(F.building,F.floor);
@@ -1646,10 +1675,23 @@ function autoReviewer(){
     if(fo&&fo.weekendLead) return {name:fo.weekendLead, src:"floor-wknd", label:"🗓️ weekend lead for "+esc(F.floor)};
     if(b&&b.weekendLead) return {name:b.weekendLead, src:"bldg-wknd", label:"🗓️ weekend lead for "+esc(b.name)};
   }
-  if(co&&co.reviewer) return {name:co.reviewer, src:"company", label:esc(co.name)+"'s assigned Jacobs superintendent"};
+  if(b&&b.lead) return {name:b.lead, src:"building", label:"building lead for "+esc(b.name)};
   if(fo&&fo.lead) return {name:fo.lead, src:"floor", label:"floor lead for "+esc(F.floor)};
+  if(co&&co.reviewer) return {name:co.reviewer, src:"company", label:esc(co.name)+"'s assigned Jacobs superintendent"};
   return null;
 }
+function dayChips(){
+  const names=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  let out="";
+  for(let i=0;i<7;i++){ const d=new Date(); d.setDate(d.getDate()+i);
+    const ds=ymd(d), dow=d.getDay(), wknd=(dow===0||dow===6);
+    out+=`<button class="daychip ${F.startDate===ds?"on":""} ${wknd?"wknd":""}" onclick="pickDay('${ds}')" type="button">
+      <span class="dc-day">${wknd?"🗓️ ":""}${T(names[dow])}${i===0?" ("+T("today")+")":""}</span>
+      <span class="dc-date">${d.getMonth()+1}/${d.getDate()}</span></button>`;
+  }
+  return out;
+}
+function pickDay(ds){ F.startDate=ds; if(!F.goodThrough||F.goodThrough<ds) F.goodThrough=ds; applyAutoReviewer(); rerenderForm(); }
 function applyAutoReviewer(){
   if(F._revManual) return;           // user hand-picked — leave it alone
   const a=autoReviewer();
@@ -1682,8 +1724,12 @@ function stepLocation(){
     ${DB.buildings.filter(b=>b.active).map(b=>`<option value="${b.code}" ${F.building===b.code?"selected":""}>${esc(b.name)}</option>`).join("")}</select>`)}
   ${fld("floor","Floor / Level",1,`<select class="f-in" onchange="pickFloor(this.value)">
     <option value="">${T("Select floor…")}</option>${floors.map(o=>`<option ${F.floor===o?"selected":""}>${esc(o)}</option>`).join("")}</select>`)}
-  ${(()=>{const a=autoReviewer(); return a&&a.src==="floor"?`<div class="pill-hint">👷 ${T("Floor lead")}: <b>${esc(a.name)}</b> — ${T("auto-selected as your Jacobs reviewer")}.</div>`
-    :a&&a.src==="company"?`<div class="pill-hint">👷 <b>${esc(a.name)}</b> — ${T("your company's assigned Jacobs superintendent, already selected")}.</div>`:"";})()}
+  <div class="f-group"><label class="f-label">${T("What day are you working?")}<span class="req">*</span></label>
+    <div class="daygrid">${dayChips()}</div>
+    <div class="hint">${isWeekend(F.startDate)?"🗓️ "+T("Weekend work — this permit goes to the weekend lead automatically."):T("Pick your work day. Weekend days route to the weekend lead automatically — nobody else gets bothered.")}</div></div>
+  ${(()=>{const a=autoReviewer(); if(!a) return `<div class="pill-hint" style="background:#fff8e6;color:#7a5b00">⚠️ ${T("No Jacobs lead is set for this yet — pick your reviewer on the review step, or ask your admin to assign one.")}</div>`;
+    const wk=a.src.indexOf("wknd")>-1;
+    return `<div class="pill-hint"${wk?' style="background:#fff8e6;color:#7a5b00"':''}>${wk?"🗓️":"👷"} <b>${esc(a.name)}</b> — ${a.label} — ${T("auto-selected as your Jacobs reviewer")}.</div>`;})()}
   ${fp?`<div class="f-group"><button class="btn btn-line btn-block" onclick="showPlan()">🗺️ View Floor Plan — ${esc(F.floor)}</button>
     <div class="hint">Look up your sector or room on the drawing, then enter it below.</div></div>`:""}
   ${fld("area","Area / Room / Column Line",0,`<input class="f-in" id="area" list="areaSug" value="${esc(F.area??"")}" placeholder="Start typing — sectors &amp; rooms suggest themselves" onchange="F.area=this.value">
@@ -1695,7 +1741,8 @@ function stepContractor(){
   return `<div class="section-t">${T("Trade Partner Information")}</div>
   ${fld("company","Trade Partner Company",1,`<select class="f-in" onchange="pickCompany(this.value)">
     <option value="">Select…</option>${DB.contractors.filter(c=>c.active).map(c=>`<option ${F.company===c.name?"selected":""}>${esc(c.name)}</option>`).join("")}</select>`)}
-  ${co.reviewer?`<div class="pill-hint">👷 <b>${esc(co.reviewer)}</b> — ${esc(F.company)} ${T("Jacobs superintendent")} — ${T("auto-selected as your reviewer")}.</div>`:""}
+  ${(()=>{const a=autoReviewer(); if(!a) return ""; const wk=a.src.indexOf("wknd")>-1;
+    return `<div class="pill-hint"${wk?' style="background:#fff8e6;color:#7a5b00"':''}>${wk?"🗓️":"👷"} <b>${esc(a.name)}</b> — ${a.label} — ${T("auto-selected as your reviewer")}.</div>`;})()}
   ${co.safName?`<div class="pill-hint">🦺 ${esc(co.safName)} (${esc(F.company)} ${T("safety manager")}) ${T("will also be notified of this permit.")}</div>`:""}
   ${fld("requestedBy","Requested By",1,inp("requestedBy","Your name"))}
   <div class="f-row">
@@ -2561,6 +2608,8 @@ function promptFields(title,fields,cb){
 const BUILDING_FIELDS=b=>[
   {key:"name",label:"Building Name",value:b?.name},
   {key:"code",label:"Building Code (e.g., D3)",value:b?.code},
+  {key:"lead",label:"Building Lead (weekday, optional) — supersedes floor & company",type:"combo",opts:DB.reviewers.map(r=>r.name),value:b?.lead,
+   hint:"If set, this person reviews EVERY weekday permit in the building — above floor leads and company superintendents. Leave blank when the building uses floor leads instead (like DSM-4)."},
   {key:"weekendLead",label:"🗓️ Weekend Jacobs Lead (Sat/Sun) — whole building",type:"combo",opts:DB.reviewers.map(r=>r.name),value:b?.weekendLead,
    hint:"On weekends, permits in this building route to this person unless a floor or trade partner has its own weekend lead. Change it each week for whoever's covering."},
   {key:"safLead",label:"Jacobs Safety Lead — Name",value:b?.safLead,hint:"Notified on every permit in this building that requires Jacobs Safety sign-off (Confined Space, Pressure Test, Roof Access, Elevated Work, Man-Basket…)."},
@@ -2584,7 +2633,7 @@ const CONTRACTOR_FIELDS=c=>[
   {key:"phone",label:"Phone",value:c?.phone},
   {key:"email",label:"Email",value:c?.email},
   {key:"reviewer",label:"Assigned Jacobs Superintendent (optional)",type:"combo",opts:DB.reviewers.map(r=>r.name),value:c?.reviewer,
-   hint:"When anyone from this company requests a permit, this reviewer auto-fills — it takes priority over the floor lead. Leave blank to use the floor lead instead."},
+   hint:"Weekday fallback: used when the floor has no floor lead (and the building has no building lead). This is the superintendent who owns this trade partner's contract."},
   {key:"weekendReviewer",label:"🗓️ Weekend Jacobs Superintendent (Sat/Sun, optional)",type:"combo",opts:DB.reviewers.map(r=>r.name),value:c?.weekendReviewer,
    hint:"On weekends, this company's permits route here. Highest priority of all weekend routing."},
   {key:"safName",label:"Safety Manager — Name",value:c?.safName,hint:"Gets notified whenever this trade partner submits a permit."},
