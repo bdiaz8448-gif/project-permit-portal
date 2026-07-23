@@ -408,6 +408,10 @@ a.btn{text-decoration:none}
 .switch-tx{font-weight:700;font-size:13.5px}
 .pf-preview{display:block;width:100%;max-height:220px;object-fit:contain;border:1px solid #dfe4ea;border-radius:10px;margin-bottom:8px;background:#f4f6f9}
 .pf-preview.empty{display:flex;align-items:center;justify-content:center;height:90px;color:var(--muted);font-size:13px}
+.lvl-row{border:1.5px solid #dfe4ea;border-radius:12px;padding:12px;margin-bottom:12px;background:#fafbfc}
+.lvl-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.f-label.sm{font-size:12.5px;margin-top:8px;display:block}
+body.dark .lvl-row{background:#132540;border-color:#314566}
 body.dark .pf-preview{background:#0f1c31;border-color:#314566}
 body.dark .switch .sl{background:#3a4a63}
 body.dark .daychip{background:#0f1c31;border-color:#314566}
@@ -1130,6 +1134,20 @@ const ES={
 "View Floor Plan":"Ver Plano del Piso","Open the drawing, find your sector or room, then type it below.":"Abra el dibujo, encuentre su sector o cuarto, luego escríbalo abajo.",
 "No drawing loaded for this floor yet — an admin can add one under Admin ▸ Floors.":"Aún no hay dibujo para este piso — un administrador puede agregarlo en Admin ▸ Pisos.",
 "No drawing yet":"Aún no hay dibujo","Remove drawing":"Quitar dibujo","On":"Encendido","Off":"Apagado",
+"Level":"Nivel","Remove":"Quitar","Level name, e.g., Ground Floor (GF)":"Nombre del nivel, ej. Planta Baja (GF)","Mon–Fri":"Lun–Vie",
+"Areas / sectors (optional, one per line)":"Áreas / sectores (opcional, uno por línea)","Levels in this building":"Niveles en este edificio",
+"Add each level, its floor lead, and its drawing. These are the floors requesters pick from on the permit form.":"Agregue cada nivel, su líder de piso y su dibujo. Estos son los pisos que los solicitantes eligen en el formulario.",
+"Add Level":"Agregar Nivel","Add Building":"Agregar Edificio","Edit Building":"Editar Edificio","Building Name":"Nombre del Edificio","Building Code (e.g., D3)":"Código del Edificio (ej. D3)",
+"Is this building set up for floor leads?":"¿Este edificio está configurado con líderes de piso?",
+"ON: each level's floor lead reviews that level's weekday permits. OFF: the system routes to the Jacobs superintendent assigned to each trade partner instead.":"ENCENDIDO: el líder de cada nivel revisa los permisos entre semana de ese nivel. APAGADO: el sistema los envía al superintendente de Jacobs asignado a cada empresa colaboradora.",
+"✅ Floor leads ON — route by level":"✅ Líderes de piso ENCENDIDO — enviar por nivel","⛔ Floor leads OFF — route by contractor superintendent":"⛔ Líderes de piso APAGADO — enviar al superintendente del contratista",
+"Building Lead (weekday, optional) — OVERRIDES floor leads":"Líder del Edificio (entre semana, opcional) — ANULA a los líderes de piso",
+"Only set this when ONE person should review every weekday permit in the whole building. Leave blank to use floor leads / contractor superintendents.":"Solo configúrelo cuando UNA persona deba revisar todos los permisos entre semana del edificio. Déjelo en blanco para usar líderes de piso / superintendentes del contratista.",
+"Saturday Jacobs Lead — whole building":"Líder Jacobs del Sábado — todo el edificio","Sunday Jacobs Lead — whole building":"Líder Jacobs del Domingo — todo el edificio",
+"Weekend permits anywhere in this building route to these people. Sunday can differ from Saturday.":"Los permisos de fin de semana en este edificio se envían a estas personas. El domingo puede ser diferente del sábado.",
+"Jacobs Safety Lead — Name":"Líder de Seguridad Jacobs — Nombre",
+"Notified on every permit in this building that needs Jacobs Safety sign-off (Confined Space, Pressure Test, Roof Access, Elevated Work, Man-Basket…).":"Notificado en cada permiso del edificio que requiere firma de Seguridad de Jacobs (Espacio Confinado, Prueba de Presión, Acceso a Techo, Trabajo en Altura, Canastilla…).",
+"Safety Lead — Cell":"Seguridad — Celular","Safety Lead — Email":"Seguridad — Correo","Floor Lead":"Líder de Piso","A building needs a name and a code.":"Un edificio necesita nombre y código.",
 "already filled in for you. Change it only if you need someone else.":"ya está llenado para usted. Cámbielo solo si necesita a otra persona.",
 "Don't know who reviews your area? Pick \"Building HSE/CM (any available)\".":"¿No sabe quién revisa su área? Elija \"Building HSE/CM (cualquiera disponible)\".",
 "Weekend work":"Trabajo de fin de semana","Routed to the weekend lead":"Dirigido al líder de fin de semana",
@@ -1698,25 +1716,20 @@ function segYN(id,label,req){
 }
 function rerenderForm(){ document.getElementById("app").innerHTML=VIEWS.form(); }
 
-/* ---------- Who reviews this permit? Clear priority chain ----------
-   WEEKEND supersedes everything, and Saturday vs Sunday can be different people:
-       company weekend(day) → floor weekend(day) → building weekend(day)
+/* ---------- Who reviews this permit? One simple chain ----------
+   WEEKEND (Sat/Sun) supersedes everything — set once per building, Saturday and Sunday can differ:
+       building's Saturday lead   (or Sunday lead)
    WEEKDAY:
-       building lead → floor lead (only if the building's floor-leads switch is ON) → company superintendent
-   When floor leads are OFF and the company has no assigned superintendent, it falls to the building lead, else blank.
-   (each step falls to the next when empty) ---------------------------------------------------------- */
+       building lead (override) → level's floor lead (only if the building's floor-leads switch is ON) → contractor's Jacobs superintendent
+   (each step falls to the next when empty; nothing assigned → requester picks) --------------------------- */
 function autoReviewer(){
   const co=DB.contractors.find(c=>c.name===F.company);
   const fo=floorObj(F.building,F.floor);
   const b=bldOf(F.building);
   const g=dowOf(F.startDate); const isSat=g===6, isSun=g===0;
-  const dayName=isSat?"Saturday":"Sunday";
-  // pick Saturday-vs-Sunday value, falling back to the old single weekend field
-  const wk=(sat,sun,legacy)=> (isSat?sat:sun)||legacy||"";
-  if(isSat||isSun){
-    if(co){ const n=wk(co.weekendReviewerSat,co.weekendReviewerSun,co.weekendReviewer); if(n) return {name:n, src:"company-wknd", label:"🗓️ "+esc(co.name)+"'s "+dayName+" Jacobs lead"}; }
-    if(fo){ const n=wk(fo.weekendLeadSat,fo.weekendLeadSun,fo.weekendLead); if(n) return {name:n, src:"floor-wknd", label:"🗓️ "+dayName+" lead for "+esc(F.floor)}; }
-    if(b){ const n=wk(b.weekendLeadSat,b.weekendLeadSun,b.weekendLead); if(n) return {name:n, src:"bldg-wknd", label:"🗓️ "+dayName+" lead for "+esc(b.name)}; }
+  if((isSat||isSun) && b){
+    const n=(isSat?b.weekendLeadSat:b.weekendLeadSun)||b.weekendLead||"";
+    if(n) return {name:n, src:"bldg-wknd", label:"🗓️ "+(isSat?"Saturday":"Sunday")+" lead for "+esc(b.name)};
   }
   if(b&&b.lead) return {name:b.lead, src:"building", label:"building lead for "+esc(b.name)};
   const floorLeadsOn = b ? (b.floorLeadsOn!==false) : true;
@@ -2495,7 +2508,7 @@ function applyBoardFilters(){
    ============================================================ */
 let ADMIN_TAB="buildings";
 VIEWS.admin = ()=>{
-  const tabs=[["buildings","Buildings"],["floors","Floors / Levels"],["contractors","Trade Partners"],["types","Permit Types"],["reviewers","Jacobs Reviewers"],["admins","Admin Users"],["safetyacc","Safety Access"],["qr","QR Codes"],["settings","Settings & Data"]];
+  const tabs=[["buildings","Buildings & Levels"],["contractors","Trade Partners"],["types","Permit Types"],["reviewers","Jacobs Reviewers"],["admins","Admin Users"],["safetyacc","Safety Access"],["qr","QR Codes"],["settings","Settings & Data"]];
   if(IS_OWNER) tabs.push(["trash","🗑 Trash"+(DB.trash&&DB.trash.length?" ("+DB.trash.length+")":"")],["activity","👑 Activity Log"]);
   return `
   <h2 class="page">Admin Management</h2>
@@ -2508,29 +2521,21 @@ function adminTab(){
   const delBtn=(coll,i)=>`<button class="btn btn-r btn-sm" onclick="adminDel('${coll}',${i})">Delete</button>`;
   if(ADMIN_TAB==="buildings") return `
     <div class="btnrow" style="margin:0 0 8px"><button class="btn btn-y btn-sm" onclick="adminAddBuilding()">+ Add Building</button></div>
-    <div class="hint" style="margin-bottom:8px">Toggle <b>floor leads ON/OFF</b> per building, and set separate <b>Saturday & Sunday</b> weekend leads. Change them each week for whoever's covering.</div>
-    ${DB.buildings.map((b,i)=>row(esc(b.name),"Code: "+esc(b.code)
-      +(b.floorLeadsOn!==false?'<br>✅ Floor leads ON':'<br>⛔ Floor leads OFF — routes by contractor superintendent')
-      +(b.lead?'<br>👷 Building lead: '+esc(b.lead):'')
-      +wkndLabel(b.weekendLeadSat,b.weekendLeadSun,b.weekendLead),
-      `<button class="btn btn-line btn-sm" onclick="adminEditBuilding(${i})">Edit</button>${delBtn("buildings",i)}`)).join("")}`;
-  if(ADMIN_TAB==="floors") return `
-    <div class="btnrow" style="margin:0 0 8px"><button class="btn btn-y btn-sm" onclick="adminAddFloor()">+ Add Floor</button></div>
-    <div class="hint" style="margin-bottom:8px">👷 Set a <b>Floor Lead</b> (Mon–Fri) and optionally a <b>🗓️ Weekend Lead</b> on each floor. Add sectors/rooms so the Area field suggests them.</div>
-    ${DB.buildings.map(b=>`<div class="grp-h">${esc(b.name)}</div>
-      ${DB.floors.map((f,i)=>f.b!==b.code?"":row(esc(f.name),
-        (f.lead?"👷 Lead: "+esc(f.lead):'<span style="color:var(--orange)">⚠ no floor lead assigned</span>')
-        +wkndLabel(f.weekendLeadSat,f.weekendLeadSun,f.weekendLead)
-        +((f.plan||FLOORPLANS[b.code+"|"+f.name])?' · 🗺️ drawing loaded':' · <span style="color:var(--muted)">no drawing</span>')
-        +(f.areas&&f.areas.length?" · "+f.areas.length+" areas":""),
-        `<button class="btn btn-line btn-sm" onclick="adminEditFloor(${i})">Edit</button>${delBtn("floors",i)}`)).join("")||'<div class="hint">No floors yet — add one.</div>'}`).join("")}`;
+    <div class="hint" style="margin-bottom:8px">Everything for a building lives here: its <b>levels</b>, each level's <b>floor lead</b> and <b>drawing</b>, the floor-leads <b>ON/OFF</b> switch, and the <b>Saturday & Sunday</b> weekend leads.</div>
+    ${DB.buildings.map((b,i)=>{ const fls=DB.floors.filter(f=>f.b===b.code&&f.active);
+      const draw=fls.filter(f=>f.plan||FLOORPLANS[b.code+"|"+f.name]).length;
+      return row(esc(b.name),"Code: "+esc(b.code)
+      +(b.floorLeadsOn!==false?'<br>✅ Floor leads ON — routes by level':'<br>⛔ Floor leads OFF — routes by contractor superintendent')
+      +(b.lead?'<br>👷 Building lead (override): '+esc(b.lead):'')
+      +wkndLabel(b.weekendLeadSat,b.weekendLeadSun,b.weekendLead)
+      +'<br>🏢 '+fls.length+' level'+(fls.length===1?'':'s')+' · 🗺️ '+draw+' drawing'+(draw===1?'':'s'),
+      `<button class="btn btn-line btn-sm" onclick="adminEditBuilding(${i})">Edit</button>${delBtn("buildings",i)}`); }).join("")}`;
   if(ADMIN_TAB==="contractors") return `
     <div class="btnrow" style="margin:0 0 8px"><button class="btn btn-y btn-sm" onclick="adminAddContractor()">+ Add Trade Partner</button></div>
     <div class="hint" style="margin-bottom:8px">🦺 Add each trade partner's <b>Safety Manager</b> — they get a notification every time their crew submits a permit, and they can sign in as "Trade Partner Safety" to see all their company's permits.</div>
     ${DB.contractors.map((c,i)=>row(esc(c.name),
       esc([c.contact,c.phone,c.email].filter(Boolean).join(" · "))
       +(c.reviewer?'<br>👷 Jacobs superintendent: '+esc(c.reviewer):'')
-      +wkndLabel(c.weekendReviewerSat,c.weekendReviewerSun,c.weekendReviewer)
       +(c.safName?'<br>🦺 Safety: '+esc(c.safName)+(c.safPhone?" · "+esc(c.safPhone):""):'<br><span style="color:var(--orange)">⚠ no safety manager — notifications unavailable</span>'),
       `<button class="btn btn-line btn-sm" onclick="adminEditContractor(${i})">Edit</button>${delBtn("contractors",i)}`)).join("")}`;
   if(ADMIN_TAB==="admins") return `
@@ -2696,47 +2701,96 @@ const RNAMES=()=>DB.reviewers.map(r=>r.name);
 function wkndLabel(sat,sun,legacy){ sat=sat||legacy||""; sun=sun||legacy||"";
   if(!sat&&!sun) return '<br><span style="color:var(--muted)">no weekend lead set</span>';
   return '<br>🗓️ '+(sat?'Sat: '+esc(sat):'Sat: —')+' · '+(sun?'Sun: '+esc(sun):'Sun: —'); }
-const BUILDING_FIELDS=b=>[
-  {key:"name",label:"Building Name",value:b?.name},
-  {key:"code",label:"Building Code (e.g., D3)",value:b?.code},
-  {key:"floorLeadsOn",label:"Is this building set up for floor leads?",type:"toggle",onLabel:"✅ Floor leads ON — route by floor",offLabel:"⛔ Floor leads OFF — route by contractor's Jacobs superintendent",value:b?(b.floorLeadsOn!==false):true,
-   hint:"ON (early in the job): each floor's lead reviews that floor's weekday permits. OFF (later, when floor leads roll off): the system skips floor leads and routes to the Jacobs superintendent assigned to each trade partner instead."},
-  {key:"lead",label:"Building Lead (weekday, optional) — supersedes floor & company",type:"select",opts:RNAMES(),value:b?.lead,
-   hint:"If set, this person reviews EVERY weekday permit in the building — above floor leads and company superintendents. Leave blank when the building uses floor leads or per-contractor superintendents."},
-  {key:"weekendLeadSat",label:"🗓️ Saturday Jacobs Lead — whole building",type:"select",opts:RNAMES(),value:b?.weekendLeadSat,
-   hint:"Covers Saturday permits in this building unless a floor or trade partner has its own Saturday lead."},
-  {key:"weekendLeadSun",label:"🗓️ Sunday Jacobs Lead — whole building",type:"select",opts:RNAMES(),value:b?.weekendLeadSun,
-   hint:"Covers Sunday permits — can be a different person than Saturday."},
-  {key:"safLead",label:"Jacobs Safety Lead — Name",value:b?.safLead,hint:"Notified on every permit in this building that requires Jacobs Safety sign-off (Confined Space, Pressure Test, Roof Access, Elevated Work, Man-Basket…)."},
-  {key:"safPhone",label:"Jacobs Safety Lead — Cell Phone",value:b?.safPhone},
-  {key:"safEmail",label:"Jacobs Safety Lead — Email",value:b?.safEmail}];
-function adminAddBuilding(){ promptFields("Add Building",BUILDING_FIELDS(),o=>{ if(o.name&&o.code) DB.buildings.push({...o,code:o.code.toUpperCase(),active:true}); }); }
-function adminEditBuilding(i){ const b=DB.buildings[i]; promptFields("Edit Building",BUILDING_FIELDS(b),o=>{ Object.assign(b,o); b.code=(o.code||b.code).toUpperCase(); }); }
-const FLOOR_FIELDS=f=>[
-  {key:"name",label:"Floor Name (e.g., First Floor Interstitial)",value:f?.name},
-  {key:"b",label:"Building Code (e.g., D4)",value:f?.b},
-  {key:"lead",label:"Floor Lead — Jacobs reviewer for this floor",type:"select",opts:RNAMES(),value:f?.lead,
-   hint:"Auto-fills the Jacobs Reviewer when contractors pick this floor (Mon–Fri) — only while the building's floor-leads switch is ON."},
-  {key:"weekendLeadSat",label:"🗓️ Saturday Floor Lead (optional)",type:"select",opts:RNAMES(),value:f?.weekendLeadSat,
-   hint:"Saturday coverage for this floor. Leave blank to fall back to the building's Saturday lead."},
-  {key:"weekendLeadSun",label:"🗓️ Sunday Floor Lead (optional)",type:"select",opts:RNAMES(),value:f?.weekendLeadSun,
-   hint:"Sunday coverage — can differ from Saturday."},
-  {key:"plan",label:"🗺️ Floor Plan Drawing (optional)",type:"image",value:f?.plan,
-   hint:"Upload the floor's drawing (JPG/PNG). Requesters can open it on the permit form to pinpoint their work area. Auto-shrunk to save space."},
-  {key:"areas",label:"Areas / rooms / sectors (one per line — suggested while contractors type)",type:"textarea",value:(f?.areas||[]).join("\n")}];
-function adminAddFloor(){ promptFields("Add Floor",FLOOR_FIELDS(),o=>{ if(o.name&&o.b) DB.floors.push({id:uid(),b:o.b.toUpperCase(),name:o.name,lead:o.lead||"",weekendLeadSat:o.weekendLeadSat||"",weekendLeadSun:o.weekendLeadSun||"",plan:o.plan||"",areas:o.areas?o.areas.split("\n").map(s=>s.trim()).filter(Boolean):[],active:true}); }); }
-function adminEditFloor(i){ const f=DB.floors[i]; promptFields("Edit Floor",FLOOR_FIELDS(f),o=>{ f.name=o.name||f.name; f.b=(o.b||f.b).toUpperCase(); f.lead=o.lead||""; f.weekendLeadSat=o.weekendLeadSat||""; f.weekendLeadSun=o.weekendLeadSun||""; f.plan=o.plan||""; f.areas=o.areas?o.areas.split("\n").map(s=>s.trim()).filter(Boolean):[]; }); }
+/* ---- One place for everything about a building: its levels, each level's floor lead & drawing ---- */
+function revOptionsHtml(cur){ const opts=RNAMES().slice(); if(cur&&opts.indexOf(cur)<0) opts.unshift(cur);
+  return `<option value="">${T("— none —")}</option>`+opts.map(o=>`<option ${cur===o?"selected":""}>${esc(o)}</option>`).join(""); }
+let BLD_LEVELS=[];
+function levelRowHtml(idx,lv){
+  return `<div class="lvl-row" id="lvlrow_${idx}">
+    <div class="lvl-head"><b>🏢 ${T("Level")} ${idx+1}</b><button type="button" class="btn btn-line btn-sm" onclick="bldRemoveLevel(${idx})">✕ ${T("Remove")}</button></div>
+    <input class="f-in" placeholder="${T("Level name, e.g., Ground Floor (GF)")}" value="${esc(lv.name||"")}" oninput="BLD_LEVELS[${idx}].name=this.value">
+    <label class="f-label sm">${T("Floor Lead")} <span style="font-weight:400;color:var(--muted)">(${T("Mon–Fri")})</span></label>
+    <select class="f-in" onchange="BLD_LEVELS[${idx}].lead=this.value">${revOptionsHtml(lv.lead||"")}</select>
+    <label class="f-label sm">🗺️ ${T("Floor Plan Drawing (optional)")}</label>
+    ${lv.plan?`<img src="${lv.plan}" class="pf-preview" id="lvlprev_${idx}">`:`<div class="pf-preview empty" id="lvlprev_${idx}">${T("No drawing yet")}</div>`}
+    <input type="file" accept="image/*" class="f-in" style="padding:8px" onchange="bldLoadLevelImg(${idx},this)">
+    <label class="f-label sm">${T("Areas / sectors (optional, one per line)")}</label>
+    <textarea class="f-in" style="min-height:56px" oninput="BLD_LEVELS[${idx}].areas=this.value">${esc(lv.areas||"")}</textarea></div>`;
+}
+function bldAddLevel(){ BLD_LEVELS.push({name:"",lead:"",plan:"",areas:""}); const host=document.getElementById("bld_levels");
+  if(host) host.insertAdjacentHTML("beforeend", levelRowHtml(BLD_LEVELS.length-1, BLD_LEVELS[BLD_LEVELS.length-1])); }
+function bldRemoveLevel(idx){ BLD_LEVELS[idx]=null; const el=document.getElementById("lvlrow_"+idx); if(el) el.remove(); }
+function bldLoadLevelImg(idx,input){ const file=input.files&&input.files[0]; if(!file||!BLD_LEVELS[idx]) return;
+  const rd=new FileReader(); rd.onload=e=>{ const img=new Image(); img.onload=()=>{
+    const maxW=1500; let w=img.width,h=img.height; if(w>maxW){ h=Math.round(h*maxW/w); w=maxW; }
+    const cv=document.createElement("canvas"); cv.width=w; cv.height=h; cv.getContext("2d").drawImage(img,0,0,w,h);
+    BLD_LEVELS[idx].plan=cv.toDataURL("image/jpeg",0.72);
+    const prev=document.getElementById("lvlprev_"+idx); if(prev){ const im=document.createElement("img"); im.src=BLD_LEVELS[idx].plan; im.className="pf-preview"; im.id="lvlprev_"+idx; prev.replaceWith(im); }
+  }; img.src=e.target.result; }; rd.readAsDataURL(file); }
+function openBuildingEditor(i){
+  const b = i!=null ? DB.buildings[i] : null;
+  const code = b?b.code:"";
+  BLD_LEVELS = b ? DB.floors.filter(f=>f.b===code).map(f=>({name:f.name,lead:f.lead||"",plan:f.plan||"",areas:(f.areas||[]).join("\n")})) : [];
+  modal(`<h3>${b?T("Edit Building"):T("Add Building")}</h3>
+    <div class="f-group"><label class="f-label">${T("Building Name")}</label><input class="f-in" id="bld_name" value="${esc(b?.name||"")}"></div>
+    <div class="f-group"><label class="f-label">${T("Building Code (e.g., D3)")}</label><input class="f-in" id="bld_code" value="${esc(code)}"></div>
+    <div class="f-group"><label class="f-label">${T("Is this building set up for floor leads?")}</label>
+      <label class="switch"><input type="checkbox" id="bld_flo" ${(b?(b.floorLeadsOn!==false):true)?"checked":""}><span class="sl"></span><span class="switch-tx" id="bld_flo_tx"></span></label>
+      <div class="hint">${T("ON: each level's floor lead reviews that level's weekday permits. OFF: the system routes to the Jacobs superintendent assigned to each trade partner instead.")}</div></div>
+    <div class="f-group"><label class="f-label">${T("Building Lead (weekday, optional) — OVERRIDES floor leads")}</label>
+      <select class="f-in" id="bld_lead">${revOptionsHtml(b?.lead||"")}</select>
+      <div class="hint">${T("Only set this when ONE person should review every weekday permit in the whole building. Leave blank to use floor leads / contractor superintendents.")}</div></div>
+    <div class="f-group"><label class="f-label">🗓️ ${T("Saturday Jacobs Lead — whole building")}</label><select class="f-in" id="bld_sat">${revOptionsHtml(b?.weekendLeadSat||"")}</select></div>
+    <div class="f-group"><label class="f-label">🗓️ ${T("Sunday Jacobs Lead — whole building")}</label><select class="f-in" id="bld_sun">${revOptionsHtml(b?.weekendLeadSun||"")}</select>
+      <div class="hint">${T("Weekend permits anywhere in this building route to these people. Sunday can differ from Saturday.")}</div></div>
+    <div class="f-group"><label class="f-label">${T("Jacobs Safety Lead — Name")}</label><input class="f-in" id="bld_safn" value="${esc(b?.safLead||"")}">
+      <div class="hint">${T("Notified on every permit in this building that needs Jacobs Safety sign-off (Confined Space, Pressure Test, Roof Access, Elevated Work, Man-Basket…).")}</div></div>
+    <div class="f-row"><div class="f-group"><label class="f-label">${T("Safety Lead — Cell")}</label><input class="f-in" id="bld_safp" value="${esc(b?.safPhone||"")}"></div>
+      <div class="f-group"><label class="f-label">${T("Safety Lead — Email")}</label><input class="f-in" id="bld_safe" value="${esc(b?.safEmail||"")}"></div></div>
+    <div class="section-t" style="margin-top:8px">🏢 ${T("Levels in this building")}</div>
+    <div class="hint" style="margin-bottom:8px">${T("Add each level, its floor lead, and its drawing. These are the floors requesters pick from on the permit form.")}</div>
+    <div id="bld_levels">${BLD_LEVELS.map((lv,idx)=>levelRowHtml(idx,lv)).join("")}</div>
+    <button type="button" class="btn btn-line btn-block" onclick="bldAddLevel()">➕ ${T("Add Level")}</button>
+    <div class="btnrow" style="margin-top:12px"><button class="btn btn-g" onclick="saveBuildingEditor(${i==null?"null":i})">✓ ${T("Save")}</button><button class="btn btn-line btn-cancel" onclick="closeModal()">${T("Cancel")}</button></div>`);
+  const cb2=document.getElementById("bld_flo"), tx=document.getElementById("bld_flo_tx");
+  const upd=()=>tx.textContent=cb2.checked?T("✅ Floor leads ON — route by level"):T("⛔ Floor leads OFF — route by contractor superintendent");
+  upd(); cb2.addEventListener("change",upd);
+  const mo=document.querySelector(".modal"); if(mo) mo.style.maxWidth="min(680px,96vw)";
+}
+function saveBuildingEditor(i){
+  const name=document.getElementById("bld_name").value.trim();
+  const code=document.getElementById("bld_code").value.trim().toUpperCase();
+  if(!name||!code){ alert(T("A building needs a name and a code.")); return; }
+  const snap = ROLE==="admin" ? configSnapshot() : "";
+  const data={ name, code, floorLeadsOn:document.getElementById("bld_flo").checked, lead:document.getElementById("bld_lead").value,
+    weekendLeadSat:document.getElementById("bld_sat").value, weekendLeadSun:document.getElementById("bld_sun").value,
+    safLead:document.getElementById("bld_safn").value.trim(), safPhone:document.getElementById("bld_safp").value.trim(), safEmail:document.getElementById("bld_safe").value.trim() };
+  let b, oldCode=null;
+  if(i!=null){ b=DB.buildings[i]; oldCode=b.code; Object.assign(b,data); }
+  else { b=Object.assign({active:true},data); DB.buildings.push(b); }
+  if(oldCode&&oldCode!==code) DB.floors.forEach(f=>{ if(f.b===oldCode) f.b=code; });   // keep levels linked if code renamed
+  // sync the level list → DB.floors for this building
+  const levels=BLD_LEVELS.filter(lv=>lv&&lv.name&&lv.name.trim());
+  const keep=levels.map(lv=>lv.name.trim());
+  DB.floors=DB.floors.filter(f=> f.b!==code || keep.indexOf(f.name)>=0 );
+  levels.forEach(lv=>{ const nm=lv.name.trim(); const areas=lv.areas?lv.areas.split("\n").map(s=>s.trim()).filter(Boolean):[];
+    let f=DB.floors.find(x=>x.b===code&&x.name===nm);
+    if(f){ f.lead=lv.lead||""; f.plan=lv.plan||""; f.areas=areas; f.active=true; }
+    else DB.floors.push({id:uid(), b:code, name:nm, lead:lv.lead||"", plan:lv.plan||"", areas, active:true});
+  });
+  closeModal();
+  if(ROLE==="admin") logChange(i!=null?"Edit Building":"Add Building", name, snap);
+  saveDB(); route();
+}
+function adminAddBuilding(){ openBuildingEditor(null); }
+function adminEditBuilding(i){ openBuildingEditor(i); }
 const CONTRACTOR_FIELDS=c=>[
   {key:"name",label:"Trade Partner Name",value:c?.name},
   {key:"contact",label:"Primary Contact",value:c?.contact},
   {key:"phone",label:"Phone",value:c?.phone},
   {key:"email",label:"Email",value:c?.email},
   {key:"reviewer",label:"Assigned Jacobs Superintendent",type:"select",opts:RNAMES(),value:c?.reviewer,
-   hint:"The superintendent who owns this trade partner's contract. Reviews their weekday permits when the building's floor leads are OFF (or a floor has no lead). Pick a name from the list."},
-  {key:"weekendReviewerSat",label:"🗓️ Saturday Jacobs Superintendent (optional)",type:"select",opts:RNAMES(),value:c?.weekendReviewerSat,
-   hint:"Covers this company's Saturday permits — highest priority of all Saturday routing."},
-  {key:"weekendReviewerSun",label:"🗓️ Sunday Jacobs Superintendent (optional)",type:"select",opts:RNAMES(),value:c?.weekendReviewerSun,
-   hint:"Covers Sunday permits — can be a different person than Saturday."},
+   hint:"The superintendent who owns this trade partner's contract. Reviews their weekday permits when the building's floor leads are OFF (or a level has no floor lead). Pick a name from the list. (Weekend coverage is set on the building, not here.)"},
   {key:"safName",label:"Safety Manager — Name",value:c?.safName,hint:"Gets notified whenever this trade partner submits a permit."},
   {key:"safPhone",label:"Safety Manager — Cell Phone",value:c?.safPhone},
   {key:"safEmail",label:"Safety Manager — Email",value:c?.safEmail}];
