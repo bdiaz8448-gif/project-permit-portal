@@ -408,6 +408,10 @@ a.btn{text-decoration:none}
 .switch-tx{font-weight:700;font-size:13.5px}
 .pf-preview{display:block;width:100%;max-height:220px;object-fit:contain;border:1px solid #dfe4ea;border-radius:10px;margin-bottom:8px;background:#f4f6f9}
 .pf-preview.empty{display:flex;align-items:center;justify-content:center;height:90px;color:var(--muted);font-size:13px}
+.wknd-fld{background:#fff7e0;border:1.5px solid #f0c46a;border-radius:12px;padding:10px 12px;margin-bottom:12px}
+.wknd-fld .f-label{color:#9a6a00}
+body.dark .wknd-fld{background:#2a2213;border-color:#7a5f1e}
+body.dark .wknd-fld .f-label{color:#e6b449}
 .lvl-row{border:1.5px solid #dfe4ea;border-radius:12px;padding:12px;margin-bottom:12px;background:#fafbfc}
 .lvl-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .f-label.sm{font-size:12.5px;margin-top:8px;display:block}
@@ -745,6 +749,28 @@ function migrate(){
     });
     DB._v=14; saveDB();
   }
+  if((DB._v||1)<15){
+    // Reunite DSM-4's floors that got split across the old "D4" code and the current code,
+    // then stamp the built-in DSM-4 drawings onto every level (nothing is deleted).
+    const b4 = DB.buildings.find(x=>/^dsm-?4$/i.test(x.name)) || DB.buildings.find(x=>x.code==="DSM4"||x.code==="D4");
+    if(b4){
+      const code=b4.code;
+      DB.floors.forEach(f=>{ if(f.b==="D4" && code!=="D4") f.b=code; });   // relink orphaned originals
+      const seen={};
+      DB.floors=DB.floors.filter(f=>{
+        if(f.b!==code) return true;
+        const k=f.name;
+        if(!seen[k]){ seen[k]=f; return true; }
+        const keep=seen[k];                                            // merge duplicate into the first, newest values win
+        if(f.lead) keep.lead=f.lead;
+        if(f.plan) keep.plan=f.plan;
+        if(f.areas&&f.areas.length) keep.areas=f.areas;
+        return false;
+      });
+      DB.floors.forEach(f=>{ if(f.b===code && !f.plan && DSM4PLANS[f.name]) f.plan=DSM4PLANS[f.name]; });
+    }
+    DB._v=15; saveDB();
+  }
 }
 const isWeekend=ds=>{ if(!ds) return false; const d=new Date(ds+"T00:00:00"); const g=d.getDay(); return g===0||g===6; };
 const dowOf=ds=>{ if(!ds) return -1; return new Date(ds+"T00:00:00").getDay(); };   // 0=Sun … 6=Sat
@@ -866,7 +892,16 @@ const FLOORPLANS={
   "D4|Ground Floor (GF)":"assets/d4-ground.jpg","D4|Ground Floor Interstitial":"assets/d4-ground-int.jpg",
   "D4|First Floor (FF)":"assets/d4-first.jpg","D4|First Floor Interstitial":"assets/d4-first-int.jpg",
   "D4|Second Floor (SF)":"assets/d4-second.jpg","D4|Second Floor Interstitial":"assets/d4-second-int.jpg"};
-const floorPlanFor=(b,f)=>{ const fo=floorObj(b,f); if(fo&&fo.plan) return fo.plan; return FLOORPLANS[b+"|"+f]||null; };
+// DSM-4's built-in drawings keyed by LEVEL NAME (so they resolve no matter what the building code is)
+const DSM4PLANS={
+  "Ground Floor (GF)":"assets/d4-ground.jpg","Ground Floor Interstitial":"assets/d4-ground-int.jpg",
+  "First Floor (FF)":"assets/d4-first.jpg","First Floor Interstitial":"assets/d4-first-int.jpg",
+  "Second Floor (SF)":"assets/d4-second.jpg","Second Floor Interstitial":"assets/d4-second-int.jpg"};
+const isDSM4=b=>{ const bo=bldOf(b); return !!(bo&&(/^dsm-?4$/i.test(bo.name)||bo.code==="D4"||bo.code==="DSM4")); };
+const floorPlanFor=(b,f)=>{ const fo=floorObj(b,f); if(fo&&fo.plan) return fo.plan;
+  if(FLOORPLANS[b+"|"+f]) return FLOORPLANS[b+"|"+f];
+  if(isDSM4(b)&&DSM4PLANS[f]) return DSM4PLANS[f];
+  return null; };
 const floorObj=(b,name)=> DB.floors.find(f=>f.b===b&&f.name===name);
 function saveDB(){ localStorage.setItem(KEY, JSON.stringify(DB)); scheduleSync(); }
 const saveDBLocal=()=> localStorage.setItem(KEY, JSON.stringify(DB));
@@ -1148,6 +1183,11 @@ const ES={
 "Jacobs Safety Lead — Name":"Líder de Seguridad Jacobs — Nombre",
 "Notified on every permit in this building that needs Jacobs Safety sign-off (Confined Space, Pressure Test, Roof Access, Elevated Work, Man-Basket…).":"Notificado en cada permiso del edificio que requiere firma de Seguridad de Jacobs (Espacio Confinado, Prueba de Presión, Acceso a Techo, Trabajo en Altura, Canastilla…).",
 "Safety Lead — Cell":"Seguridad — Celular","Safety Lead — Email":"Seguridad — Correo","Floor Lead":"Líder de Piso","A building needs a name and a code.":"Un edificio necesita nombre y código.",
+"Building Construction Manager (optional)":"Gerente de Construcción del Edificio (opcional)",
+"Oversight role for the whole building. Shown for reference — NOT notified unless you turn it on for them later.":"Rol de supervisión de todo el edificio. Se muestra como referencia — NO se le notifica a menos que lo active más tarde.",
+"Over the whole building. Only set this when ONE person should review every weekday permit here. Not notified unless you turn it on for them. Leave blank to use floor leads / contractor superintendents.":"Sobre todo el edificio. Configúrelo solo cuando UNA persona deba revisar cada permiso entre semana aquí. No se le notifica a menos que lo active. Déjelo en blanco para usar líderes de piso / superintendentes del contratista.",
+"Pick your work day.":"Elija su día de trabajo.",
+"Notifications are off — this permit is for record & numbering only. No reviewer is assigned and no alerts are sent. Jacobs can review it from the board.":"Las notificaciones están apagadas — este permiso es solo para registro y numeración. No se asigna revisor ni se envían alertas. Jacobs puede revisarlo desde el tablero.",
 "already filled in for you. Change it only if you need someone else.":"ya está llenado para usted. Cámbielo solo si necesita a otra persona.",
 "Don't know who reviews your area? Pick \"Building HSE/CM (any available)\".":"¿No sabe quién revisa su área? Elija \"Building HSE/CM (cualquiera disponible)\".",
 "Weekend work":"Trabajo de fin de semana","Routed to the weekend lead":"Dirigido al líder de fin de semana",
@@ -1301,6 +1341,10 @@ function notifyActive(){
   if(!s.notifyOn) return false;
   return (s.notifyDays||[0,1,2,3,4,5,6]).includes(new Date().getDay());
 }
+// Master switch for the "who reviews / who gets notified" layer.
+// ON  → floor leads, superintendents, safety managers are assigned, shown, and notified.
+// OFF → pure record-keeping: permit numbers only, no reviewer assignment, no names shown, no alerts.
+function routingOn(){ return DB.settings.notifyOn!==false; }
 function escBase(p){
   if(!p.submittedAt) return null;
   let base=new Date(p.submittedAt);
@@ -1750,6 +1794,7 @@ function dayChips(){
 }
 function pickDay(ds){ F.startDate=ds; if(!F.goodThrough||F.goodThrough<ds) F.goodThrough=ds; applyAutoReviewer(); rerenderForm(); }
 function applyAutoReviewer(){
+  if(!routingOn()){ if(F._revAuto){ F.reviewer=""; F._revAuto=false; } return; }  // notifications off → no auto-assignment
   if(F._revManual) return;           // user hand-picked — leave it alone
   const a=autoReviewer();
   if(a){ F.reviewer=a.name; F._revAuto=true; F._revSrc=a.src; F._revLabel=a.label; }
@@ -1783,10 +1828,10 @@ function stepLocation(){
     <option value="">${T("Select floor…")}</option>${floors.map(o=>`<option ${F.floor===o?"selected":""}>${esc(o)}</option>`).join("")}</select>`)}
   <div class="f-group"><label class="f-label">${T("What day are you working?")}<span class="req">*</span></label>
     <div class="daygrid">${dayChips()}</div>
-    <div class="hint">${(()=>{const g=dowOf(F.startDate); if(g===6||g===0) return "🗓️ "+(g===6?T("Saturday"):T("Sunday"))+" — "+T("routed to the weekend lead automatically."); return T("Pick your work day. Weekend days route to the weekend lead automatically — nobody else gets bothered.");})()}</div></div>
-  ${(()=>{const a=autoReviewer(); if(!a) return `<div class="pill-hint" style="background:#fff8e6;color:#7a5b00">⚠️ ${T("No Jacobs lead is set for this yet — pick your reviewer on the review step, or ask your admin to assign one.")}</div>`;
+    <div class="hint">${(()=>{const g=dowOf(F.startDate); if(g===6||g===0) return "🗓️ "+(g===6?T("Saturday"):T("Sunday"))+(routingOn()?" — "+T("routed to the weekend lead automatically."):""); return routingOn()?T("Pick your work day. Weekend days route to the weekend lead automatically — nobody else gets bothered."):T("Pick your work day.");})()}</div></div>
+  ${routingOn()?(()=>{const a=autoReviewer(); if(!a) return `<div class="pill-hint" style="background:#fff8e6;color:#7a5b00">⚠️ ${T("No Jacobs lead is set for this yet — pick your reviewer on the review step, or ask your admin to assign one.")}</div>`;
     const wk=a.src.indexOf("wknd")>-1;
-    return `<div class="pill-hint"${wk?' style="background:#fff8e6;color:#7a5b00"':''}>${wk?"🗓️":"👷"} <b>${esc(a.name)}</b> — ${a.label} — ${T("auto-selected as your Jacobs reviewer")}.</div>`;})()}
+    return `<div class="pill-hint"${wk?' style="background:#fff8e6;color:#7a5b00"':''}>${wk?"🗓️":"👷"} <b>${esc(a.name)}</b> — ${a.label} — ${T("auto-selected as your Jacobs reviewer")}.</div>`;})():""}
   ${F.floor?(fp
     ? `<div class="f-group"><button class="btn btn-dark btn-block" onclick="showPlan()">🗺️ ${T("View Floor Plan")} — ${esc(F.floor)}</button>
         <div class="hint">${T("Open the drawing, find your sector or room, then type it below.")}</div></div>`
@@ -1800,9 +1845,9 @@ function stepContractor(){
   return `<div class="section-t">${T("Trade Partner Information")}</div>
   ${fld("company","Trade Partner Company",1,`<select class="f-in" onchange="pickCompany(this.value)">
     <option value="">Select…</option>${DB.contractors.filter(c=>c.active).map(c=>`<option ${F.company===c.name?"selected":""}>${esc(c.name)}</option>`).join("")}</select>`)}
-  ${(()=>{const a=autoReviewer(); if(!a) return ""; const wk=a.src.indexOf("wknd")>-1;
-    return `<div class="pill-hint"${wk?' style="background:#fff8e6;color:#7a5b00"':''}>${wk?"🗓️":"👷"} <b>${esc(a.name)}</b> — ${a.label} — ${T("auto-selected as your reviewer")}.</div>`;})()}
-  ${co.safName?`<div class="pill-hint">🦺 ${esc(co.safName)} (${esc(F.company)} ${T("safety manager")}) ${T("will also be notified of this permit.")}</div>`:""}
+  ${routingOn()?(()=>{const a=autoReviewer(); if(!a) return ""; const wk=a.src.indexOf("wknd")>-1;
+    return `<div class="pill-hint"${wk?' style="background:#fff8e6;color:#7a5b00"':''}>${wk?"🗓️":"👷"} <b>${esc(a.name)}</b> — ${a.label} — ${T("auto-selected as your reviewer")}.</div>`;})():""}
+  ${routingOn()&&co.safName?`<div class="pill-hint">🦺 ${esc(co.safName)} (${esc(F.company)} ${T("safety manager")}) ${T("will also be notified of this permit.")}</div>`:""}
   ${fld("requestedBy","Requested By",1,inp("requestedBy","Your name"))}
   <div class="f-row">
     ${fld("phone","Requester Phone",1,inp("phone","(555) 555-5555","tel"))}
@@ -1827,7 +1872,7 @@ function stepWork(){
     ${fld("startDate","Start Date",1,`<input class="f-in" id="startDate" type="date" value="${esc(F.startDate??"")}" onchange="F.startDate=this.value;applyAutoReviewer();rerenderForm()">`)}
     ${fld("goodThrough","Permit Good Through",1,inp("goodThrough","","date"))}
   </div>
-  ${isWeekend(F.startDate)?(()=>{const a=autoReviewer();
+  ${isWeekend(F.startDate)&&routingOn()?(()=>{const a=autoReviewer();
     return `<div class="pill-hint" style="background:#fff8e6;color:#7a5b00">🗓️ ${T("Weekend work")} (${new Date(F.startDate+"T00:00:00").toLocaleDateString(undefined,{weekday:"long"})}). ${a&&a.src.includes("wknd")?T("Routed to the weekend lead")+": <b>"+esc(a.name)+"</b>.":T("No weekend lead is set — using the regular reviewer. Ask the admin to assign a weekend lead.")}</div>`;})():""}
   <div class="f-row">
     ${fld("startTime","Estimated Start Time",0,inp("startTime","","time"))}
@@ -1863,13 +1908,15 @@ function stepPaper(){
 function toggleLinked(c){ const i=F.linkedTypes.indexOf(c); if(i>=0) F.linkedTypes.splice(i,1); else F.linkedTypes.push(c); rerenderForm(); }
 function stepReview(){
   const t=typeOf(F.typeCode);
-  applyAutoReviewer(); // safety net — fill from company or floor if not hand-picked
+  const on=routingOn();
+  if(on) applyAutoReviewer(); // safety net — fill from company or floor if not hand-picked
   const revOpts=[...new Set([...DB.reviewers.filter(r=>r.active).map(r=>r.name), ...(F.reviewer?[F.reviewer]:[])])];
   return `<div class="section-t">Jacobs Review</div>
-  ${F._revAuto&&F.reviewer?`<div class="pill-hint">👷 <b>${esc(F.reviewer)}</b> — ${F._revLabel||T("auto-selected")} — ${T("already filled in for you. Change it only if you need someone else.")}</div>`
+  ${!on?`<div class="pill-hint" style="background:#eef1f5;color:#5b6773">🔕 ${T("Notifications are off — this permit is for record & numbering only. No reviewer is assigned and no alerts are sent. Jacobs can review it from the board.")}</div>`
+    :F._revAuto&&F.reviewer?`<div class="pill-hint">👷 <b>${esc(F.reviewer)}</b> — ${F._revLabel||T("auto-selected")} — ${T("already filled in for you. Change it only if you need someone else.")}</div>`
     :!F.reviewer?`<div class="hint" style="margin-bottom:8px">${T("Don't know who reviews your area? Pick \"Building HSE/CM (any available)\".")}</div>`:""}
-  ${fld("reviewer","Requested Jacobs Reviewer",1,`<select class="f-in" onchange="pickReviewer(this.value)">
-    <option value="">Select…</option>${revOpts.map(o=>`<option ${F.reviewer===o?"selected":""}>${esc(o)}</option>`).join("")}</select>`)}
+  ${on?fld("reviewer","Requested Jacobs Reviewer",1,`<select class="f-in" onchange="pickReviewer(this.value)">
+    <option value="">Select…</option>${revOpts.map(o=>`<option ${F.reviewer===o?"selected":""}>${esc(o)}</option>`).join("")}</select>`):""}
   ${fld("notes","Additional notes for Jacobs",0,ta("notes","Anything Jacobs should know?"))}
   <hr class="div"><div class="section-t">${T("Quick check before you submit")}</div>
   <dl class="kv">
@@ -1892,7 +1939,7 @@ function validateStep(){
     if(F.startDate&&F.goodThrough&&F.goodThrough<F.startDate) errs.push("Permit Good Through cannot be before the Start Date"); }
   if(F.step===4){ need(F.paperwork,"Required paperwork submitted?"); need(F.jha,"JHA / SSOW available?");
     const t=typeOf(F.typeCode); (t.q||[]).forEach((q,i)=>{ if(!F.answers["q:"+i]) errs.push("Safety question: "+q); }); }
-  if(F.step===5){ need(F.reviewer,"Requested Jacobs Reviewer"); }
+  if(F.step===5){ if(routingOn()) need(F.reviewer,"Requested Jacobs Reviewer"); }
   return errs;
 }
 function stepGo(d){
@@ -2526,6 +2573,7 @@ function adminTab(){
       const draw=fls.filter(f=>f.plan||FLOORPLANS[b.code+"|"+f.name]).length;
       return row(esc(b.name),"Code: "+esc(b.code)
       +(b.floorLeadsOn!==false?'<br>✅ Floor leads ON — routes by level':'<br>⛔ Floor leads OFF — routes by contractor superintendent')
+      +(b.cm?'<br>🏗️ Construction manager: '+esc(b.cm):'')
       +(b.lead?'<br>👷 Building lead (override): '+esc(b.lead):'')
       +wkndLabel(b.weekendLeadSat,b.weekendLeadSun,b.weekendLead)
       +'<br>🏢 '+fls.length+' level'+(fls.length===1?'':'s')+' · 🗺️ '+draw+' drawing'+(draw===1?'':'s'),
@@ -2734,19 +2782,23 @@ function openBuildingEditor(i){
   modal(`<h3>${b?T("Edit Building"):T("Add Building")}</h3>
     <div class="f-group"><label class="f-label">${T("Building Name")}</label><input class="f-in" id="bld_name" value="${esc(b?.name||"")}"></div>
     <div class="f-group"><label class="f-label">${T("Building Code (e.g., D3)")}</label><input class="f-in" id="bld_code" value="${esc(code)}"></div>
-    <div class="f-group"><label class="f-label">${T("Is this building set up for floor leads?")}</label>
-      <label class="switch"><input type="checkbox" id="bld_flo" ${(b?(b.floorLeadsOn!==false):true)?"checked":""}><span class="sl"></span><span class="switch-tx" id="bld_flo_tx"></span></label>
-      <div class="hint">${T("ON: each level's floor lead reviews that level's weekday permits. OFF: the system routes to the Jacobs superintendent assigned to each trade partner instead.")}</div></div>
+    <div class="f-group"><label class="f-label">🏗️ ${T("Building Construction Manager (optional)")}</label>
+      <select class="f-in" id="bld_cm">${revOptionsHtml(b?.cm||"")}</select>
+      <div class="hint">${T("Oversight role for the whole building. Shown for reference — NOT notified unless you turn it on for them later.")}</div></div>
     <div class="f-group"><label class="f-label">${T("Building Lead (weekday, optional) — OVERRIDES floor leads")}</label>
       <select class="f-in" id="bld_lead">${revOptionsHtml(b?.lead||"")}</select>
-      <div class="hint">${T("Only set this when ONE person should review every weekday permit in the whole building. Leave blank to use floor leads / contractor superintendents.")}</div></div>
-    <div class="f-group"><label class="f-label">🗓️ ${T("Saturday Jacobs Lead — whole building")}</label><select class="f-in" id="bld_sat">${revOptionsHtml(b?.weekendLeadSat||"")}</select></div>
-    <div class="f-group"><label class="f-label">🗓️ ${T("Sunday Jacobs Lead — whole building")}</label><select class="f-in" id="bld_sun">${revOptionsHtml(b?.weekendLeadSun||"")}</select>
+      <div class="hint">${T("Over the whole building. Only set this when ONE person should review every weekday permit here. Not notified unless you turn it on for them. Leave blank to use floor leads / contractor superintendents.")}</div></div>
+    <div class="f-group wknd-fld"><label class="f-label">🗓️ ${T("Saturday Jacobs Lead — whole building")}</label><select class="f-in" id="bld_sat">${revOptionsHtml(b?.weekendLeadSat||"")}</select></div>
+    <div class="f-group wknd-fld"><label class="f-label">🗓️ ${T("Sunday Jacobs Lead — whole building")}</label><select class="f-in" id="bld_sun">${revOptionsHtml(b?.weekendLeadSun||"")}</select>
       <div class="hint">${T("Weekend permits anywhere in this building route to these people. Sunday can differ from Saturday.")}</div></div>
     <div class="f-group"><label class="f-label">${T("Jacobs Safety Lead — Name")}</label><input class="f-in" id="bld_safn" value="${esc(b?.safLead||"")}">
       <div class="hint">${T("Notified on every permit in this building that needs Jacobs Safety sign-off (Confined Space, Pressure Test, Roof Access, Elevated Work, Man-Basket…).")}</div></div>
     <div class="f-row"><div class="f-group"><label class="f-label">${T("Safety Lead — Cell")}</label><input class="f-in" id="bld_safp" value="${esc(b?.safPhone||"")}"></div>
       <div class="f-group"><label class="f-label">${T("Safety Lead — Email")}</label><input class="f-in" id="bld_safe" value="${esc(b?.safEmail||"")}"></div></div>
+    <hr class="div">
+    <div class="f-group"><label class="f-label">${T("Is this building set up for floor leads?")}</label>
+      <label class="switch"><input type="checkbox" id="bld_flo" ${(b?(b.floorLeadsOn!==false):true)?"checked":""}><span class="sl"></span><span class="switch-tx" id="bld_flo_tx"></span></label>
+      <div class="hint">${T("ON: each level's floor lead reviews that level's weekday permits. OFF: the system routes to the Jacobs superintendent assigned to each trade partner instead.")}</div></div>
     <div class="section-t" style="margin-top:8px">🏢 ${T("Levels in this building")}</div>
     <div class="hint" style="margin-bottom:8px">${T("Add each level, its floor lead, and its drawing. These are the floors requesters pick from on the permit form.")}</div>
     <div id="bld_levels">${BLD_LEVELS.map((lv,idx)=>levelRowHtml(idx,lv)).join("")}</div>
@@ -2762,7 +2814,7 @@ function saveBuildingEditor(i){
   const code=document.getElementById("bld_code").value.trim().toUpperCase();
   if(!name||!code){ alert(T("A building needs a name and a code.")); return; }
   const snap = ROLE==="admin" ? configSnapshot() : "";
-  const data={ name, code, floorLeadsOn:document.getElementById("bld_flo").checked, lead:document.getElementById("bld_lead").value,
+  const data={ name, code, floorLeadsOn:document.getElementById("bld_flo").checked, cm:document.getElementById("bld_cm").value, lead:document.getElementById("bld_lead").value,
     weekendLeadSat:document.getElementById("bld_sat").value, weekendLeadSun:document.getElementById("bld_sun").value,
     safLead:document.getElementById("bld_safn").value.trim(), safPhone:document.getElementById("bld_safp").value.trim(), safEmail:document.getElementById("bld_safe").value.trim() };
   let b, oldCode=null;
