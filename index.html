@@ -414,8 +414,9 @@ body.dark .wknd-fld{background:#2a2213;border-color:#7a5f1e}
 body.dark .wknd-fld .f-label{color:#e6b449}
 .lvl-row{border:1.5px solid #dfe4ea;border-radius:12px;padding:12px;margin-bottom:12px;background:#fafbfc}
 .lvl-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px}
+.lvl-name{flex:1;min-width:0;font-weight:700}
 .lvl-btns{display:flex;gap:4px;flex-shrink:0}
-.lvl-btns .btn{padding:5px 9px}
+.lvl-btns .btn{padding:8px 11px;font-weight:700}
 .lvl-btns .btn[disabled]{opacity:.35;cursor:default}
 .f-label.sm{font-size:12.5px;margin-top:8px;display:block}
 body.dark .lvl-row{background:#132540;border-color:#314566}
@@ -2774,13 +2775,13 @@ let BLD_LEVELS=[];
 function levelRowHtml(idx,lv){
   const last=BLD_LEVELS.length-1;
   return `<div class="lvl-row" id="lvlrow_${idx}">
-    <div class="lvl-head"><b>🏢 ${T("Level")} ${idx+1}</b>
+    <div class="lvl-head">
+      <input class="f-in lvl-name" placeholder="${T("Level name, e.g., Ground Floor (GF)")}" value="${esc(lv.name||"")}" oninput="BLD_LEVELS[${idx}].name=this.value">
       <span class="lvl-btns">
         <button type="button" class="btn btn-line btn-sm" title="${T("Move up")}" onclick="bldMoveLevel(${idx},-1)" ${idx===0?"disabled":""}>▲</button>
         <button type="button" class="btn btn-line btn-sm" title="${T("Move down")}" onclick="bldMoveLevel(${idx},1)" ${idx===last?"disabled":""}>▼</button>
-        <button type="button" class="btn btn-line btn-sm" onclick="bldRemoveLevel(${idx})">✕ ${T("Remove")}</button>
+        <button type="button" class="btn btn-line btn-sm" title="${T("Remove")}" onclick="bldRemoveLevel(${idx})">✕</button>
       </span></div>
-    <input class="f-in" placeholder="${T("Level name, e.g., Ground Floor (GF)")}" value="${esc(lv.name||"")}" oninput="BLD_LEVELS[${idx}].name=this.value">
     <label class="f-label sm">${T("Floor Lead")} <span style="font-weight:400;color:var(--muted)">(${T("Mon–Fri")})</span></label>
     <select class="f-in" onchange="BLD_LEVELS[${idx}].lead=this.value">${revOptionsHtml(lv.lead||"")}</select>
     <label class="f-label sm">🗺️ ${T("Floor Plan Drawing (optional)")}</label>
