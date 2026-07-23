@@ -1724,7 +1724,14 @@ VIEWS.help = ()=>`
 let F=null; // working form state
 function blankForm(tCode){
   const qs=new URLSearchParams(location.search);
-  return { typeCode:tCode, building:qs.get("b")||"D4", floor:qs.get("f")||"", area:"", location:"",
+  // Resolve the starting building to a REAL current code (fixes empty floor list on first open).
+  let bcode=qs.get("b")||"";
+  if(bcode && !DB.buildings.some(b=>b.code===bcode)){                 // old/legacy code from a QR link → map to current
+    const cur=DB.buildings.find(b=>(LEGACY_CODES[b.code]||[]).indexOf(bcode)>=0);
+    bcode=cur?cur.code:"";
+  }
+  if(!bcode) bcode=(DB.buildings.find(b=>b.active)||{}).code||"";     // default to the first active building
+  return { typeCode:tCode, building:bcode, floor:qs.get("f")||"", area:"", location:"",
     company:MYCO||"", requestedBy:MYNAME||"", phone:"", email:"", foreman:"", foremanPhone:"",
     shift:"Days", startDate:today(), goodThrough:today(), startTime:"", endTime:"",
     description:"", equipment:"", workers:"", paperwork:"", jha:"", permitDocs:"",
